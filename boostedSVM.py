@@ -56,7 +56,7 @@ elif sample == 'cancer':
 
 # print data after preparation
 print("After preparation", data_set.shape)
-print(data_set.head())
+print(X.head())
 
 # divide sample into train and test sample
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.4)
