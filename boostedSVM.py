@@ -43,7 +43,6 @@ if len(sys.argv) != 2:
 
 sample = sys.argv[1]
 
-
 # fetch data
 if sample == 'titanic':
     data_set = pd.read_csv('./data/titanic.csv')
