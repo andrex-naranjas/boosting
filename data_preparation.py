@@ -94,3 +94,67 @@ def two_norm(data_set):
     X = data_set.drop("Class", axis=1)
     Y = data_set["Class"]
     return X,Y
+
+
+def german(data_set):
+    #change names
+    title_mapping = {1: 0, 2: 1}
+    data_set['Class'] = data_set['Class'].map(title_mapping)
+    data_set['Class'] = data_set['Class'].fillna(0)
+    
+    title_mapping = {'A11': 0, 'A12': 1, 'A13': 2, 'A14': 3}
+    data_set['Status'] = data_set['Status'].map(title_mapping)
+    data_set['Status'] = data_set['Status'].fillna(0)
+    
+    title_mapping = {'A30': 0, 'A31': 1, 'A32': 2, 'A33': 3, 'A34': 4}
+    data_set['History'] = data_set['History'].map(title_mapping)
+    data_set['History'] = data_set['History'].fillna(0)
+    
+    title_mapping = {'A40': 0, 'A41': 1, 'A42': 2, 'A43': 3, 'A44': 4,'A45': 5, 'A46': 6, 'A47': 7, 'A48': 8, 'A49': 9, 'A410': 10}
+    data_set['Purpose'] = data_set['Purpose'].map(title_mapping)
+    data_set['Purpose'] = data_set['Purpose'].fillna(0)
+    
+    title_mapping = {'A61': 0, 'A62': 1, 'A63': 2, 'A64': 3, 'A65': 4}
+    data_set['Savings'] = data_set['Savings'].map(title_mapping)
+    data_set['Savings'] = data_set['Savings'].fillna(0)
+    
+    title_mapping = {'A71': 0, 'A72': 1, 'A73': 2, 'A74': 3, 'A75': 4}
+    data_set['Employment'] = data_set['Employment'].map(title_mapping)
+    data_set['Employment'] = data_set['Employment'].fillna(0)
+    
+    title_mapping = {'A91': 0, 'A92': 1, 'A93': 2, 'A94': 3, 'A95': 4}
+    data_set['SexStatus'] = data_set['SexStatus'].map(title_mapping)
+    data_set['SexStatus'] = data_set['SexStatus'].fillna(0)
+    
+    title_mapping = {'A101': 0, 'A102': 1, 'A103': 2}
+    data_set['Debtor'] = data_set['Debtor'].map(title_mapping)
+    data_set['Debtor'] = data_set['Debtor'].fillna(0)
+    
+    title_mapping = {'A121': 0, 'A122': 1, 'A123': 2, 'A124': 3}
+    data_set['Property'] = data_set['Property'].map(title_mapping)
+    data_set['Property'] = data_set['Property'].fillna(0)
+    
+    title_mapping = {'A141': 0, 'A142': 1, 'A143': 2, 'A144': 3}
+    data_set['Plans'] = data_set['Plans'].map(title_mapping)
+    data_set['Plans'] = data_set['Plans'].fillna(0)
+    
+    title_mapping = {'A151': 0, 'A152': 1, 'A153': 2}
+    data_set['Housing'] = data_set['Housing'].map(title_mapping)
+    data_set['Housing'] = data_set['Housing'].fillna(0)
+    
+    title_mapping = {'A171': 0, 'A172': 1, 'A173': 2,  'A174': 3}
+    data_set['Job'] = data_set['Job'].map(title_mapping)
+    data_set['Job'] = data_set['Job'].fillna(0)
+    
+    title_mapping = {'A191': 0, 'A192': 1}
+    data_set['Phone'] = data_set['Phone'].map(title_mapping)
+    data_set['Phone'] = data_set['Phone'].fillna(0)
+    
+    title_mapping = {'A201': 0, 'A202': 1}
+    data_set['Foreign'] = data_set['Foreign'].map(title_mapping)
+    data_set['Foreign'] = data_set['Foreign'].fillna(0)
+    
+    X = data_set.drop("Class", axis=1)
+    Y = data_set["Class"]
+
+    return X,Y

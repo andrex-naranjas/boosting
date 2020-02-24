@@ -38,7 +38,9 @@ elif sample == 'two_norm':
     data_set = pd.read_csv('./data/two_norm.csv')
 elif sample == 'cancer':
     data_set = pd.read_csv('./data/breast_cancer.csv')
-        
+elif sample == 'german':
+    data_set = pd.read_csv('./data/german.csv')
+
 # check data
 print("Before preparation", data_set.shape)
 print(data_set.columns.values)
@@ -46,14 +48,16 @@ print(data_set.head())
 print(data_set.tail())
 print(data_set.describe())
 
-#data preparation
+# prepare data
 if sample == 'titanic':
     X,Y = dp.titanic(data_set)
 elif sample == 'two_norm':
     X,Y = dp.two_norm(data_set)
 elif sample == 'cancer':
     X,Y = dp.bCancer(data_set)
-
+elif sample == 'german':
+    X,Y = dp.german(data_set)
+    
 # print data after preparation
 print("After preparation", data_set.shape)
 print(X.head())
