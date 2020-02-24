@@ -40,6 +40,8 @@ elif sample == 'cancer':
     data_set = pd.read_csv('./data/breast_cancer.csv')
 elif sample == 'german':
     data_set = pd.read_csv('./data/german.csv')
+else:
+    sys.exit('The sample name provided does not exist. Try again!')
 
 # check data
 print("Before preparation", data_set.shape)
