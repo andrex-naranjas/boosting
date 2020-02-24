@@ -90,7 +90,7 @@ def bCancer(data_set):
     return X,Y
 
 def two_norm(data_set):
-    #These data is already formatted
+    #These data are already well-formatted
     X = data_set.drop("Class", axis=1)
     Y = data_set["Class"]
     return X,Y
