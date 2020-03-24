@@ -158,3 +158,15 @@ def german(data_set):
     Y = data_set["Class"]
 
     return X,Y
+
+# heart conditions data set
+def heart(data_set):
+    #change names
+    title_mapping = {0: 0, 1: 1, 2: 1, 3: 1, 4: 1}
+    data_set['Class'] = data_set['Class'].map(title_mapping)
+    data_set['Class'] = data_set['Class'].fillna(0)
+    
+    X = data_set.drop("Class", axis=1)
+    Y = data_set["Class"]
+
+    return X,Y

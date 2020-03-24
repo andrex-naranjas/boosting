@@ -43,6 +43,8 @@ elif sample == 'cancer':
     data_set = pd.read_csv('./data/breast_cancer.csv')
 elif sample == 'german':
     data_set = pd.read_csv('./data/german.csv')
+elif sample == 'heart':
+    data_set = pd.read_csv('./data/heart.csv')
 else:
     sys.exit('The sample name provided does not exist. Try again!')
 
@@ -62,6 +64,8 @@ elif sample == 'cancer':
     X,Y = dp.bCancer(data_set)
 elif sample == 'german':
     X,Y = dp.german(data_set)
+elif sample == 'heart':
+    X,Y = dp.heart(data_set)
     
 # print data after preparation
 print("After preparation", data_set.shape)
