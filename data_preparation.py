@@ -5,6 +5,28 @@
 #authors: A. Ramirez-Morales and J. Salmon-Gamboa
 
 #Data preparation module
+# python basics
+import sys
+
+# data analysis and wrangling
+import pandas as pd
+
+
+# fetch data
+def fetch_data(sample):
+    if sample == 'titanic':
+        data_set = pd.read_csv('./data/titanic.csv')
+    elif sample == 'two_norm':
+        data_set = pd.read_csv('./data/two_norm.csv')
+    elif sample == 'cancer':
+        data_set = pd.read_csv('./data/breast_cancer.csv')
+    elif sample == 'german':
+        data_set = pd.read_csv('./data/german.csv')
+    elif sample == 'heart':
+        data_set = pd.read_csv('./data/heart.csv')
+    else:
+        sys.exit('The sample name provided does not exist. Try again!')
+    return data_set
 
 #Titanic data preparation
 def titanic(data_set):

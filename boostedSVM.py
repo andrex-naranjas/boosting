@@ -10,7 +10,6 @@
 import sys
 
 # data analysis and wrangling
-import pandas as pd
 import numpy as np
 import random as rnd
 
@@ -34,19 +33,8 @@ if len(sys.argv) != 2:
 
 sample = sys.argv[1]
 
-# fetch data
-if sample == 'titanic':
-    data_set = pd.read_csv('./data/titanic.csv')
-elif sample == 'two_norm':
-    data_set = pd.read_csv('./data/two_norm.csv')
-elif sample == 'cancer':
-    data_set = pd.read_csv('./data/breast_cancer.csv')
-elif sample == 'german':
-    data_set = pd.read_csv('./data/german.csv')
-elif sample == 'heart':
-    data_set = pd.read_csv('./data/heart.csv')
-else:
-    sys.exit('The sample name provided does not exist. Try again!')
+# fetch data set (from available list)
+data_set = dp.fetch_data(sample)
 
 # check data
 print("Before preparation", data_set.shape)
