@@ -15,10 +15,6 @@ import random as rnd
 
 # machine learning
 from sklearn.svm import SVC, LinearSVC
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn.neural_network import MLPClassifier
-from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.model_selection import train_test_split
 
 # import module for data preparation
@@ -27,6 +23,8 @@ import data_preparation as dp
 # import module for data utils
 import data_utils as du
 
+# import ML models for comparison
+import model_comparison as mc
 
 if len(sys.argv) != 2:
     sys.exit('Please provide which sample name to analyse. Try again!') 
@@ -71,26 +69,5 @@ svc.fit(X_train, Y_train)
 Y_pred = svc.predict(X_test)
 du.metrics('svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
 
-# RANDOM forest classifier
-random_forest = RandomForestClassifier(n_estimators=100)
-random_forest.fit(X_train, Y_train)
-Y_pred = random_forest.predict(X_test)
-du.metrics('rForest',random_forest, X_train, Y_train, Y_test, X_test, Y_pred)
-
-# AdaBoost-SAMME: Zhu, H. Zou, S. Rosset, T. Hastie, “Multi-class AdaBoost”, 2009.
-AdaBoost = AdaBoostClassifier(n_estimators=100, random_state=0)
-AdaBoost.fit(X_train, Y_train)
-Y_pred = AdaBoost.predict(X_test)
-du.metrics('AdaBoost-SAMME',AdaBoost, X_train, Y_train, Y_test, X_test, Y_pred)
-
-# Neural Network Multi Layer perceptron classifier
-NeuralNet = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
-NeuralNet.fit(X_train, Y_train)
-Y_pred = NeuralNet.predict(X_test)
-du.metrics('NeuralNet',NeuralNet, X_train, Y_train, Y_test, X_test, Y_pred)
-
-# Gradient Boost Classifier XGBoost
-model_GBC = GradientBoostingClassifier(n_estimators=100, learning_rate=1.0, max_depth=1, random_state=0)
-model_GBC.fit(X_train, Y_train)
-Y_pred=model_GBC.predict(X_test)
-du.metrics('XGBoost',model_GBC, X_train, Y_train, Y_test, X_test, Y_pred)
+# comparison with other models (fit, predict and metrics)
+mc.comparison(X_train, Y_train, Y_test, X_test, Y_pred)
