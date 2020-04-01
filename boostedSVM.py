@@ -72,9 +72,10 @@ du.metrics('svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
 # boosting
 # initialize 
 gammaIni,gammaMin,gammaStep,gammaVar = 7.01,0.07,0.1,0.0
-cost,count = 1, 0
+cost,count,norm = 1,0,0.0
 y = []
 weights = []
+new_weights = []
 h_list = []
 alpha_list = []
 
@@ -85,6 +86,9 @@ for var in Y_train:
 # svm function, keeps the error below 50%
 def svc_train(myKernel, myGamma, iniGamma, stepGamma, y, x_train, y_train, myWeights, count):
 
+    x_train_new = x_train.multiply(1.0)
+    y_train_new = y_train.multiply(myWeights)    
+    
     if count == 0:
         myGamma = iniGamma
         
@@ -95,7 +99,7 @@ def svc_train(myKernel, myGamma, iniGamma, stepGamma, y, x_train, y_train, myWei
         svcB.fit(x_train, y_train)
         y_pred = svcB.predict(x_train)
         
-        hOut = []
+        hOut[:] = []
         for var in y_pred:
             hOut.append(var)
         
@@ -114,24 +118,51 @@ def svc_train(myKernel, myGamma, iniGamma, stepGamma, y, x_train, y_train, myWei
 # AdaBoost loop
 while True:
 
-    gammaVar,error,h = svc_train('rbf', gammaVar, gammaIni, gammaStep, y, X_train, Y_train, weights, count)
+    if count == 0:
+        norm = 1.0
+        new_weights = weights.copy()
 
+    new_weights = [i * (1/norm) for i in new_weights]
+
+    # call svm, weight samples, iterate sigma(gamma), get errors, obtain predicted classifier(h)
+    gammaVar,error,h = svc_train('rbf', gammaVar, gammaIni, gammaStep, y, X_train, Y_train, new_weights, count)
+
+    # store the predicted classifiers
     h_list.append(h) 
-        
+
+    # classifier weights (alpha), obtain and store
     x = (1 - error)/error
     alpha = 0.5 * np.log(x)
     alpha_list.append(alpha)
-    new_weights = []
+    
+    # reset weight lists
+    weights[:] = []
+    weights = new_weights.copy()
+    new_weights[:] = []
+    norm = 0.0
 
+    # set weights for next iteration
     for i in range(len(y)):
         x = (-1.0) * alpha * y[i] * h[i]
-        new_weights = weights[i] * np.exp(x)
+        new_weights.append( weights[i] * np.exp(x) )
+        norm += weights[i] * np.exp(x)
         
     count+=1
     print(gammaVar,' :gamma')
-        
+
+    # do loop as long gamma > gammaMin
     if gammaVar < gammaMin:
         break
+
+
+# combine the classifiers (final step)
+final = 0.0
+
+for i in range(len(alpha_list)):
+    print(alpha_list[i], ': alpha')
+    final += alpha_list[i]
+
+final = np.sign(final)
 
 #du.metrics('svmBoosted', svcB, X_train, Y_train, Y_test, X_test, Y_predB)
 
