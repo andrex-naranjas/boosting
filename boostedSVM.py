@@ -65,7 +65,6 @@ print(X_test.shape, Y_test.shape)
 # support vector machine
 # nominal 
 
-
 svc = SVC(gamma='auto', probability = True)
 svc.fit(X_train, Y_train)
 Y_pred = svc.predict(X_test)
@@ -163,9 +162,15 @@ h_list = np.array(h_list)
 # combine the classifiers (final step)
 final = 0.0
 
+print(np.shape(alpha_list), type(alpha_list))
+print(np.shape(h_list), type(h_list))
+
 for i in range(len(alpha_list)):
     print(alpha_list[i], ': alpha')
+    #final = [j * alpha_list[i] for j in h_list[j]]
     final += alpha_list[i]
+    #print(h_list[i]*alpha_list[i])
+    #print('********************************************************************')
 
 final = np.sign(final)
 
