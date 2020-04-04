@@ -170,8 +170,6 @@ for i in range(len(alpha_list)):
     #final = [j * alpha_list[i] for j in h_list[j]]
     final += alpha_list[i]
     #print(h_list[i]*alpha_list[i])
-    #print('********************************************************************')
-    #gordo
 
 final = np.sign(final)
 
