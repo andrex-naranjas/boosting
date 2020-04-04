@@ -171,6 +171,7 @@ for i in range(len(alpha_list)):
     final += alpha_list[i]
     #print(h_list[i]*alpha_list[i])
     #print('********************************************************************')
+    #gordo
 
 final = np.sign(final)
 
