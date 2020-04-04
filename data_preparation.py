@@ -11,7 +11,6 @@ import sys
 # data analysis and wrangling
 import pandas as pd
 
-
 # fetch data
 def fetch_data(sample):
     if sample == 'titanic':
@@ -62,6 +61,8 @@ def titanic(data_set):
     data_set['IsAlone'] = 0
     data_set.loc[data_set['FamilySize'] == 1, 'IsAlone'] = 1
 
+    #return data_set #(for tmva prep)
+
     X = data_set.drop("Survived", axis=1)
     Y = data_set["Survived"]
 
@@ -83,28 +84,30 @@ def bCancer(data_set):
     data_set['menopause'] = data_set['menopause'].fillna(0)
     
     title_mapping = {'0-4': 0,'5-9': 1, '10-14': 2, '15-19': 3, '20-24': 4, '25-29': 5, '30-34': 6, '35-39': 7, '40-44': 8, '45-49': 9, '50-54': 10, '55-59': 11}
-    data_set['tumor-size'] = data_set['tumor-size'].map(title_mapping)
-    data_set['tumor-size'] = data_set['tumor-size'].fillna(0)
+    data_set['tumorSize'] = data_set['tumorSize'].map(title_mapping)
+    data_set['tumorSize'] = data_set['tumorSize'].fillna(0)
     
     title_mapping = {'0-2': 0, '3-5': 1, '6-8': 2, '9-11': 3, '12-14': 4, '15-17': 5, '18-20': 6, '21-23': 7, '24-26': 8, '27-29': 9, '30-32': 10, '33-35': 11, '36-39': 12}
-    data_set['inv-nodes'] = data_set['inv-nodes'].map(title_mapping)
-    data_set['inv-nodes'] = data_set['inv-nodes'].fillna(0)
+    data_set['invNodes'] = data_set['invNodes'].map(title_mapping)
+    data_set['invNodes'] = data_set['invNodes'].fillna(0)
 
     title_mapping = {'yes': 0, 'no': 1}
-    data_set['node-caps'] = data_set['node-caps'].map(title_mapping)
-    data_set['node-caps'] = data_set['node-caps'].fillna(0)
+    data_set['nodeCaps'] = data_set['nodeCaps'].map(title_mapping)
+    data_set['nodeCaps'] = data_set['nodeCaps'].fillna(0)
     
     title_mapping ={'left': 0, 'right': 1}
     data_set['breast'] = data_set['breast'].map(title_mapping)
     data_set['breast'] = data_set['breast'].fillna(0)
     
     title_mapping = {'left-up': 0, 'left-low': 1, 'right-up': 2, 'right-low': 3, 'central': 4}
-    data_set['breast-quad'] = data_set['breast-quad'].map(title_mapping)
-    data_set['breast-quad'] = data_set['breast-quad'].fillna(0)
+    data_set['breastQuad'] = data_set['breastQuad'].map(title_mapping)
+    data_set['breastQuad'] = data_set['breastQuad'].fillna(0)
 
     title_mapping = {'yes': 0, 'no': 1}
     data_set['irradiat'] = data_set['irradiat'].map(title_mapping)
     data_set['irradiat'] = data_set['irradiat'].fillna(0)
+
+    #return data_set #(for tmva preparation)
 
     X = data_set.drop("Class", axis=1)
     Y = data_set["Class"]
@@ -113,6 +116,9 @@ def bCancer(data_set):
 
 def two_norm(data_set):
     #These data are already well-formatted
+
+    #return data_set #(for tmva data prep)
+
     X = data_set.drop("Class", axis=1)
     Y = data_set["Class"]
     return X,Y
@@ -176,6 +182,8 @@ def german(data_set):
     data_set['Foreign'] = data_set['Foreign'].map(title_mapping)
     data_set['Foreign'] = data_set['Foreign'].fillna(0)
     
+    #return data_set #(for tmva prep)
+
     X = data_set.drop("Class", axis=1)
     Y = data_set["Class"]
 
@@ -187,6 +195,8 @@ def heart(data_set):
     title_mapping = {0: 0, 1: 1, 2: 1, 3: 1, 4: 1}
     data_set['Class'] = data_set['Class'].map(title_mapping)
     data_set['Class'] = data_set['Class'].fillna(0)
+
+    #return data_set #(for tmva prep)
     
     X = data_set.drop("Class", axis=1)
     Y = data_set["Class"]
