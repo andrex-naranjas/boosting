@@ -66,12 +66,10 @@ print(X_test.shape, Y_test.shape)
 
 # support vector machine
 # nominal 
-
 svc = SVC(gamma='auto', probability = True)
 svc.fit(X_train, Y_train)
 Y_pred = svc.predict(X_test)
 du.metrics('svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
-
 
 # boosting
 # initialize 
