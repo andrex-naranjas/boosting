@@ -23,6 +23,8 @@ def fetch_data(sample):
         data_set = pd.read_csv('./data/german.csv')
     elif sample == 'heart':
         data_set = pd.read_csv('./data/heart.csv')
+    elif sample == 'solar':
+        data_set = pd.read_csv('./data/solar.csv')
     else:
         sys.exit('The sample name provided does not exist. Try again!')
     return data_set
@@ -198,6 +200,62 @@ def heart(data_set):
 
     #return data_set #(for tmva prep)
     
+    X = data_set.drop("Class", axis=1)
+    Y = data_set["Class"]
+
+    return X,Y
+
+def solar(data_set):
+    #change names
+    title_mapping = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'H': 6}
+    data_set['Zurich'] = data_set['Zurich'].map(title_mapping)
+    data_set['Zurich'] = data_set['Zurich'].fillna(0)
+    
+    title_mapping = {'X': 0, 'R': 1, 'S': 2, 'A': 3, 'H': 4, 'K': 5}
+    data_set['Size'] = data_set['Size'].map(title_mapping)
+    data_set['Size'] = data_set['Size'].fillna(0)
+    
+    title_mapping = {'X': 0, 'O': 1, 'I': 2, 'C': 3}
+    data_set['Distro'] = data_set['Distro'].map(title_mapping)
+    data_set['Distro'] = data_set['Distro'].fillna(0)
+    
+    title_mapping = {'1': 0, '2': 1}
+    data_set['Activity'] = data_set['Activity'].map(title_mapping)
+    data_set['Activity'] = data_set['Activity'].fillna(0)
+    
+    title_mapping = {'1': 0, '2': 1, '3': 2}
+    data_set['Evolution'] = data_set['Evolution'].map(title_mapping)
+    data_set['Evolution'] = data_set['Evolution'].fillna(0)
+    
+    title_mapping = {'1': 0, '2': 1}
+    data_set['Prev24'] = data_set['Prev24'].map(title_mapping)
+    data_set['Prev24'] = data_set['Prev24'].fillna(0)
+    
+    title_mapping = {'1': 0, '2': 1}
+    data_set['Histo'] = data_set['Histo'].map(title_mapping)
+    data_set['Histo'] = data_set['Histo'].fillna(0)
+    
+    title_mapping = {'1': 0, '2': 1}
+    data_set['Complex'] = data_set['Complex'].map(title_mapping)
+    data_set['Complex'] = data_set['Complex'].fillna(0)
+    
+    title_mapping = {'1': 0, '2': 1}
+    data_set['Area'] = data_set['Area'].map(title_mapping)
+    data_set['Area'] = data_set['Area'].fillna(0)
+    
+    title_mapping = {'1': 0, '2': 1}
+    data_set['Largest'] = data_set['Largest'].map(title_mapping)
+    data_set['Largest'] = data_set['Largest'].fillna(0)
+    
+    #create the Class
+    #data_set['Class'] = 0
+    data_set['Class']=data_set.sum(axis=1)
+    data_set.loc[(data_set['Class1'] == 0) & (data_set['Class2'] == 0) & (data_set['Class3'] == 0), 'Class'] = 0
+    data_set.loc[(data_set['Class1'] != 0) | (data_set['Class2'] != 0) | (data_set['Class3'] != 0), 'Class'] = 1    
+    data_set = data_set.drop(['Class1', 'Class2', 'Class3' ], axis=1)
+
+    #return data_set #(for tmva prep)
+
     X = data_set.drop("Class", axis=1)
     Y = data_set["Class"]
 

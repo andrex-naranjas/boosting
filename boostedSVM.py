@@ -52,6 +52,8 @@ elif sample == 'german':
     X,Y = dp.german(data_set)
 elif sample == 'heart':
     X,Y = dp.heart(data_set)
+elif sample == 'solar':
+    X,Y = dp.solar(data_set)
     
 # print data after preparation
 print("After preparation", data_set.shape)
