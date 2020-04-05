@@ -15,8 +15,8 @@ import pandas as pd
 import data_preparation as dp
 
 # fetch data set (from available list)
-data_set = dp.fetch_data('heart')
-new_data = dp.heart(data_set)
+data_set = dp.fetch_data('solar')
+new_data = dp.solar(data_set)
 
 signal = new_data.loc[new_data['Class']==0]
 background = new_data.loc[new_data['Class']==1]
