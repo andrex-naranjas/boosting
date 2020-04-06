@@ -4,6 +4,8 @@
 # Code to improve SVM (machine learning methods module)
 # authors: A. Ramirez-Morales and J. Salmon-Gamboa
 
+# model comparison module
+
 # machine learning modules
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import AdaBoostClassifier
@@ -14,7 +16,7 @@ from sklearn.ensemble import GradientBoostingClassifier
 import data_utils as du
 
 # perform the ml algos (fit , predict and metrics)
-def comparison(X_train, Y_train, Y_test, X_test, Y_pred):
+def comparison(X_train, Y_train, Y_test, X_test):
     
     # RANDOM forest classifier
     random_forest = RandomForestClassifier(n_estimators=100)

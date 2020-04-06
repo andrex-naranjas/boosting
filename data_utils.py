@@ -31,7 +31,7 @@ def generate_auc_roc_curve(model, X_val,Y_test, name):
     string_model= str(model)
     plt.plot(fpr, tpr, label = 'AUC ROC ' + string_model[:3] + '=' + str(auc))
     plt.legend(loc = 4)
-    plt.savefig(name+'.png')
+    plt.savefig(name+'.pdf')
     #pass
     return
 
