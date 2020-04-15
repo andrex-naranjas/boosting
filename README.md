@@ -3,7 +3,7 @@
 python3 boostedSVM.py sample_name
 
 
-## Install Dash on Ubuntu: 
+# Install Dash on Ubuntu: 
   
 Let’s start by installing the python3-venv package that provides the venv module.
 ## $ sudo apt install python3-venv
