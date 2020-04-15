@@ -15,7 +15,7 @@ Then install dash with the command: **$ pip install dash==1.11.0**
 
 Everytime you want to use dash, activate the dash environment.
 
-## Install Dash on Win 10 using coda: 
+## Install Dash on Win 10 using conda: 
 
 Open the conda command prompt, create and activate a virtual environment and install dash using **$ pip install dash==1.11.0** Again, everytime you want to use dash, activate the dash environment.
 
