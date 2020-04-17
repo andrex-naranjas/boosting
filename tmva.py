@@ -18,13 +18,13 @@ m_factory = TMVA.Factory( "TMVAClassification", m_outputFile #this is optional
 
 m_loader = TMVA.DataLoader("dataset")
 
-m_loader.AddVariable("age")
-m_loader.AddVariable("menopause")
-m_loader.AddVariable("tumorSize")
-m_loader.AddVariable("invNodes")
-m_loader.AddVariable("degMalig")
-# m_loader.AddVariable("nodeCaps")
-# m_loader.AddVariable("breast")
+m_loader.AddVariable("age", 'F')
+m_loader.AddVariable("menopause", 'F')
+m_loader.AddVariable("tumorSize", 'F')
+m_loader.AddVariable("invNodes", 'F')
+m_loader.AddVariable("degMalig", 'F')
+# m_loader.AddVariable("nodeCaps", 'F')
+# m_loader.AddVariable("breast", 'I')
 # m_loader.AddVariable("breastQuad")
 # m_loader.AddVariable("irradiat")
 
