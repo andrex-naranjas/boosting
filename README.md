@@ -1,6 +1,6 @@
-# boosting
+# Boosted Support Vector Machines
 ## Usage
-python3 boostedSVM.py sample_name
+python3 boostedSVM.py
 
 
 ## Install Dash on Ubuntu: 
