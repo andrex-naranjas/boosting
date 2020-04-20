@@ -131,7 +131,7 @@ def german(data_set):
     title_mapping = {1: 0, 2: 1}
     data_set['Class'] = data_set['Class'].map(title_mapping)
     data_set['Class'] = data_set['Class'].fillna(0)
-
+    
     title_mapping = {'A11': 0, 'A12': 1, 'A13': 2, 'A14': 3}
     data_set['Status'] = data_set['Status'].map(title_mapping)
     data_set['Status'] = data_set['Status'].fillna(0)
