@@ -76,7 +76,6 @@ def main(sample):
     
     # boosting
     # initialize
-    #gammaIni, gammaMin, gammaStep, gammaVar = 7.01, 0.07, 0.1, 0.0
     gammaIni, gammaMin, gammaStep, gammaVar = 10, 0.01, 0.1, 0.0
     cost, count, norm = 1, 0, 0.0
     weights = ([])
@@ -143,7 +142,7 @@ def main(sample):
         h_temp = h.tolist()
         h_list.append(h_temp)
 
-        print(round(error,4), round(gammaVar,2))
+        print("Error: {} Gamma: {}".format(round(error,4), round(gammaVar,2)))
         # classifier weights (alpha), obtain and store
         x = (1 - error)/error
         alpha = 0.5 * np.log(x)
@@ -173,28 +172,39 @@ def main(sample):
     h_list = np.array(h_list)
     
     # combine the classifiers (final step)
-    final = 0.0
-    print(np.shape(alpha_list), type(alpha_list))
-    print(np.shape(h_list), type(h_list))
     print(count,'number of classifiers')
-    
+
+    h_alpha = []
     for i in range(len(alpha_list)):
-        #print(alpha_list[i], ': alpha')
-        #final = [j * alpha_list[i] for j in h_list[j]]
-        final += alpha_list[i]
-        #print(h_list[i]*alpha_list[i])
+        h_alpha.append(h_list[i] * alpha_list[i])
+
+    h_alpha = np.array(h_alpha)
+
+    final = ([])
+    for j in range(len(h_alpha[0])):
+        suma = 0.0
+        for i in range(len(alpha_list)):
+            suma+=h_alpha[i][j]
+            
+        final = np.append(final, [np.sign(suma)])
 
         
-    final = np.sign(final)
+    # final error calculation
+    final_error = 0.0
+    for i in range(len(y)):
+        if(y[i]!=final[i]):
+            final_error+=1
+        
+    print('boost_pred vs trained error:', round(final_error/len(y),4))
+        
     #du.metrics(sample,'svmBoosted', svcB, X_train, Y_train, Y_test, X_test, Y_predB)
-    #'''
-
+    
     # # comparison with other ml models (fit, predict and metrics)
     # mc.comparison(sample, X_train, Y_train, Y_test, X_test)
 
     pass
 
-main('titanic')
+main('cancer')
 
 # # run main function for every dataset
 # for item in sample_list:
