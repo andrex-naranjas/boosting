@@ -77,37 +77,47 @@ def main(sample):
     # boosting
     # initialize
     #gammaIni, gammaMin, gammaStep, gammaVar = 7.01, 0.07, 0.1, 0.0
-    gammaIni, gammaMin, gammaStep, gammaVar = 25, 0.01, 0.1, 0.0
+    gammaIni, gammaMin, gammaStep, gammaVar = 10, 0.01, 0.1, 0.0
     cost, count, norm = 1, 0, 0.0
     weights = ([])
     h_list = []
     alpha_list = ([])
     y = Y_train.values
-    
+
     for var in Y_train:
          weights = np.append(weights, [1.0/len(Y_train)])
+
          
     # svm function, keeps the error below 50%
-    def svc_train(myKernel, myGamma, iniGamma, stepGamma, y, x_train, y_train, myWeights, count):
+    def svc_train(myKernel, myGamma, iniGamma, stepGamma, x_train, y_train, x_test, y_test, myWeights, count):
+
+        y_train = y_train.values
+        x_train = x_train.values
+
+        #weight (boost) training samples
+        x_train_boosted = []
+        for i in range(len(myWeights)):
+            x_train_boosted.append(myWeights[i] * x_train[i])
         
-        x_train_new = x_train.multiply(1.0)
-        y_train_new = y_train.multiply(myWeights)
+        x_train_boosted = np.array(x_train_boosted)           
         
         if count == 0:
             myGamma = iniGamma
         errorOut = 0.0
         
         while True:
+            
             svcB = SVC(C=1.0, kernel='rbf', gamma=myGamma, shrinking = True, probability = True, tol = 0.001)
-            svcB.fit(x_train, y_train)
-            y_pred = svcB.predict(x_train)
+            svcB.fit(x_train_boosted, y_train)
+            y_pred = svcB.predict(x_train_boosted)
             hOut = y_pred
             
             for i in range(len(y_pred)):
-                if(y[i]!=hOut[i]):
+                if(y_train[i]!=hOut[i]):
                     errorOut+=myWeights[i]
-                    
-            if errorOut < 0.5:
+
+            # require an error below 50% and avoid null errors
+            if errorOut < 0.5 and errorOut != 0:
                 myGamma -= stepGamma
                 break
             
@@ -124,11 +134,7 @@ def main(sample):
         new_weights = np.array([i * (1/norm) for i in new_weights])
         
         # call svm, weight samples, iterate sigma(gamma), get errors, obtain predicted classifier (h as an array)
-        gammaVar, error, h = svc_train('rbf', gammaVar, gammaIni, gammaStep, y, X_train, Y_train, new_weights, count)
-
-        # if gamma < 0, SVM fails
-        if gammaVar < 0:
-            sys.exit('Not suitable gamma found. Bye!')            
+        gammaVar, error, h = svc_train('rbf', gammaVar, gammaIni, gammaStep, X_train, Y_train, X_test, Y_test, new_weights, count)
 
         # count how many times SVM runs
         count+=1
@@ -136,12 +142,8 @@ def main(sample):
         # store the predicted classifiers
         h_temp = h.tolist()
         h_list.append(h_temp)
-        
-        # avoid null errors (ML algos arent perfect)
-        if error == 0:
-            print(count, gammaVar)
-            continue
-        
+
+        print(round(error,4), round(gammaVar,2))
         # classifier weights (alpha), obtain and store
         x = (1 - error)/error
         alpha = 0.5 * np.log(x)
@@ -160,11 +162,12 @@ def main(sample):
             
         #print(gammaVar,' :gamma')
         
-        # do loop as long gamma > gammaMin
-        if gammaVar < gammaMin:
+        # do loop as long gamma > gammaMin, if gamma < 0, SVM fails exit loop
+        if (gammaVar < gammaMin) or (gammaVar < 0):
             break
         
         #end of adaboost loop
+
         
     # h_list into array
     h_list = np.array(h_list)
@@ -173,6 +176,7 @@ def main(sample):
     final = 0.0
     print(np.shape(alpha_list), type(alpha_list))
     print(np.shape(h_list), type(h_list))
+    print(count,'number of classifiers')
     
     for i in range(len(alpha_list)):
         #print(alpha_list[i], ': alpha')
