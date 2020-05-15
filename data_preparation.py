@@ -65,6 +65,11 @@ def titanic(data_set):
 
     #return data_set #(for tmva prep)
 
+    #change names
+    title_mapping = {0: 1, 1: -1}
+    data_set['Survived'] = data_set['Survived'].map(title_mapping)
+    data_set['Survived'] = data_set['Survived'].fillna(0)
+    
     X = data_set.drop("Survived", axis=1)
     Y = data_set["Survived"]
 
@@ -73,7 +78,7 @@ def titanic(data_set):
 #Breast-cancer data preparation
 def bCancer(data_set):
     #change names
-    title_mapping = {"no-recurrence-events": 0, "recurrence-events": 1}
+    title_mapping = {"no-recurrence-events": 1, "recurrence-events": -1}
     data_set['Class'] = data_set['Class'].map(title_mapping)
     data_set['Class'] = data_set['Class'].fillna(0)
 
@@ -128,7 +133,7 @@ def two_norm(data_set):
 
 def german(data_set):
     #change names
-    title_mapping = {1: 0, 2: 1}
+    title_mapping = {1: 1, 2: -1}
     data_set['Class'] = data_set['Class'].map(title_mapping)
     data_set['Class'] = data_set['Class'].fillna(0)
     
@@ -194,7 +199,7 @@ def german(data_set):
 # heart conditions data set
 def heart(data_set):
     #change names
-    title_mapping = {0: 0, 1: 1, 2: 1, 3: 1, 4: 1}
+    title_mapping = {0: 1, 1: -1, 2: -1, 3: -1, 4: -1}
     data_set['Class'] = data_set['Class'].map(title_mapping)
     data_set['Class'] = data_set['Class'].fillna(0)
 
@@ -249,8 +254,8 @@ def solar(data_set):
 
     #create the Class
     data_set['Class']=data_set.sum(axis=1)
-    data_set.loc[(data_set['Class1'] == 0) & (data_set['Class2'] == 0) & (data_set['Class3'] == 0), 'Class'] = 0
-    data_set.loc[(data_set['Class1'] != 0) | (data_set['Class2'] != 0) | (data_set['Class3'] != 0), 'Class'] = 1
+    data_set.loc[(data_set['Class1'] == 0) & (data_set['Class2'] == 0) & (data_set['Class3'] == 0), 'Class'] = 1
+    data_set.loc[(data_set['Class1'] != 0) | (data_set['Class2'] != 0) | (data_set['Class3'] != 0), 'Class'] = -1
     data_set = data_set.drop(['Class1', 'Class2', 'Class3' ], axis=1)
 
     #return data_set #(for tmva prep)
