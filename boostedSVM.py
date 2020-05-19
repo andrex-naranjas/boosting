@@ -16,10 +16,9 @@ import pandas as pd
 
 # machine learning
 from sklearn.svm import SVC, LinearSVC
-from sklearn.model_selection import train_test_split
 
 # import module for data preparation
-import data_preparation as dp
+from data_preparation import data_preparation
 
 # import module for data utils
 import data_utils as du
@@ -32,62 +31,6 @@ sample_list = ['titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar']
 du.make_directories(sample_list)
 
 # main function
-def dataset(sample):
-
-    # fetch data set (from available list)
-    data_set = dp.fetch_data(sample)
-
-    # check data
-    print("Before preparation", data_set.shape)
-    print(data_set.columns.values)
-    print(data_set.head())
-    print(data_set.tail())
-    print(data_set.describe())
-
-    # prepare data
-    if sample == 'titanic':
-        X,Y = dp.titanic(data_set)
-    elif sample == 'two_norm':
-        X,Y = dp.two_norm(data_set)
-    elif sample == 'cancer':
-        X,Y = dp.bCancer(data_set)
-    elif sample == 'german':
-        X,Y = dp.german(data_set)
-    elif sample == 'heart':
-        X,Y = dp.heart(data_set)
-    elif sample == 'solar':
-        X,Y = dp.solar(data_set)
-
-        
-    # print data after preparation
-    print("After preparation", data_set.shape)
-    print(X.head())
-
-    # divide sample into train and test sample
-    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.4)
-    print(X_train.shape, Y_train.shape)
-    print(X_test.shape, Y_test.shape)
-    
-    # support vector machine
-    # nominal
-    
-    weights= np.ones(len(Y_train))/len(Y_train)
-    
-    svc = SVC(C=150.0, kernel='rbf', gamma=10, shrinking = True, probability = True, tol = 0.001)
-    svc.fit(X_train, Y_train, weights)
-    Y_pred = svc.predict(X_test)
-    du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)    
-    
-    # comparison with other ml models (fit, predict and metrics)
-    #mc.comparison(sample, X_train, Y_train, Y_test, X_test)
-    
-    return X_train, Y_train, X_test, Y_test
-
-
-# run main function for every dataset
-# for item in sample_list:
-#     main(item)
- 
 
 class AdaBoostSVM:
     
@@ -231,10 +174,27 @@ class AdaBoostSVM:
         svm_preds = np.array([learner.predict(X) for learner in self.weak_svm])
         return np.sign(np.dot(self.alphas, svm_preds))
 
+    
+# start calculations
+    
+# get the data
+data = data_preparation()
+sample = 'titanic'
+X_train, Y_train, X_test, Y_test = data.dataset(sample, 0.4)
 
-X_train, Y_train, X_test, Y_test = dataset('titanic')
+# support vector machine
+# nominal
+weights= np.ones(len(Y_train))/len(Y_train)
+svc = SVC(C=150.0, kernel='rbf', gamma=10, shrinking = True, probability = True, tol = 0.001)
+svc.fit(X_train, Y_train, weights)
+Y_pred = svc.predict(X_test)
+du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)    
+
+# comparison with other ml models (fit, predict and metrics)
+#mc.comparison(sample, X_train, Y_train, Y_test, X_test)
 
 
+#AdaBoost support vector machine
 model = AdaBoostSVM()
 model.fit(X_train, Y_train, C_parameter = 150, gammaIni = 10)
 y_preda = model.predict(X_test)
@@ -243,7 +203,17 @@ test_err = (model.predict(X_test) != Y_test).mean()
 print(f'Test error: {test_err:.1%}')
 
 
+
+
+
+
+
 '''
+run main function for every dataset
+for item in sample_list:
+    main(item)
+
+
 to be pasted at the beginning of the svc_train function
 # check normalization 
 check = 0.
