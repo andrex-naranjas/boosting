@@ -84,7 +84,7 @@ def dataset(sample):
     return X_train, Y_train, X_test, Y_test
 
 
- # # run main function for every dataset
+# run main function for every dataset
 # for item in sample_list:
 #     main(item)
  
