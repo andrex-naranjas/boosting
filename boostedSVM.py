@@ -17,7 +17,7 @@ import pandas as pd
 # machine learning
 from sklearn.svm import SVC, LinearSVC
 
-# import module for data preparation
+# import class for data preparation
 from data_preparation import data_preparation
 
 # import module for data utils
@@ -193,7 +193,6 @@ du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
 # comparison with other ml models (fit, predict and metrics)
 #mc.comparison(sample, X_train, Y_train, Y_test, X_test)
 
-
 #AdaBoost support vector machine
 model = AdaBoostSVM()
 model.fit(X_train, Y_train, C_parameter = 150, gammaIni = 10)
@@ -204,15 +203,10 @@ print(f'Test error: {test_err:.1%}')
 
 
 
-
-
-
-
 '''
 run main function for every dataset
 for item in sample_list:
     main(item)
-
 
 to be pasted at the beginning of the svc_train function
 # check normalization 
