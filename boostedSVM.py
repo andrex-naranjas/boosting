@@ -27,7 +27,7 @@ import data_utils as du
 import model_comparison as mc
 
 # make directories
-sample_list = ['titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar']
+sample_list = ['titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar','car','contra','nursery','tac_toe']
 du.make_directories(sample_list)
 
 # main function
@@ -179,7 +179,7 @@ class AdaBoostSVM:
     
 # get the data
 data = data_preparation()
-sample = 'titanic'
+sample = 'tac_toe'
 X_train, Y_train, X_test, Y_test = data.dataset(sample, 0.4)
 
 # support vector machine

@@ -34,6 +34,14 @@ class data_preparation:
             data_set = pd.read_csv('./data/heart.csv')
         elif sample == 'solar':
             data_set = pd.read_csv('./data/solar.csv')
+        elif sample == 'car':
+            data_set = pd.read_csv('./data/car.csv')
+        elif sample == 'contra':
+            data_set = pd.read_csv('./data/contra.csv')
+        elif sample == 'nursery':
+            data_set = pd.read_csv('./data/nursery.csv')
+        elif sample == 'tac_toe':
+            data_set = pd.read_csv('./data/tac_toe.csv')
         else:
             sys.exit('The sample name provided does not exist. Try again!')
         return data_set
@@ -64,7 +72,15 @@ class data_preparation:
             X,Y = self.heart(data_set)
         elif sample == 'solar':
             X,Y = self.solar(data_set)
-        
+        elif sample == 'car':
+            X,Y = self.car(data_set)
+        elif sample == 'contra':
+            X,Y = self.contra(data_set)
+        elif sample == 'nursery':
+            X,Y = self.nursery(data_set)
+        elif sample == 'tac_toe':
+            X,Y = self.tac_toe(data_set)
+            
         # print data after preparation
         print("After preparation", data_set.shape)
         print(X.head())
@@ -311,4 +327,177 @@ class data_preparation:
         X = data_set.drop("Class", axis=1)
         Y = data_set["Class"]
 
+        return X,Y
+
+    def car(self, data_set):
+
+        title_mapping = {'vhigh': 0, 'high': 1, 'med': 2, 'low': 3}
+        data_set['Buy'] = data_set['Buy'].map(title_mapping)
+        data_set['Buy'] = data_set['Buy'].fillna(0)
+
+        title_mapping = {'vhigh': 0, 'high': 1, 'med': 2, 'low': 3}
+        data_set['Maint'] = data_set['Maint'].map(title_mapping)
+        data_set['Maint'] = data_set['Maint'].fillna(0)
+
+        title_mapping = {2: 0, 3: 1, 4: 2, '5more': 3}
+        data_set['Doors'] = data_set['Doors'].map(title_mapping)
+        data_set['Doors'] = data_set['Doors'].fillna(0)
+
+        title_mapping = {2: 0, 4: 1, 'more': 2}
+        data_set['Persons'] = data_set['Persons'].map(title_mapping)
+        data_set['Persons'] = data_set['Persons'].fillna(0)
+
+        title_mapping = {2: 0, 4: 1, 'more': 2}
+        data_set['Persons'] = data_set['Persons'].map(title_mapping)
+        data_set['Persons'] = data_set['Persons'].fillna(0)
+
+        title_mapping = {'small': 0, 'med': 1, 'big': 2}
+        data_set['Lug'] = data_set['Lug'].map(title_mapping)
+        data_set['Lug'] = data_set['Lug'].fillna(0)
+
+        title_mapping = {'low': 0, 'med': 1, 'high': 2}
+        data_set['Safety'] = data_set['Safety'].map(title_mapping)
+        data_set['Safety'] = data_set['Safety'].fillna(0)
+
+        title_mapping = {'unacc': -1, 'acc': 1, 'good': 1, 'vgood': 1}
+        data_set['Class'] = data_set['Class'].map(title_mapping)
+        data_set['Class'] = data_set['Class'].fillna(0)
+
+        X = data_set.drop("Class", axis=1)
+        Y = data_set["Class"]
+
+        return X,Y
+
+
+    def contra(self, data_set):
+
+        data_set.loc[ data_set['Age'] <= 17, 'Age'] = 0
+        data_set.loc[(data_set['Age'] > 17) & (data_set['Age'] <= 25), 'Age'] = 1
+        data_set.loc[(data_set['Age'] > 25) & (data_set['Age'] <= 33), 'Age'] = 2
+        data_set.loc[(data_set['Age'] > 33) & (data_set['Age'] <= 41), 'Age'] = 3
+        data_set.loc[ data_set['Age'] > 41, 'Age'] = 4
+
+        title_mapping = {1: 0, 2: 1, 3: 2, 4: 3}
+        data_set['W_edu'] = data_set['W_edu'].map(title_mapping)
+        data_set['W_edu'] = data_set['W_edu'].fillna(0)
+
+        title_mapping = {1: 0, 2: 1, 3: 2, 4: 3}
+        data_set['H_edu'] = data_set['H_edu'].map(title_mapping)
+        data_set['H_edu'] = data_set['H_edu'].fillna(0)
+
+        ###Children missing, se puede categorizar en intervalos?
+
+        ##W_religion OKAY
+        ##W_work OKAY
+
+        title_mapping = {1: 0, 2: 1, 3: 2, 4: 3}
+        data_set['H_occupation'] = data_set['H_occupation'].map(title_mapping)
+        data_set['H_occupation'] = data_set['H_occupation'].fillna(0)
+
+        title_mapping = {1: 0, 2: 1, 3: 2, 4: 3}
+        data_set['Living_index'] = data_set['Living_index'].map(title_mapping)
+        data_set['Living_index'] = data_set['Living_index'].fillna(0)
+
+        ##Exposure OKAY
+
+        title_mapping = {1: -1, 2: 1, 3: 1}
+        data_set['Class'] = data_set['Class'].map(title_mapping)
+        data_set['Class'] = data_set['Class'].fillna(0)
+
+        data_set = data_set.drop('Children',axis=1)
+
+        X = data_set.drop("Class", axis=1)
+        Y = data_set["Class"]
+        
+        return X,Y
+
+
+    def nursery(self, data_set):
+    
+        title_mapping = {'usual': 0, 'pretentious': 1, 'great_pret': 2}
+        data_set['Parents'] = data_set['Parents'].map(title_mapping)
+        data_set['Parents'] = data_set['Parents'].fillna(0)
+
+        title_mapping = {'proper' : 0, 'less_proper' : 1, 'improper' : 2, 'critical' : 3, 'very_crit' : 4}
+        data_set['Has_nurs'] = data_set['Has_nurs'].map(title_mapping)
+        data_set['Has_nurs'] = data_set['Has_nurs'].fillna(0)
+
+        title_mapping = {'complete' : 0, 'completed' : 1, 'incomplete' : 2, 'foster' : 3}
+        data_set['Form_fam'] = data_set['Form_fam'].map(title_mapping)
+        data_set['Form_fam'] = data_set['Form_fam'].fillna(0)
+
+        title_mapping = {1: 0, 2: 1, 3: 2, 'more': 4}
+        data_set['Children'] = data_set['Children'].map(title_mapping)
+        data_set['Children'] = data_set['Children'].fillna(0)
+
+        title_mapping = {'convenient' : 0, 'less_conv' : 1, 'critical' : 2}
+        data_set['Housing'] = data_set['Housing'].map(title_mapping)
+        data_set['Housing'] = data_set['Housing'].fillna(0)
+
+        title_mapping = {'convenient' : 0, 'inconv' : 0}
+        data_set['Finance'] = data_set['Finance'].map(title_mapping)
+        data_set['Finance'] = data_set['Finance'].fillna(0)
+
+        title_mapping = {'nonprob' : 0, 'slightly_prob' : 1, 'problematic' : 2}
+        data_set['Social'] = data_set['Social'].map(title_mapping)
+        data_set['Social'] = data_set['Social'].fillna(0)
+
+        title_mapping = {'recommended' : 0, 'priority' : 1, 'not_recom' : 2}
+        data_set['Health'] = data_set['Health'].map(title_mapping)
+        data_set['Health'] = data_set['Health'].fillna(0)
+
+        title_mapping = {'not_recom' : -1, 'recommend' : 1, 'very_recom' : 1, 'priority' : 1, 'spec_prior' : 1}
+        data_set['Class'] = data_set['Class'].map(title_mapping)
+        data_set['Class'] = data_set['Class'].fillna(0)
+
+        X = data_set.drop("Class", axis=1)
+        Y = data_set["Class"]
+
+        return X,Y
+
+    def tac_toe(self, data_set):
+
+        title_mapping = {'x': 0, 'o': 1, 'b': 2}
+        data_set['TL'] = data_set['TL'].map(title_mapping)
+        data_set['TL'] = data_set['TL'].fillna(0)
+
+        title_mapping = {'x': 0, 'o': 1, 'b': 2}
+        data_set['TM'] = data_set['TM'].map(title_mapping)
+        data_set['TM'] = data_set['TM'].fillna(0)
+
+        title_mapping = {'x': 0, 'o': 1, 'b': 2}
+        data_set['TR'] = data_set['TR'].map(title_mapping)
+        data_set['TR'] = data_set['TR'].fillna(0)
+
+        title_mapping = {'x': 0, 'o': 1, 'b': 2}
+        data_set['ML'] = data_set['ML'].map(title_mapping)
+        data_set['ML'] = data_set['ML'].fillna(0)
+
+        title_mapping = {'x': 0, 'o': 1, 'b': 2}
+        data_set['MM'] = data_set['MM'].map(title_mapping)
+        data_set['MM'] = data_set['MM'].fillna(0)
+
+        title_mapping = {'x': 0, 'o': 1, 'b': 2}
+        data_set['MR'] = data_set['MR'].map(title_mapping)
+        data_set['MR'] = data_set['MR'].fillna(0)
+
+        title_mapping = {'x': 0, 'o': 1, 'b': 2}
+        data_set['BL'] = data_set['BL'].map(title_mapping)
+        data_set['BL'] = data_set['BL'].fillna(0)
+
+        title_mapping = {'x': 0, 'o': 1, 'b': 2}
+        data_set['BM'] = data_set['BM'].map(title_mapping)
+        data_set['BM'] = data_set['BM'].fillna(0)
+
+        title_mapping = {'x': 0, 'o': 1, 'b': 2}
+        data_set['BR'] = data_set['BR'].map(title_mapping)
+        data_set['BR'] = data_set['BR'].fillna(0)
+
+        title_mapping = {'positive' : 1, 'negative' : -1}
+        data_set['Class'] = data_set['Class'].map(title_mapping)
+        data_set['Class'] = data_set['Class'].fillna(0)
+
+        X = data_set.drop("Class", axis=1)
+        Y = data_set["Class"]
+        
         return X,Y
