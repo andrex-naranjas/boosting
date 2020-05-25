@@ -595,7 +595,7 @@ Survived,Pclass,Name,Sex,Age,Siblings/Spouses Aboard,Parents/Children Aboard,Far
 1,2,"Miss. Jessie Wills Leitch",female,31,0,0,33
 0,3,"Mr. Alfred Johnson",male,49,0,0,0
 0,3,"Mr. Hanna Boulos",male,18,0,0,7.225
-1,1,Sir. Cosmo Edmund Duff Gordon",male,49,1,0,56.9292
+1,1,"Sir. Cosmo Edmund Duff Gordon",male,49,1,0,56.9292
 1,2,"Mrs. Sidney Samuel (Amy Frances Christy) Jacobsohn",female,24,2,1,27
 0,3,"Mr. Petco Slabenoff",male,42,0,0,7.8958
 0,1,"Mr. Charles H Harrington",male,37,0,0,42.4
