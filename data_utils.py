@@ -32,7 +32,7 @@ def cv_scores(model, x,y):
     return ["%0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2)]
 
 
-### Makeshift metric para los predictores alv ###
+# Makeshift metric for predictors
 def cv_metrics(model, X, y):
     
     X = X.values
