@@ -34,8 +34,10 @@ du.make_directories(sample_list)
 
 class AdaBoostSVM:
     
-    def __init__(self):
+    def __init__(self, C, gammaIni):
         
+        self.C = C
+        self.gammaIni = gammaIni
         self.weak_svm = ([])
         self.alphas = ([])
     
@@ -45,16 +47,20 @@ class AdaBoostSVM:
         # Validate assumptions about format of input data. Expecting response variable to be formatted as ±1
         assert set(y) == {-1, 1}
         
-        # convert pandas into numpy arrays
-        X = X.values
-        y = y.values
-        return X, y
+        # If input data already is numpy array, do nothing
+        if type(X) == type(np.array([])) and type(y) == type(np.array([])):
+            return X, y
+        else:
+            # convert pandas into numpy arrays
+            X = X.values
+            y = y.values
+            return X, y
         
     
-    def svc_train(self, myKernel, C_parameter, myGamma, iniGamma, stepGamma, x_train, y_train, myWeights, count):
+    def svc_train(self, myKernel, myGamma, stepGamma, x_train, y_train, myWeights, count):
         
         if count == 0:
-            myGamma = iniGamma
+            myGamma = self.gammaIni
         
         while True:
             if myGamma<0:
@@ -62,7 +68,7 @@ class AdaBoostSVM:
 
             errorOut = 0.0 
             
-            svcB = SVC(C = C_parameter, kernel='rbf', gamma=1/(2*(myGamma**2)), shrinking = True, probability = True, tol = 0.001)
+            svcB = SVC(C = self.C, kernel='rbf', gamma=1/(2*(myGamma**2)), shrinking = True, probability = True, tol = 0.001)
             svcB.fit(x_train, y_train, sample_weight=myWeights)
             y_pred = svcB.predict(x_train)
             
@@ -80,7 +86,7 @@ class AdaBoostSVM:
         return myGamma, errorOut, y_pred, svcB
     
     
-    def fit(self, X, y, C_parameter, gammaIni):
+    def fit(self, X, y):
         
         X_train, Y_train = self._check_X_y(X, y)
         n = X.shape[0]
@@ -99,7 +105,7 @@ class AdaBoostSVM:
             new_weights = new_weights/norm
         
             # call svm, weight samples, iterate sigma(gamma), get errors, obtain predicted classifier (h as an array) 
-            gammaVar, error, h, learner = self.svc_train('rbf', C_parameter, gammaVar, gammaIni, gammaStep, X_train, Y_train, new_weights, count)
+            gammaVar, error, h, learner = self.svc_train('rbf', gammaVar, gammaStep, X_train, Y_train, new_weights, count)
         
             # count how many times SVM runs
             count += 1
@@ -173,13 +179,13 @@ class AdaBoostSVM:
         # Make predictions using already fitted model
         svm_preds = np.array([learner.predict(X) for learner in self.weak_svm])
         return np.sign(np.dot(self.alphas, svm_preds))
-
+    
     
 # start calculations
     
 # get the data
 data = data_preparation()
-sample = 'tac_toe'
+sample = 'titanic'
 X_train, Y_train, X_test, Y_test = data.dataset(sample, 0.4)
 
 # support vector machine
@@ -194,20 +200,19 @@ du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
 #mc.comparison(sample, X_train, Y_train, Y_test, X_test)
 
 #AdaBoost support vector machine
-model = AdaBoostSVM()
-model.fit(X_train, Y_train, C_parameter = 150, gammaIni = 10)
+model = AdaBoostSVM(C = 150, gammaIni = 10)
+model.fit(X_train, Y_train)
 y_preda = model.predict(X_test)
 
 test_err = (model.predict(X_test) != Y_test).mean()
 print(f'Test error: {test_err:.1%}')
 
-
+du.cv_metrics(model, X_train, Y_train)
 
 '''
 run main function for every dataset
 for item in sample_list:
     main(item)
-
 to be pasted at the beginning of the svc_train function
 # check normalization 
 check = 0.
