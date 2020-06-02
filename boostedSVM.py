@@ -217,14 +217,4 @@ to be pasted at the beginning of the svc_train function
 # check normalization 
 check = 0.
 for i in range(len(myWeights,)):
-    check+=myWeights[i]
-    
-print('Check normalisation', round(check,2))'''
-
-'''
-# #weight (boost) training samples
-# x_train_boosted = []
-# for i in range(len(myWeights)):
-#     x_train_boosted.append( x_train[i] * myWeights[i]) 
-# x_train_boosted = np.array(x_train_boosted)           
-'''
+    check+=myWeights[i] #weights must add one, i.e. check=1.
