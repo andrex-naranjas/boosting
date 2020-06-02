@@ -218,3 +218,4 @@ to be pasted at the beginning of the svc_train function
 check = 0.
 for i in range(len(myWeights,)):
     check+=myWeights[i] #weights must add one, i.e. check=1.
+'''
