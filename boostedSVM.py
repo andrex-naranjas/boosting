@@ -150,10 +150,10 @@ class AdaBoostSVM:
 
         print(count,'number of classifiers')
 
-        # Compute precision
+        # Start to calculate the final classifier
         h_alpha = np.array([h_list[i]*self.alphas[i] for i in range(count)])
 
-        final = ([])
+        final = ([]) # final classifier is an array
         for j in range(len(h_alpha[0])):
             suma = 0.0
             for i in range(count):
