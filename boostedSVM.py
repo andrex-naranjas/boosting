@@ -32,6 +32,8 @@ du.make_directories(sample_list)
 
 # main function
 
+compare = 0
+
 class AdaBoostSVM:
     
     def __init__(self, C, gammaIni):
@@ -182,10 +184,10 @@ class AdaBoostSVM:
     
     
 # start calculations
-    
+# sample_list = ['titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar','car','contra','nursery','tac_toe']    
 # get the data
 data = data_preparation()
-sample = 'titanic'
+sample = 'nursery' # german heart
 X_train, Y_train, X_test, Y_test = data.dataset(sample, 0.4)
 
 # support vector machine
@@ -202,12 +204,18 @@ du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
 #AdaBoost support vector machine
 model = AdaBoostSVM(C = 150, gammaIni = 10)
 model.fit(X_train, Y_train)
-y_preda = model.predict(X_test)
+# y_preda = model.predict(X_test)
 
-test_err = (model.predict(X_test) != Y_test).mean()
-print(f'Test error: {test_err:.1%}')
+# test_err = (model.predict(X_test) != Y_test).mean()
+# print(f'Test error: {test_err:.1%}')
 
-du.cv_metrics(model, X_train, Y_train)
+#du.cv_metrics(model, X_train, Y_train)
+
+y_tr = model.predict(X_train)
+test_err = (model.predict(X_train) == Y_train).mean()
+print("Final Precision: {} ".format( round(test_err,4)) )
+
+
 
 '''
 run main function for every dataset
