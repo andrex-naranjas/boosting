@@ -32,8 +32,6 @@ du.make_directories(sample_list)
 
 # main function
 
-compare = 0
-
 class AdaBoostSVM:
     
     def __init__(self, C, gammaIni):
@@ -183,17 +181,17 @@ class AdaBoostSVM:
         return np.sign(np.dot(self.alphas, svm_preds))
     
     
-# start calculations
-# sample_list = ['titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar','car','contra','nursery','tac_toe']    
+# run the calculations
 # get the data
+#'titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar','car','contra','nursery','tac_toe'
 data = data_preparation()
-sample = 'nursery' # german heart
+sample = 'two_norm' # heart (issues); two_norm, nursery(large)
 X_train, Y_train, X_test, Y_test = data.dataset(sample, 0.4)
 
-# support vector machine
-# nominal
+
+# single support vector machine
 weights= np.ones(len(Y_train))/len(Y_train)
-svc = SVC(C=150.0, kernel='rbf', gamma=10, shrinking = True, probability = True, tol = 0.001)
+svc = SVC(C=150.0, kernel='rbf', gamma=1/(2*(10**2)), shrinking = True, probability = True, tol = 0.001)
 svc.fit(X_train, Y_train, weights)
 Y_pred = svc.predict(X_test)
 du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)    
@@ -204,18 +202,14 @@ du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
 #AdaBoost support vector machine
 model = AdaBoostSVM(C = 150, gammaIni = 10)
 model.fit(X_train, Y_train)
-# y_preda = model.predict(X_test)
+y_preda = model.predict(X_test)
 
-# test_err = (model.predict(X_test) != Y_test).mean()
-# print(f'Test error: {test_err:.1%}')
+test_pre = (model.predict(X_test) == Y_test).mean()
+test_err = (model.predict(X_test) != Y_test).mean()
+print(f'Test prec.: {test_pre:.1%}')
+print(f'Test error: {test_err:.1%}')
 
 #du.cv_metrics(model, X_train, Y_train)
-
-y_tr = model.predict(X_train)
-test_err = (model.predict(X_train) == Y_train).mean()
-print("Final Precision: {} ".format( round(test_err,4)) )
-
-
 
 '''
 run main function for every dataset
