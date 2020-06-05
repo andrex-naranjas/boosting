@@ -150,7 +150,7 @@ class AdaBoostSVM:
 
         print(count,'number of classifiers')
 
-        # Start to calculate the final classifier
+        # start to calculate the final classifier
         h_alpha = np.array([h_list[i]*self.alphas[i] for i in range(count)])
 
         final = ([]) # final classifier is an array (size of number of data points)
@@ -179,13 +179,27 @@ class AdaBoostSVM:
         # Make predictions using already fitted model
         svm_preds = np.array([learner.predict(X) for learner in self.weak_svm])
         return np.sign(np.dot(self.alphas, svm_preds))
+
     
-    
+    # different number of classifiers
+    def number_class(self, X):
+        
+        svm_preds = np.array([learner.predict(X) for learner in self.weak_svm])
+        number = [] #array of predicted samples i.e. array of arrays
+                
+        for i in range(len(self.alphas)):
+            number.append(self.alphas[i]*svm_preds[i])
+
+        number = np.array(number)
+        number = np.cumsum(number,axis=0)        
+        return np.sign(number)
+
+
 # run the calculations
 # get the data
 #'titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar','car','contra','nursery','tac_toe'
 data = data_preparation()
-sample = 'two_norm' # heart (issues); two_norm, nursery(large)
+sample = 'titanic' # heart (issues); two_norm, nursery(large)
 X_train, Y_train, X_test, Y_test = data.dataset(sample, 0.4)
 
 
@@ -208,6 +222,9 @@ test_pre = (model.predict(X_test) == Y_test).mean()
 test_err = (model.predict(X_test) != Y_test).mean()
 print(f'Test prec.: {test_pre:.1%}')
 print(f'Test error: {test_err:.1%}')
+
+test_number = model.number_class(X_test)
+
 
 #du.cv_metrics(model, X_train, Y_train)
 
