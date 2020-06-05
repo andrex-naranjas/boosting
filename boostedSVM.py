@@ -208,7 +208,7 @@ weights= np.ones(len(Y_train))/len(Y_train)
 svc = SVC(C=150.0, kernel='rbf', gamma=1/(2*(10**2)), shrinking = True, probability = True, tol = 0.001)
 svc.fit(X_train, Y_train, weights)
 Y_pred = svc.predict(X_test)
-du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)    
+du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
 
 # comparison with other ml models (fit, predict and metrics)
 #mc.comparison(sample, X_train, Y_train, Y_test, X_test)
@@ -226,6 +226,22 @@ print(f'Test error: {test_err:.1%}')
 test_number = model.number_class(X_test)
 
 
+
+error = ([])
+num = ([])
+for i in range(len(test_number)):
+    error_d = 0
+    error_d = (test_number[i] != Y_test).mean()
+    error   = np.append(error, [round(error_d * 100, 2)])
+    num = np.append(num,i+1)
+    
+frame = pd.DataFrame(error,num)
+print(frame)
+
+import matplotlib.pyplot as plt
+frame.plot()
+plt.show()
+    
 #du.cv_metrics(model, X_train, Y_train)
 
 '''
