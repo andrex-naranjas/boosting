@@ -4,33 +4,21 @@
 #Code to improve SVM
 #authors: A. Ramirez-Morales and J. Salmon-Gamboa
 
-#Main module
-
 # python basics
 import sys
 
 # data analysis and wrangling
 import numpy as np
+
+# import random
 import random as rnd
-import pandas as pd
 
 # machine learning
 from sklearn.svm import SVC, LinearSVC
 
-# import class for data preparation
-from data_preparation import data_preparation
 
-# import module for data utils
-import data_utils as du
 
-# import ML models for comparison
-import model_comparison as mc
-
-# make directories
-sample_list = ['titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar','car','contra','nursery','tac_toe']
-du.make_directories(sample_list)
-
-# main function
+# AdaBoost class
 
 class AdaBoostSVM:
     
@@ -61,13 +49,16 @@ class AdaBoostSVM:
         
         if count == 0:
             myGamma = self.gammaIni
-        
-        while True:
-            if myGamma<0:
-                break
 
-            errorOut = 0.0 
+        if myGamma<=0:
+            return 0,0,None,None
             
+        while True:
+            if myGamma<=0:
+                return 0,0,None,None
+            
+            errorOut = 0.0
+
             svcB = SVC(C = self.C, kernel='rbf', gamma=1/(2*(myGamma**2)), shrinking = True, probability = True, tol = 0.001)
             svcB.fit(x_train, y_train, sample_weight=myWeights)
             y_pred = svcB.predict(x_train)
@@ -77,7 +68,7 @@ class AdaBoostSVM:
                     errorOut += myWeights[i]
 
             # require an error below 50% and avoid null errors
-            if errorOut < 0.5 and errorOut != 0:
+            if(errorOut < 0.5 and errorOut > 0.0):
                 myGamma -= stepGamma
                 break
             
@@ -92,7 +83,7 @@ class AdaBoostSVM:
         n = X.shape[0]
         weights= np.ones(n)/n
         
-        gammaMin, gammaStep, gammaVar = 0.1, 0.1, 0.0
+        gammaMin, gammaStep, gammaVar = 1.0, 0.1, 0.0
         cost, count, norm = 1, 0, 0.0
         h_list = []
 
@@ -106,14 +97,17 @@ class AdaBoostSVM:
         
             # call svm, weight samples, iterate sigma(gamma), get errors, obtain predicted classifier (h as an array) 
             gammaVar, error, h, learner = self.svc_train('rbf', gammaVar, gammaStep, X_train, Y_train, new_weights, count)
-        
+
+            if(gammaVar<=0 or error<=0):# or learner == None or h == None):
+                break
+                        
             # count how many times SVM runs
             count += 1
             
             # calculate precision
             fp,tp = 0,0
             for i in range(n):
-                if(Y_train[i]!=h[i]):                
+                if(Y_train[i]!=h[i]):    
                     fp+=1
                 else:
                     tp+=1      
@@ -123,7 +117,7 @@ class AdaBoostSVM:
             h_list.append(h_temp)
 
             print("Error: {} Precision: {} Gamma: {} ".format(round(error,4), round(tp / (tp + fp),4), round(gammaVar+gammaStep,2)))
-            # classifier weights (alpha), obtain and store
+            # classifier weights (alpha), obtain and store            
             x = (1 - error)/error
             alpha = 0.5 * np.log(x)
             self.alphas = np.append(self.alphas, alpha)
@@ -148,7 +142,9 @@ class AdaBoostSVM:
         # h_list into array
         h_list = np.array(h_list)
 
-        print(count,'number of classifiers')
+        print(count,'number of classifiers')        
+        if(count==0):
+            sys.exit('No classifiers in the ensemble, try again!')
 
         # start to calculate the final classifier
         h_alpha = np.array([h_list[i]*self.alphas[i] for i in range(count)])
@@ -195,54 +191,6 @@ class AdaBoostSVM:
         return np.sign(number)
 
 
-# run the calculations
-# get the data
-#'titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar','car','contra','nursery','tac_toe'
-data = data_preparation()
-sample = 'titanic' # heart (issues); two_norm, nursery(large)
-X_train, Y_train, X_test, Y_test = data.dataset(sample, 0.4)
-
-
-# single support vector machine
-weights= np.ones(len(Y_train))/len(Y_train)
-svc = SVC(C=150.0, kernel='rbf', gamma=1/(2*(10**2)), shrinking = True, probability = True, tol = 0.001)
-svc.fit(X_train, Y_train, weights)
-Y_pred = svc.predict(X_test)
-du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
-
-# comparison with other ml models (fit, predict and metrics)
-#mc.comparison(sample, X_train, Y_train, Y_test, X_test)
-
-#AdaBoost support vector machine
-model = AdaBoostSVM(C = 150, gammaIni = 10)
-model.fit(X_train, Y_train)
-y_preda = model.predict(X_test)
-
-test_pre = (model.predict(X_test) == Y_test).mean()
-test_err = (model.predict(X_test) != Y_test).mean()
-print(f'Test prec.: {test_pre:.1%}')
-print(f'Test error: {test_err:.1%}')
-
-test_number = model.number_class(X_test)
-
-
-
-error = ([])
-num = ([])
-for i in range(len(test_number)):
-    error_d = 0
-    error_d = (test_number[i] != Y_test).mean()
-    error   = np.append(error, [round(error_d * 100, 2)])
-    num = np.append(num,i+1)
-    
-frame = pd.DataFrame(error,num)
-print(frame)
-
-import matplotlib.pyplot as plt
-frame.plot()
-plt.show()
-    
-#du.cv_metrics(model, X_train, Y_train)
 
 '''
 run main function for every dataset

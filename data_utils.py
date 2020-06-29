@@ -18,6 +18,15 @@ from sklearn.model_selection import KFold
 
 import numpy as np
 
+# import class for data preparation
+from data_preparation import data_preparation
+
+# import boostedSVM class
+from boostedSVM import AdaBoostSVM
+
+# bootstrap
+from sklearn.utils import resample
+
 # makes a directory for each dataset
 def make_directories(sample_list):
     for item in sample_list:
@@ -96,3 +105,56 @@ def metrics(sample, name, method, X_train, Y_train, Y_test, X_test, Y_pred):
     generate_auc_roc_curve(sample, method, X_test,Y_test, name)
     print('\n '+name+': ')
     return cv_scores(method, X_train, Y_train) + generate_report(Y_test, Y_pred)
+
+
+# function to get average errors via bootstrap, for 1-n classifiers
+def error_number(sample_name, myC, myGammaIni):
+
+    # fetch data_frame without preparation
+    data_df   = data_preparation()
+    sample_df = data_df.fetch_data(sample_name)
+
+    #prepare bootstrap sample
+    total = []
+    number = ([])
+    
+    for _ in range(100): # arbitrary number of samples to produce
+        sampled_data = resample(sample_df, replace = True, n_samples = 400, random_state = 0)
+        data = data_preparation()
+
+        X_train, Y_train, X_test, Y_test = data.dataset(sample_name,sampled_data,True,0.4)
+        
+        # run AdaBoostSVM (train the model)
+        model = AdaBoostSVM(C = myC, gammaIni = myGammaIni)
+        model.fit(X_train, Y_train)
+        
+        # compute test samples
+        test_number = model.number_class(X_test)
+        number = np.append(number, [len(test_number)])
+        error = ([])
+        for i in range(len(test_number)):
+            error_d = 0
+            error_d = (test_number[i] != Y_test).mean()
+            error   = np.append(error, [round(error_d * 100, 2)])
+            
+            total.append(error)
+            
+    total = np.array(total)
+
+    # complete total with nan's for dimension consistency
+    total_final = []
+    for i in range(len(total)):    
+        if(len(total[i]) < np.amax(number)):
+            for _ in range(int(np.amax(number) - len(total[i]))):
+                total[i] = np.append(total[i], [np.nan])
+                
+        total_final.append(total[i])
+                        
+                        
+    total_final = np.array(total_final)
+                        
+    #print(total_final.shape)
+                        
+    final_final = np.nanmean(total_final,axis=0)
+                                            
+    return pd.DataFrame(final_final,np.arange(np.amax(number)))
