@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-#Code to improve SVM
-#authors: A. Ramirez-Morales and J. Salmon-Gamboa
+# code to improve SVM
+# authors: A. Ramirez-Morales and J. Salmon-Gamboa
 
 # python basics
 import sys
@@ -17,7 +17,6 @@ import random as rnd
 from sklearn.svm import SVC, LinearSVC
 
 
-
 # AdaBoost class
 
 class AdaBoostSVM:
@@ -28,6 +27,9 @@ class AdaBoostSVM:
         self.gammaIni = gammaIni
         self.weak_svm = ([])
         self.alphas = ([])
+        self.weights_list = []
+        self.errors    = ([])
+        self.precision = ([])
     
     
     def _check_X_y(self, X, y):
@@ -94,6 +96,9 @@ class AdaBoostSVM:
                 new_weights = weights.copy()
 
             new_weights = new_weights/norm
+
+            
+            self.weights_list.append(new_weights)
         
             # call svm, weight samples, iterate sigma(gamma), get errors, obtain predicted classifier (h as an array) 
             gammaVar, error, h, learner = self.svc_train('rbf', gammaVar, gammaStep, X_train, Y_train, new_weights, count)
@@ -116,8 +121,13 @@ class AdaBoostSVM:
             h_temp = h.tolist()
             h_list.append(h_temp)
 
-            print("Error: {} Precision: {} Gamma: {} ".format(round(error,4), round(tp / (tp + fp),4), round(gammaVar+gammaStep,2)))
-            # classifier weights (alpha), obtain and store            
+            # print("Error: {} Precision: {} Gamma: {} ".format(round(error,4), round(tp / (tp + fp),4), round(gammaVar+gammaStep,2)))
+            # store errors
+            self.errors = np.append(self.errors, [error])
+            # store precision
+            self.precision = np.append(self.precision, [tp / (tp + fp)])
+            
+            # classifier weights (alpha), obtain and store
             x = (1 - error)/error
             alpha = 0.5 * np.log(x)
             self.alphas = np.append(self.alphas, alpha)
@@ -135,7 +145,7 @@ class AdaBoostSVM:
                 norm += weights[i] * np.exp(x)
         
             # do loop as long gamma > gammaMin, if gamma < 0, SVM fails exit loop
-            if gammaVar < gammaMin:#) or (gammaVar < 0):
+            if gammaVar <= gammaMin:#) or (gammaVar < 0):
                 break
         
 
@@ -190,7 +200,11 @@ class AdaBoostSVM:
         number = np.cumsum(number,axis=0)        
         return np.sign(number)
 
+    def get_metrics(self):
+        return np.array(self.weights_list), self.errors, self.precision
+        
 
+    
 
 '''
 run main function for every dataset

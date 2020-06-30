@@ -25,7 +25,7 @@ import data_utils as du
 # import ML models for comparison
 import model_comparison as mc
 
-# import AdaBoost
+# import AdaBoost class
 from boostedSVM import AdaBoostSVM
 
 # start of the module
@@ -57,6 +57,15 @@ model = AdaBoostSVM(C = 150, gammaIni = 10)
 model.fit(X_train, Y_train)
 y_preda = model.predict(X_test)
 
+weights, errors, precision = model.get_metrics()
+
+import pandas as pd
+
+
+#frame = pd.DataFrame(precision*100,np.arange(weights.shape[0]))
+frame = pd.DataFrame(errors*100,np.arange(weights.shape[0]))
+frame = pd.DataFrame(weights[10],np.arange(weights.shape[1]))
+
 # check model performance
 test_pre = (model.predict(X_test) == Y_test).mean()
 test_err = (model.predict(X_test) != Y_test).mean()
@@ -64,10 +73,9 @@ print(f'Test prec.: {test_pre:.1%}')
 print(f'Test error: {test_err:.1%}')
 
 # boostrap error VS number of classiffiers calculation
-frame = du.error_number('titanic',150,10)
+# frame = du.error_number('german',50,20)
 
 import matplotlib.pyplot as plt
 frame.plot()
+plt.ylim(0,0.025)
 plt.show()
-    
-
