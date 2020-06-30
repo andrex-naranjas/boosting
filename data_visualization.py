@@ -1,28 +1,32 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-#Code to improve SVM
-#authors: A. Ramirez-Morales and J. Salmon-Gamboa
+# code to improve SVM
+# authors: A. Ramirez-Morales and J. Salmon-Gamboa
 
-# visualization moduler
+# visualization module
 
-#work in progress
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import norm
+import pandas as pd
 
-#Pivoting
-#print(data_set[['Pclass', 'Survived']].groupby(['Pclass'], as_index=False).mean().sort_values(by='Survived', ascending=False))
-#print(data_set[["Sex", "Survived"]].groupby(['Sex'], as_index=False).mean().sort_values(by='Survived', ascending=False))
+# sample plots
+def plot_frame(frame,name,xlabel,ylabel,yUserRange,ymin,ymax,sample):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
 
-#plotting
-# g = sns.FacetGrid(data_set, col='Survived')
-# g.map(plt.hist, 'Age', bins=20)
-
-# grid = sns.FacetGrid(data_set, col='Survived', row='Pclass', size=2.2, aspect=1.6)
-# grid.map(plt.hist, 'Age', alpha=.5, bins=20)
-# grid.add_legend();
-# #fig = grid.get_figure()
-# grid.savefig("output.png")
-
-# grid = sns.FacetGrid(data_set, row='Fare', size=2.2, aspect=1.6)
-# grid.map(sns.pointplot, 'Pclass', 'Survived', 'Sex', palette='deep')
-# grid.add_legend()
-# grid.savefig("male_female.png")
+    # plt.hist(sample, 100, density=True, label = 'Sampling')
+    # plt.plot(x,y,label='Gaussian fit')
+    # frame.plot()
+    plt.plot(frame,label=sample)
+    if yUserRange:
+        plt.ylim(ymin,ymax)    
+    # plt.text(0.15, 0.9,'$\mu$={}, $\sigma$={}'.format(round(1.0,1), round(1.0,1)),
+    #          ha='center', va='center', transform=ax.transAxes)
+    plt.legend(frameon=False)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(name)
+    plt.savefig('./plots/'+name+'.pdf')
+    plt.close()
