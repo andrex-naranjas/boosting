@@ -8,32 +8,29 @@
 
 # python basics
 import sys
-
-# data analysis and wrangling
 import numpy as np
 import pandas as pd
 
 # machine learning
 from sklearn.svm import SVC, LinearSVC
 
-# import class for data preparation
+# class for data preparation
 from data_preparation import data_preparation
 
-# import module for data utils
+# module for data utils
 import data_utils as du
 
-# import ML models for comparison
+# ML module for comparison
 import model_comparison as mc
 
-# import AdaBoost class
+# AdaBoost class
 from boostedSVM import AdaBoostSVM
 
-# import data visualization 
+# data visualization module
 import data_visualization as dv
 
 
 # start of the module
-
 # make directories
 sample_list = ['titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar','car','contra','nursery','tac_toe']
 du.make_directories(sample_list)

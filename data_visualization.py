@@ -11,14 +11,11 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 import pandas as pd
 
-# sample plots
+# frame plots
 def plot_frame(frame,name,xlabel,ylabel,yUserRange,ymin,ymax,sample):
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
-    # plt.hist(sample, 100, density=True, label = 'Sampling')
-    # plt.plot(x,y,label='Gaussian fit')
-    # frame.plot()
     plt.plot(frame,label=sample)
     if yUserRange:
         plt.ylim(ymin,ymax)    
