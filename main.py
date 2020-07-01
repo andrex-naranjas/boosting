@@ -78,14 +78,10 @@ dv.plot_frame(pd.DataFrame(errors*100,np.arange(errors.shape[0])),
 dv.plot_frame(pd.DataFrame(weights[10],np.arange(weights.shape[1])),
                            'Sample weights', 'Sample', 'weights (a.u.)', True, -0.005, 0.01,'titanic')    
 
-
-matrix = du.grid_param_gauss(X_train, Y_train, X_test, Y_test)
-
-import matplotlib.pyplot as plt
-plt.matshow(matrix)
-plt.colorbar()
-plt.show()
-
+# grid hyper parameter 2D-plots
+matrix = du.grid_param_gauss(X_train, Y_train, X_test, Y_test, sigmin=-5, sigmax=5, cmin=0, cmax=6)
+dv.plot_2dmap(matrix,-5,5,0,6,'titanic')
+        
 # boostrap error VS number of classiffiers calculation
-# frame = du.error_number('titanic',10,100)
-# dv.plot_frame(frame, 'Classifiers error', 'No. Classifiers', 'test error', False, 0, 50,'titanic')
+frame = du.error_number('titanic',10,100)
+dv.plot_frame(frame, 'Classifiers error', 'No. Classifiers', 'test error', False, 0, 50,'titanic')

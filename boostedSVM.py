@@ -152,7 +152,7 @@ class AdaBoostSVM:
         # h_list into array
         h_list = np.array(h_list)
 
-        print(count,'number of classifiers')        
+        print(count,'number of classifiers') 
         if(count==0):
             sys.exit('No classifiers in the ensemble, try again!')
 

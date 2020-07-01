@@ -161,11 +161,12 @@ def error_number(sample_name, myC, myGammaIni):
     return pd.DataFrame(final_final,np.arange(np.amax(number)))
 
 
-# grid hyperameter svm to explore test errors
-def grid_param_gauss(train_x, train_y, test_x, test_y):
+# grid svm-hyperparameters (sigma and C) to explore test errors
+def grid_param_gauss(train_x, train_y, test_x, test_y, sigmin, sigmax, cmin, cmax):
 
-    log_step_c     = np.logspace(0,6,15,endpoint=True,base=math.e)
-    log_step_sigma = np.logspace(-5,5,15,endpoint=True,base=math.e)
+    # inverted limits, to acommodate the manner at which the arrays are stored and plotted as a matrix
+    log_step_c     = np.logspace(cmax,cmin,15,endpoint=True,base=math.e)
+    log_step_sigma = np.logspace(sigmax,sigmin,15,endpoint=True,base=math.e)
     
     error_matrix = []
     for i in range(len(log_step_c)): # C loop
