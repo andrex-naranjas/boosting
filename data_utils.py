@@ -109,7 +109,7 @@ def generate_auc_roc_curve(sample, model, X_val, Y_test, name):
 def metrics(sample, name, method, X_train, Y_train, Y_test, X_test, Y_pred):
     generate_auc_roc_curve(sample, method, X_test,Y_test, name)
     print('\n '+name+': ')
-    return cv_scores(method, X_train, Y_train) + generate_report(Y_test, Y_pred, True)
+    return cv_scores(method, X_train, Y_train) + generate_report(Y_test, Y_pred, verbose=True)
 
 
 # function to get average errors via bootstrap, for 1-n classifiers
@@ -175,7 +175,7 @@ def grid_param_gauss(train_x, train_y, test_x, test_y, sigmin, sigmax, cmin, cma
             svc = SVC(C= log_step_c[i], kernel='rbf', gamma=1/(2*((log_step_sigma[j])**2)), shrinking = True, probability = True, tol = 0.001)
             svc.fit(train_x, train_y)
             pred_y = svc.predict(test_x)
-            acc, prec, recall, f1 = generate_report(test_y, pred_y,False)
+            acc, prec, recall, f1 = generate_report(test_y, pred_y, verbose=False)
             errors = np.append(errors,[(0.01)*(100-acc)])
             
         error_matrix.append(errors)
