@@ -76,8 +76,16 @@ dv.plot_frame(pd.DataFrame(errors*100,np.arange(errors.shape[0])),
 
 # weights plot
 dv.plot_frame(pd.DataFrame(weights[10],np.arange(weights.shape[1])),
-                           'Sample weights', 'Sample', 'weights (a.u.)', True, -0.005, 0.01,'titanic')
-              
+                           'Sample weights', 'Sample', 'weights (a.u.)', True, -0.005, 0.01,'titanic')    
+
+
+matrix = du.grid_param_gauss(X_train, Y_train, X_test, Y_test)
+
+import matplotlib.pyplot as plt
+plt.matshow(matrix)
+plt.colorbar()
+plt.show()
+
 # boostrap error VS number of classiffiers calculation
-frame = du.error_number('titanic',50,20)
-dv.plot_frame(frame, 'Classifiers error', 'No. Classifiers', 'test error', False, 0, 50,'titanic')
+# frame = du.error_number('titanic',10,100)
+# dv.plot_frame(frame, 'Classifiers error', 'No. Classifiers', 'test error', False, 0, 50,'titanic')

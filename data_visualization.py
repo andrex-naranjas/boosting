@@ -10,6 +10,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 import pandas as pd
+import math as math
+
+import matplotlib as mpl
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
 
 # frame plots
 def plot_frame(frame,name,xlabel,ylabel,yUserRange,ymin,ymax,sample):
