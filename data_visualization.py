@@ -65,4 +65,5 @@ def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name):
     fig.tight_layout()
     plt.xlabel('ln $\sigma$')
     plt.ylabel('ln C')
-    plt.savefig('2dplot_'+sample_name+'.pdf')
+    plt.savefig('./plots/2dplot_'+sample_name+'.pdf')
+    plt.close()
