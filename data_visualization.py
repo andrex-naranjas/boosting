@@ -12,14 +12,6 @@ from scipy.stats import norm
 import pandas as pd
 import math as math
 
-import matplotlib as mpl
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib import cm
-
-import matplotlib.pyplot as plt
-import matplotlib
-import math as math
-
 
 # frame plots
 def plot_frame(frame,name,xlabel,ylabel,yUserRange,ymin,ymax,sample):
@@ -61,7 +53,7 @@ def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name):
             text = ax.text(j, i, math.floor(100*matrix[i,j]),
                            ha="center", va="center", color="black")
 
-    ax.set_title('Test Error (%) '+sample_name)
+    ax.set_title('Test Error (%) - '+sample_name+' dataset')
     fig.tight_layout()
     plt.xlabel('ln $\sigma$')
     plt.ylabel('ln C')
