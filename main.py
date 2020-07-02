@@ -53,7 +53,7 @@ du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
 #du.cv_metrics(model, X_train, Y_train)
 
 # run AdaBoost support vector machine
-model = AdaBoostSVM(C = 150, gammaIni = 10)
+model = AdaBoostSVM(C = 50, gammaIni = 10)
 model.fit(X_train, Y_train)
 y_preda = model.predict(X_test)
 
@@ -83,5 +83,5 @@ matrix = du.grid_param_gauss(X_train, Y_train, X_test, Y_test, sigmin=-5, sigmax
 dv.plot_2dmap(matrix,-5,5,0,6,'titanic')
         
 # boostrap error VS number of classiffiers calculation
-frame = du.error_number('titanic',10,100)
+frame = du.error_number('titanic',myC=50,myGammaIni=10)
 dv.plot_frame(frame, 'Classifiers error', 'No. Classifiers', 'test error', False, 0, 50,'titanic')

@@ -10,9 +10,6 @@ import sys
 # data analysis and wrangling
 import numpy as np
 
-# import random
-import random as rnd
-
 # machine learning
 from sklearn.svm import SVC, LinearSVC
 
