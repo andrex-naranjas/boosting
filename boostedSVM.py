@@ -175,7 +175,7 @@ class AdaBoostSVM:
         return self
 
 
-    def predict(self, X):
+    def boost_predict(self, X):
         # Make predictions using already fitted model
         svm_preds = np.array([learner.predict(X) for learner in self.weak_svm])
         return np.sign(np.dot(self.alphas, svm_preds))
@@ -199,18 +199,16 @@ class AdaBoostSVM:
 class Div_AdaBoostSVM(AdaBoostSVM):
 
     # Diversity threshold-constant and empty list
-    eta = 0.7
+    eta = 0.74
     diversities = ([])
+    Div_total = ([])
 
     def diversity(self, X, y):
-        div = 0
 
-        if self.count == 0:
-            pass
-        else:
-            ensemble_pred = self.predict(X)
-            for i in range(len(y)):
-                div += 1 if (y[i] != ensemble_pred[i]) else 0
+        div = 0
+        ensemble_pred = self.boost_predict(X)
+        for i in range(len(y)):
+            div += 1 if (y[i] != ensemble_pred[i]) else 0
 
         return div
 
@@ -234,18 +232,23 @@ class Div_AdaBoostSVM(AdaBoostSVM):
                 if (y_train[i] != y_pred[i]):
                     errorOut += myWeights[i]
 
-            div = self.diversity(x_train, y_train)
-            self.diversities = np.append(self.diversities, div)
-
             if self.count == 0:
+                div = 0
                 Div_threshold = -1
+                Div_partial = 0
+
             else:
-                Div_threshold = self.eta * np.max(self.diversities)
-            #print('Div_threshold', div, Div_threshold)
-            #print(self.diversities, np.max(self.diversities))
+                div = self.diversity(x_train, y_pred)
+                self.diversities = np.append(self.diversities, div)
+                Div_partial = np.sum(self.diversities)/(len(y_train) * len(self.diversities))
+                self.Div_total = np.append(self.Div_total, Div_partial)
+                Div_threshold = self.eta * np.max(self.Div_total)
+
+
+            #print(div/len(y_train), Div_partial, Div_threshold, len(self.diversities))
 
             # require an error below 50%, diversity above threshold and avoid null errors
-            if errorOut < 0.5 and errorOut != 0 and div > Div_threshold:
+            if errorOut < 0.5 and errorOut != 0 and Div_partial > Div_threshold:
                 myGamma -= stepGamma
                 break
 
@@ -258,46 +261,69 @@ class Div_AdaBoostSVM(AdaBoostSVM):
 # get the data
 #'titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar','car','contra','nursery','tac_toe'
 data = data_preparation()
-sample = 'titanic' # heart (issues); two_norm, nursery(large)
-X_train, Y_train, X_test, Y_test = data.dataset(sample, 0.4)
+sample = 'two_norm' # heart (issues); two_norm, nursery(large)
+#X_train, Y_train, X_test, Y_test = data.dataset(sample, 0.4)
 
-
+'''
 # single support vector machine
 weights= np.ones(len(Y_train))/len(Y_train)
 svc = SVC(C=150.0, kernel='rbf', gamma=1/(2*(10**2)), shrinking = True, probability = True, tol = 0.001)
 svc.fit(X_train, Y_train, weights)
 Y_pred = svc.predict(X_test)
 du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
-
+'''
 # comparison with other ml models (fit, predict and metrics)
 #mc.comparison(sample, X_train, Y_train, Y_test, X_test)
 
-#AdaBoost support vector machine
-model1 = AdaBoostSVM(C = 150, gammaIni = 10)
-model1.fit(X_train, Y_train)
-#y_preda = model1.predict(X_test)
 
-test_pre = (model1.predict(X_test) == Y_test).mean()
-test_err = (model1.predict(X_test) != Y_test).mean()
-print('Normal AdaBoostSVM')
-print(f'Test prec.: {test_pre:.1%}')
-print(f'Test error: {test_err:.1%}')
+n_class = ([])
+div_class = ([])
 
-#test_number = model1.number_class(X_test)
+normal_pre = ([])
+normal_err = ([])
+diverse_pre = ([])
+diverse_err = ([])
 
-model2 = Div_AdaBoostSVM(C = 150, gammaIni = 10)
-model2.fit(X_train, Y_train)
-#y_preda = model2.predict(X_test)
+for i in range(10):
+    X_train, Y_train, X_test, Y_test = data.dataset(sample, 0.4)
 
-test_pre = (model2.predict(X_test) == Y_test).mean()
-test_err = (model2.predict(X_test) != Y_test).mean()
-print('Diverse AdaBoostSVM')
-print(f'Test prec.: {test_pre:.1%}')
-print(f'Test error: {test_err:.1%}')
+    #AdaBoost support vector machine
+    model1 = AdaBoostSVM(C = 150, gammaIni = 10)
+    num_class = model1.fit(X_train, Y_train).count
+    #y_preda = model1.boost_predict(X_test)
+    n_class = np.append(n_class, num_class)
+
+    test_pre = (model1.boost_predict(X_test) == Y_test).mean()
+    test_err = (model1.boost_predict(X_test) != Y_test).mean()
+    normal_pre = np.append(normal_pre, test_pre)
+    normal_err = np.append(normal_err, test_err)
+
+    #print('Normal AdaBoostSVM')
+    #print(f'Test prec.: {test_pre:.1%}')
+    #print(f'Test error: {test_err:.1%}')
+
+    #test_number = model1.number_class(X_test)
+
+    model2 = Div_AdaBoostSVM(C = 150, gammaIni = 10)
+    num_class = model2.fit(X_train, Y_train).count
+    #y_preda = model2.predict(X_test)
+    div_class = np.append(div_class, num_class)
+
+    test_pre = (model2.boost_predict(X_test) == Y_test).mean()
+    test_err = (model2.boost_predict(X_test) != Y_test).mean()
+    diverse_pre = np.append(diverse_pre, test_pre)
+    diverse_err = np.append(diverse_err, test_err)
+
+print('AdaBoost: ' + f'Test prec.: {np.mean(normal_pre)}, ' + f'Test error: {np.mean(normal_err)}')
+print('Numero promedio de class: ', np.mean(n_class) )
+print('Div_AdaBoostSVM' + f'Test prec.: {np.mean(diverse_pre)}, ' + f'Test error: {np.mean(diverse_err)}')
+print('Numero promedio de class Div: ', np.mean(div_class) )
+
+    #print('Diverse AdaBoostSVM')
+    #print(f'Test prec.: {test_pre:.1%}')
+    #print(f'Test error: {test_err:.1%}')
 
 #test_number = model2.number_class(X_test)
-
-
 
 
 '''
