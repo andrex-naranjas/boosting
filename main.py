@@ -15,7 +15,7 @@ import pandas as pd
 from sklearn.svm import SVC, LinearSVC
 
 # class for data preparation
-from data_preparation import data_preparation
+from utils import data_preparation.data_preparation as data_preparation
 
 # module for data utils
 import data_utils as du
@@ -27,7 +27,7 @@ import model_comparison as mc
 from boostedSVM import AdaBoostSVM
 
 # data visualization module
-import data_visualization as dv
+from utils import data_visualization as dv
 
 
 # start of the module
@@ -76,12 +76,12 @@ dv.plot_frame(pd.DataFrame(errors*100,np.arange(errors.shape[0])),
 
 # weights plot
 dv.plot_frame(pd.DataFrame(weights[10],np.arange(weights.shape[1])),
-                           'Sample weights', 'Sample', 'weights (a.u.)', True, -0.005, 0.01,'titanic')    
+                           'Sample weights', 'Sample', 'weights (a.u.)', True, -0.005, 0.01,'titanic')
 
 # grid hyper parameter 2D-plots
 matrix = du.grid_param_gauss(X_train, Y_train, X_test, Y_test, sigmin=-5, sigmax=5, cmin=0, cmax=6)
 dv.plot_2dmap(matrix,-5,5,0,6,'titanic')
-        
+
 # boostrap error VS number of classiffiers calculation
 frame = du.error_number('titanic',myC=50,myGammaIni=10)
 dv.plot_frame(frame, 'Classifiers error', 'No. Classifiers', 'test error', False, 0, 50,'titanic')
