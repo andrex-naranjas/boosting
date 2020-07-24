@@ -47,17 +47,17 @@ class data_preparation:
         return data_set
 
     # call data
-    def dataset(self, sample, split_sample):
+    def dataset(self, sample, data_set, sampling, split_sample):
 
         # fetch data set (from available list)
-        data_set = self.fetch_data(sample)
-
-        # check data
-        print("Before preparation", data_set.shape)
-        print(data_set.columns.values)
-        print(data_set.head())
-        print(data_set.tail())
-        print(data_set.describe())
+        if(sampling != True):
+            data_set = self.fetch_data(sample)
+            # check data
+            print("Before preparation", data_set.shape)
+            print(data_set.columns.values)
+            print(data_set.head())
+            print(data_set.tail())
+            print(data_set.describe())
 
         # prepare data
         if sample == 'titanic':
@@ -66,7 +66,7 @@ class data_preparation:
             X,Y = self.two_norm(data_set)
         elif sample == 'cancer':
             X,Y = self.bCancer(data_set)
-        elif sample == 'german':
+        elif sample == 'german':            
             X,Y = self.german(data_set)
         elif sample == 'heart':
             X,Y = self.heart(data_set)
@@ -80,7 +80,8 @@ class data_preparation:
             X,Y = self.nursery(data_set)
         elif sample == 'tac_toe':
             X,Y = self.tac_toe(data_set)
-            
+                
+                
         # print data after preparation
         print("After preparation", data_set.shape)
         print(X.head())
@@ -89,7 +90,7 @@ class data_preparation:
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=split_sample)
         print(X_train.shape, Y_train.shape)
         print(X_test.shape, Y_test.shape)
-        
+
         return X_train, Y_train, X_test, Y_test
             
 
@@ -133,12 +134,11 @@ class data_preparation:
         title_mapping = {0: 1, 1: -1}
         data_set['Survived'] = data_set['Survived'].map(title_mapping)
         data_set['Survived'] = data_set['Survived'].fillna(0)
-    
+
         X = data_set.drop("Survived", axis=1)
         Y = data_set["Survived"]
-
         return X,Y
-
+        
     #Breast-cancer data preparation
     def bCancer(self, data_set):
         #change names
@@ -178,22 +178,19 @@ class data_preparation:
         data_set['irradiat'] = data_set['irradiat'].map(title_mapping)
         data_set['irradiat'] = data_set['irradiat'].fillna(0)
 
-        #return data_set #(for tmva preparation)
-
+        #return data_set #(for tmva preparation)        
         X = data_set.drop("Class", axis=1)
         Y = data_set["Class"]
-
         return X,Y
-
+        
     def two_norm(self, data_set):
         #These data are already well-formatted
 
         #return data_set #(for tmva data prep)
-
         X = data_set.drop("Class", axis=1)
         Y = data_set["Class"]
         return X,Y
-
+    
 
     def german(self, data_set):
         #change names
@@ -268,12 +265,11 @@ class data_preparation:
         data_set['Class'] = data_set['Class'].fillna(0)
 
         #return data_set #(for tmva prep)
-
         X = data_set.drop("Class", axis=1)
         Y = data_set["Class"]
-
         return X,Y
 
+        
     def solar(self, data_set):
         #change names
         title_mapping = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'H': 6}
@@ -323,11 +319,10 @@ class data_preparation:
         data_set = data_set.drop(['Class1', 'Class2', 'Class3' ], axis=1)
 
         #return data_set #(for tmva prep)
-
         X = data_set.drop("Class", axis=1)
         Y = data_set["Class"]
-
         return X,Y
+    
 
     def car(self, data_set):
 
@@ -365,7 +360,6 @@ class data_preparation:
 
         X = data_set.drop("Class", axis=1)
         Y = data_set["Class"]
-
         return X,Y
 
 
@@ -452,8 +446,8 @@ class data_preparation:
 
         X = data_set.drop("Class", axis=1)
         Y = data_set["Class"]
-
         return X,Y
+        
 
     def tac_toe(self, data_set):
 
@@ -496,8 +490,8 @@ class data_preparation:
         title_mapping = {'positive' : 1, 'negative' : -1}
         data_set['Class'] = data_set['Class'].map(title_mapping)
         data_set['Class'] = data_set['Class'].fillna(0)
-
+        
+        
         X = data_set.drop("Class", axis=1)
         Y = data_set["Class"]
-        
-        return X,Y
+        return X,Y        

@@ -1,36 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-#Code to improve SVM
-#authors: A. Ramirez-Morales and J. Salmon-Gamboa
-
-#Main module
+# code to improve SVM
+# authors: A. Ramirez-Morales and J. Salmon-Gamboa
 
 # python basics
 import sys
 
 # data analysis and wrangling
 import numpy as np
-import random as rnd
-import pandas as pd
 
 # machine learning
 from sklearn.svm import SVC, LinearSVC
 
-# import class for data preparation
-from data_preparation import data_preparation
 
-# import module for data utils
-import data_utils as du
-
-# import ML models for comparison
-import model_comparison as mc
-
-# make directories
-sample_list = ['titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar','car','contra','nursery','tac_toe']
-du.make_directories(sample_list)
-
-# main function
+# AdaBoost class
 
 class AdaBoostSVM:
 
@@ -40,6 +24,9 @@ class AdaBoostSVM:
         self.gammaIni = gammaIni
         self.weak_svm = ([])
         self.alphas = ([])
+        self.weights_list = []
+        self.errors    = ([])
+        self.precision = ([])
 
 
     def _check_X_y(self, X, y):
@@ -57,14 +44,17 @@ class AdaBoostSVM:
             return X, y
 
 
-    def svc_train(self, myKernel, myGamma, stepGamma, x_train, y_train, myWeights):
+    def svc_train(self, myKernel, myGamma, stepGamma, x_train, y_train, myWeights, count):
 
-        if self.count == 0:
+        if count == 0:
             myGamma = self.gammaIni
 
+        if myGamma<=0:
+            return 0,0,None,None
+
         while True:
-            if myGamma<0:
-                break
+            if myGamma<=0:
+                return 0,0,None,None
 
             errorOut = 0.0
 
@@ -77,7 +67,7 @@ class AdaBoostSVM:
                     errorOut += myWeights[i]
 
             # require an error below 50% and avoid null errors
-            if errorOut < 0.5 and errorOut != 0:
+            if(errorOut < 0.5 and errorOut > 0.0):
                 myGamma -= stepGamma
                 break
 
@@ -92,23 +82,29 @@ class AdaBoostSVM:
         n = X.shape[0]
         weights= np.ones(n)/n
 
-        gammaMin, gammaStep, gammaVar = 0.1, 0.1, 0.0
-        cost, self.count, norm = 1, 0, 0.0
+        gammaMin, gammaStep, gammaVar = 1.0, 0.1, 0.0
+        cost, count, norm = 1, 0, 0.0
         h_list = []
 
         # AdaBoost loop
         while True:
-            if self.count == 0:
+            if count == 0:
                 norm = 1.0
                 new_weights = weights.copy()
 
             new_weights = new_weights/norm
 
+
+            self.weights_list.append(new_weights)
+
             # call svm, weight samples, iterate sigma(gamma), get errors, obtain predicted classifier (h as an array)
-            gammaVar, error, h, learner = self.svc_train('rbf', gammaVar, gammaStep, X_train, Y_train, new_weights)
+            gammaVar, error, h, learner = self.svc_train('rbf', gammaVar, gammaStep, X_train, Y_train, new_weights, count)
+
+            if(gammaVar<=0 or error<=0):# or learner == None or h == None):
+                break
 
             # count how many times SVM runs
-            self.count += 1
+            count += 1
 
             # calculate precision
             fp,tp = 0,0
@@ -122,7 +118,12 @@ class AdaBoostSVM:
             h_temp = h.tolist()
             h_list.append(h_temp)
 
-            #print("Error: {} Precision: {} Gamma: {} ".format(round(error,4), round(tp / (tp + fp),4), round(gammaVar+gammaStep,2)))
+            # print("Error: {} Precision: {} Gamma: {} ".format(round(error,4), round(tp / (tp + fp),4), round(gammaVar+gammaStep,2)))
+            # store errors
+            self.errors = np.append(self.errors, [error])
+            # store precision
+            self.precision = np.append(self.precision, [tp / (tp + fp)])
+
             # classifier weights (alpha), obtain and store
             x = (1 - error)/error
             alpha = 0.5 * np.log(x)
@@ -141,22 +142,24 @@ class AdaBoostSVM:
                 norm += weights[i] * np.exp(x)
 
             # do loop as long gamma > gammaMin, if gamma < 0, SVM fails exit loop
-            if gammaVar < gammaMin:#) or (gammaVar < 0):
+            if gammaVar <= gammaMin:#) or (gammaVar < 0):
                 break
 
 
         # h_list into array
         h_list = np.array(h_list)
 
-        print(self.count,'number of classifiers')
+        print(count,'number of classifiers')
+        if(count==0):
+            sys.exit('No classifiers in the ensemble, try again!')
 
         # start to calculate the final classifier
-        h_alpha = np.array([h_list[i]*self.alphas[i] for i in range(self.count)])
+        h_alpha = np.array([h_list[i]*self.alphas[i] for i in range(count)])
 
         final = ([]) # final classifier is an array (size of number of data points)
         for j in range(len(h_alpha[0])):
             suma = 0.0
-            for i in range(self.count):
+            for i in range(count):
                 suma+=h_alpha[i][j]
             final = np.append(final, [np.sign(suma)])
 
@@ -175,7 +178,7 @@ class AdaBoostSVM:
         return self
 
 
-    def boost_predict(self, X):
+    def predict(self, X):
         # Make predictions using already fitted model
         svm_preds = np.array([learner.predict(X) for learner in self.weak_svm])
         return np.sign(np.dot(self.alphas, svm_preds))
@@ -194,6 +197,10 @@ class AdaBoostSVM:
         number = np.cumsum(number,axis=0)
         return np.sign(number)
 
+    def get_metrics(self):
+        return np.array(self.weights_list), self.errors, self.precision
+
+
 
 # Diverse AdaBoostSVM
 class Div_AdaBoostSVM(AdaBoostSVM):
@@ -206,7 +213,7 @@ class Div_AdaBoostSVM(AdaBoostSVM):
     def diversity(self, X, y):
 
         div = 0
-        ensemble_pred = self.boost_predict(X)
+        ensemble_pred = self.predict(X)
         for i in range(len(y)):
             div += 1 if (y[i] != ensemble_pred[i]) else 0
 
@@ -256,93 +263,6 @@ class Div_AdaBoostSVM(AdaBoostSVM):
 
         return myGamma, errorOut, y_pred, svcB
 
-
-# run the calculations
-# get the data
-#'titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar','car','contra','nursery','tac_toe'
-data = data_preparation()
-sample = 'two_norm' # heart (issues); two_norm, nursery(large)
-#X_train, Y_train, X_test, Y_test = data.dataset(sample, 0.4)
-
-'''
-# single support vector machine
-weights= np.ones(len(Y_train))/len(Y_train)
-svc = SVC(C=150.0, kernel='rbf', gamma=1/(2*(10**2)), shrinking = True, probability = True, tol = 0.001)
-svc.fit(X_train, Y_train, weights)
-Y_pred = svc.predict(X_test)
-du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
-'''
-# comparison with other ml models (fit, predict and metrics)
-#mc.comparison(sample, X_train, Y_train, Y_test, X_test)
-
-
-n_class = ([])
-div_class = ([])
-
-normal_pre = ([])
-normal_err = ([])
-diverse_pre = ([])
-diverse_err = ([])
-
-for i in range(10):
-    X_train, Y_train, X_test, Y_test = data.dataset(sample, 0.4)
-
-    #AdaBoost support vector machine
-    model1 = AdaBoostSVM(C = 150, gammaIni = 10)
-    num_class = model1.fit(X_train, Y_train).count
-    #y_preda = model1.boost_predict(X_test)
-    n_class = np.append(n_class, num_class)
-
-    test_pre = (model1.boost_predict(X_test) == Y_test).mean()
-    test_err = (model1.boost_predict(X_test) != Y_test).mean()
-    normal_pre = np.append(normal_pre, test_pre)
-    normal_err = np.append(normal_err, test_err)
-
-    #print('Normal AdaBoostSVM')
-    #print(f'Test prec.: {test_pre:.1%}')
-    #print(f'Test error: {test_err:.1%}')
-
-    #test_number = model1.number_class(X_test)
-
-    model2 = Div_AdaBoostSVM(C = 150, gammaIni = 10)
-    num_class = model2.fit(X_train, Y_train).count
-    #y_preda = model2.predict(X_test)
-    div_class = np.append(div_class, num_class)
-
-    test_pre = (model2.boost_predict(X_test) == Y_test).mean()
-    test_err = (model2.boost_predict(X_test) != Y_test).mean()
-    diverse_pre = np.append(diverse_pre, test_pre)
-    diverse_err = np.append(diverse_err, test_err)
-
-print('AdaBoost: ' + f'Test prec.: {np.mean(normal_pre)}, ' + f'Test error: {np.mean(normal_err)}')
-print('Numero promedio de class: ', np.mean(n_class) )
-print('Div_AdaBoostSVM' + f'Test prec.: {np.mean(diverse_pre)}, ' + f'Test error: {np.mean(diverse_err)}')
-print('Numero promedio de class Div: ', np.mean(div_class) )
-
-    #print('Diverse AdaBoostSVM')
-    #print(f'Test prec.: {test_pre:.1%}')
-    #print(f'Test error: {test_err:.1%}')
-
-#test_number = model2.number_class(X_test)
-
-
-'''
-error = ([])
-num = ([])
-for i in range(len(test_number)):
-    error_d = 0
-    error_d = (test_number[i] != Y_test).mean()
-    error   = np.append(error, [round(error_d * 100, 2)])
-    num = np.append(num,i+1)
-
-frame = pd.DataFrame(error,num)
-print(frame)
-
-import matplotlib.pyplot as plt
-frame.plot()
-plt.show()
-'''
-#du.cv_metrics(model, X_train, Y_train)
 
 '''
 run main function for every dataset
