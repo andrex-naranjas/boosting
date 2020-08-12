@@ -11,8 +11,18 @@ import sys
 # data analysis and wrangling
 import pandas as pd
 
+# uproot to import ROOT format data
+import uproot
+from sklearn.preprocessing import KBinsDiscretizer
+
 # machine learning
 from sklearn.model_selection import train_test_split
+
+# bootstrap
+from sklearn.utils import resample
+
+# data visualization module
+import data_visualization as dv
 
 
 class data_preparation:
@@ -42,6 +52,9 @@ class data_preparation:
             data_set = pd.read_csv('./data/nursery.csv')
         elif sample == 'tac_toe':
             data_set = pd.read_csv('./data/tac_toe.csv')
+        elif sample == 'belle2':
+            file = uproot.open('./data/belle2_kpipi0.root')
+            data_set = file['combined'].pandas.df()            
         else:
             sys.exit('The sample name provided does not exist. Try again!')
         return data_set
@@ -80,11 +93,14 @@ class data_preparation:
             X,Y = self.nursery(data_set)
         elif sample == 'tac_toe':
             X,Y = self.tac_toe(data_set)
+        elif sample == 'belle2':
+            X,Y = self.belle2(data_set, sampling)
                 
                 
         # print data after preparation
-        print("After preparation", data_set.shape)
-        print(X.head())
+        print("After preparation shapes X and Y", X.shape, Y.shape)
+        print(X.head())#, Y.head())
+        print(Y.head())#, Y.head())
 
         # divide sample into train and test sample
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=split_sample)
@@ -93,6 +109,30 @@ class data_preparation:
 
         return X_train, Y_train, X_test, Y_test
             
+    # belle2 data preparation
+    def belle2(self, data_set, sampling):
+        
+        # bin data?!?
+        # Xin = data_set.drop("Class", axis=1)
+        # est = KBinsDiscretizer(n_bins=20, encode='ordinal', strategy='uniform')
+        # est.fit(Xin)
+        
+        # XT = est.transform(Xin)
+
+        # # Creating pandas dataframe from numpy array
+        # X = pd.DataFrame({'D0_m': XT[:, 0], 'D0_p': XT[:, 1], 'p0_p': XT[:, 2]})
+
+        if(sampling): # sampling was already carried, don't sample again!
+            return data_set.drop("Class", axis=1), data_set["Class"]
+
+        sampled_data = resample(data_set, replace = False, n_samples = 2000, random_state = 0)
+        dv.plot_hist_frame(data_set,'full')
+        dv.plot_hist_frame(sampled_data,'sampled')        
+        X = sampled_data.drop("Class", axis=1)
+        Y = sampled_data["Class"]
+                
+        return X,Y
+
 
     #Titanic data preparation
     def titanic(self, data_set):
@@ -494,4 +534,4 @@ class data_preparation:
         
         X = data_set.drop("Class", axis=1)
         Y = data_set["Class"]
-        return X,Y        
+        return X,Y

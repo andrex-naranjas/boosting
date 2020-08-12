@@ -59,3 +59,34 @@ def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name):
     plt.ylabel('ln C')
     plt.savefig('./plots/2dplot_'+sample_name+'.pdf')
     plt.close()
+
+def plot_hist_frame(frame, name):
+
+    var = ['D0_m', 'D0_p', 'p0_p']
+    for i in range(len(var)):
+
+        if(var[i]=='D0_m'):
+            xlow, xhigh, xlabel = 1.8,1.95,'$M(D^0)$ [GeV/$c^2$]'
+        if(var[i]=='D0_p'):
+            xlow, xhigh, xlabel = 0,8.0,'$p(D^0) [GeV/$c$]$'
+        if(var[i]=='p0_p'):
+            xlow, xhigh, xlabel = 0,4.5,'$p(\pi^0) [GeV/$c$]$'
+        
+        fig, ax = plt.subplots(figsize=(8,5))
+        h = ax.hist(frame[var[i]][frame.Class==1],
+                    bins=100, range=(xlow,xhigh),
+                    histtype='stepfilled', lw=1,
+                    label="Signal", edgecolor='black')
+        
+        h = ax.hist(frame[var[i]][frame.Class==-1],
+                    bins=100, range=(xlow,xhigh),
+                    histtype='step', lw=2,
+                    label="Background")
+        ax.legend(loc="best")        
+        ax.set_xlabel(xlabel, fontsize=16)
+        #ax.grid()        
+        ax.set_xlim(xlow,xhigh)
+        fig.tight_layout()
+        
+        plt.savefig('./plots/mva_'+var[i]+'_'+name+'.pdf')
+        plt.close()

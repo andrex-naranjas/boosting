@@ -32,13 +32,13 @@ import data_visualization as dv
 
 # start of the module
 # make directories
-sample_list = ['titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar','car','contra','nursery','tac_toe']
+sample_list = ['titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar','car','contra','nursery','tac_toe', 'belle2']
 du.make_directories(sample_list)
 
 # get the data
 #'titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar','car','contra','nursery','tac_toe'
 data = data_preparation()
-sample = 'titanic' # heart (issues); two_norm, nursery(large)
+sample = 'belle2' # heart (issues); two_norm, nursery(large)
 X_train, Y_train, X_test, Y_test = data.dataset(sample,'',False,0.4)
 
 # run single support vector machine
@@ -69,19 +69,19 @@ weights, errors, precision = model.get_metrics()
 
 # precision plot
 dv.plot_frame(pd.DataFrame(precision*100,np.arange(precision.shape[0])),
-                           'Classifier precision', 'Classifier', 'training precision (%)', True, 0, 100,'titanic')
+                           'Classifier precision', 'Classifier', 'training precision (%)', True, 0, 100,'belle2')
 # errors plot
 dv.plot_frame(pd.DataFrame(errors*100,np.arange(errors.shape[0])),
-                           'Classifier error', 'Classifier', 'training error (%)', True, 0, 100,'titanic')
+                           'Classifier error', 'Classifier', 'training error (%)', True, 0, 100,'belle2')
 
 # weights plot
 dv.plot_frame(pd.DataFrame(weights[10],np.arange(weights.shape[1])),
-                           'Sample weights', 'Sample', 'weights (a.u.)', True, -0.005, 0.01,'titanic')    
+                           'Sample weights', 'Sample', 'weights (a.u.)', True, -0.005, 0.01,'belle2')    
 
 # grid hyper parameter 2D-plots
 matrix = du.grid_param_gauss(X_train, Y_train, X_test, Y_test, sigmin=-5, sigmax=5, cmin=0, cmax=6)
-dv.plot_2dmap(matrix,-5,5,0,6,'titanic')
+dv.plot_2dmap(matrix,-5,5,0,6,'belle2')
         
 # boostrap error VS number of classiffiers calculation
-frame = du.error_number('titanic',myC=50,myGammaIni=10)
-dv.plot_frame(frame, 'Classifiers error', 'No. Classifiers', 'test error', False, 0, 50,'titanic')
+frame = du.error_number('belle2',myC=50,myGammaIni=10)
+dv.plot_frame(frame, 'Classifiers error', 'No. Classifiers', 'test error', False, 0, 50,'belle2')

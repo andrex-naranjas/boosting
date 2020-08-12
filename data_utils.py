@@ -114,20 +114,21 @@ def metrics(sample, name, method, X_train, Y_train, Y_test, X_test, Y_pred):
 
 # function to get average errors via bootstrap, for 1-n classifiers
 def error_number(sample_name, myC, myGammaIni):
+    print('Start of error number')
 
     # fetch data_frame without preparation
     data_df   = data_preparation()
     sample_df = data_df.fetch_data(sample_name)
 
-    #prepare bootstrap sample
+    # prepare bootstrap sample
     total = []
     number = ([])
     
     for _ in range(100): # arbitrary number of samples to produce
-        sampled_data = resample(sample_df, replace = True, n_samples = 400, random_state = 0)
+        sampled_data = resample(sample_df, replace = True, n_samples = 2000, random_state = 0)
         data = data_preparation()
 
-        X_train, Y_train, X_test, Y_test = data.dataset(sample_name,sampled_data,True,0.4)
+        X_train, Y_train, X_test, Y_test = data.dataset(sample_name,sampled_data,sampling=True,split_sample=0.4)
         
         # run AdaBoostSVM (train the model)
         model = AdaBoostSVM(C = myC, gammaIni = myGammaIni)
@@ -146,7 +147,7 @@ def error_number(sample_name, myC, myGammaIni):
             
     total = np.array(total)
 
-    # complete total with nan's for dimension consistency
+    # complete totalarray with nan's for dimension consistency
     total_final = []
     for i in range(len(total)):    
         if(len(total[i]) < np.amax(number)):
