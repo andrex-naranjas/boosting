@@ -125,7 +125,7 @@ def error_number(sample_name, myC, myGammaIni):
     number = ([])
     
     for _ in range(100): # arbitrary number of samples to produce
-        sampled_data = resample(sample_df, replace = True, n_samples = 2000, random_state = 0)
+        sampled_data = resample(sample_df, replace = True, n_samples = 7000, random_state = 0)
         data = data_preparation()
 
         X_train, Y_train, X_test, Y_test = data.dataset(sample_name,sampled_data,sampling=True,split_sample=0.4)

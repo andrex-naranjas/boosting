@@ -125,7 +125,7 @@ class data_preparation:
         if(sampling): # sampling was already carried, don't sample again!
             return data_set.drop("Class", axis=1), data_set["Class"]
 
-        sampled_data = resample(data_set, replace = False, n_samples = 2000, random_state = 0)
+        sampled_data = resample(data_set, replace = False, n_samples = 7000, random_state = 0)
         dv.plot_hist_frame(data_set,'full')
         dv.plot_hist_frame(sampled_data,'sampled')        
         X = sampled_data.drop("Class", axis=1)
