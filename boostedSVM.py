@@ -58,7 +58,7 @@ class AdaBoostSVM:
             
             errorOut = 0.0
 
-            svcB = SVC(C = self.C, kernel='rbf', gamma=1/(2*(myGamma**2)), shrinking = True, probability = True, tol = 0.001)
+            svcB = SVC(C = self.C, kernel='rbf', gamma=1/(2*(myGamma**2)), shrinking = True, probability = True, tol = 0.001, cache_size = 5000)
             svcB.fit(x_train, y_train, sample_weight=myWeights)
             y_pred = svcB.predict(x_train)
             
@@ -106,7 +106,7 @@ class AdaBoostSVM:
             # count how many times SVM runs
             count += 1
             
-            # calculate precision
+            # calculate training precision
             fp,tp = 0,0
             for i in range(n):
                 if(Y_train[i]!=h[i]):    
@@ -181,8 +181,30 @@ class AdaBoostSVM:
     def predict(self, X):
         # Make predictions using already fitted model
         svm_preds = np.array([learner.predict(X) for learner in self.weak_svm])
+        print(svm_preds.shape, 'Predict function')
         return np.sign(np.dot(self.alphas, svm_preds))
 
+    def decision_thresholds(self, X):
+        # function to threshold the svm decision, by varying the bias(intercept)
+        svm_decisions = np.array([learner.decision_function(X) for learner in self.weak_svm])
+        svm_biases    = np.array([learner.intercept_ for learner in self.weak_svm])
+
+        thres_decision = []
+        steps = np.linspace(-50,50,num=101)
+        decision = ([])
+        for i in range(len(steps)):
+            decision = np.array([np.sign(svm_decisions[j] - svm_biases[j] + steps[i]*svm_biases[j]) for j in range(len(svm_biases))])
+            thres_decision.append(decision)            
+
+        thres_decision = np.array(thres_decision)
+
+        final_threshold_decisions = []
+        for i in range(len(steps)):
+            final = np.sign(np.dot(self.alphas,thres_decision[i]))
+            final_threshold_decisions.append(final)
+            
+        return np.array(final_threshold_decisions)
+    
     
     # different number of classifiers
     def number_class(self, X):

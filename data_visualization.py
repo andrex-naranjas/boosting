@@ -27,7 +27,7 @@ def plot_frame(frame,name,xlabel,ylabel,yUserRange,ymin,ymax,sample):
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.title(name)
-    plt.savefig('./plots/'+name+'.pdf')
+    plt.savefig('./plots/'+name+'_'+sample+'.pdf')
     plt.close()
 
 # 2d test error plot as function of sigma and c SVM parameters
@@ -60,7 +60,7 @@ def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name):
     plt.savefig('./plots/2dplot_'+sample_name+'.pdf')
     plt.close()
 
-def plot_hist_frame(frame, name):
+def plot_hist_frame(frame, sample_name):
 
     var = ['D0_m', 'D0_p', 'p0_p']
     for i in range(len(var)):
@@ -88,5 +88,5 @@ def plot_hist_frame(frame, name):
         ax.set_xlim(xlow,xhigh)
         fig.tight_layout()
         
-        plt.savefig('./plots/mva_'+var[i]+'_'+name+'.pdf')
+        plt.savefig('./plots/mva_'+var[i]+'_'+sample_name+'.pdf')
         plt.close()

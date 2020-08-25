@@ -53,10 +53,10 @@ def cv_metrics(model, X, y):
     
     kf = KFold(n_splits = 5, shuffle = True)
     
-    acc_scores = np.array([])
-    prec_scores = np.array([])
+    acc_scores    = np.array([])
+    prec_scores   = np.array([])
     recall_scores = np.array([])
-    f1_scores = np.array([])
+    f1_scores     = np.array([])
     
     for train_index, test_index in kf.split(X):
         X_train, X_test = X[train_index], X[test_index]
@@ -81,10 +81,10 @@ def cv_metrics(model, X, y):
 
 
 def generate_report(y_val, y_pred, verbose):
-    acc = round(accuracy_score(y_val, y_pred) * 100, 2)
-    prec = round(precision_score(y_val, y_pred) * 100 ,2)
+    acc    = round(accuracy_score(y_val, y_pred) * 100, 2)
+    prec   = round(precision_score(y_val, y_pred) * 100 ,2)
     recall = round(recall_score(y_val, y_pred) * 100, 2)
-    f1 =  round(f1_score(y_val, y_pred) * 100, 2)
+    f1     = round(f1_score(y_val, y_pred) * 100, 2)
 
     if verbose:
         print('Accuracy = ', acc)
@@ -125,7 +125,7 @@ def error_number(sample_name, myC, myGammaIni):
     number = ([])
     
     for _ in range(100): # arbitrary number of samples to produce
-        sampled_data = resample(sample_df, replace = True, n_samples = 7000, random_state = 0)
+        sampled_data = resample(sample_df, replace = True, n_samples = 3500, random_state = 0)
         data = data_preparation()
 
         X_train, Y_train, X_test, Y_test = data.dataset(sample_name,sampled_data,sampling=True,split_sample=0.4)
@@ -166,7 +166,7 @@ def error_number(sample_name, myC, myGammaIni):
 def grid_param_gauss(train_x, train_y, test_x, test_y, sigmin, sigmax, cmin, cmax):
 
     # inverted limits, to acommodate the manner at which the arrays are stored and plotted as a matrix
-    log_step_c     = np.logspace(cmax,cmin,15,endpoint=True,base=math.e)
+    log_step_c     = np.logspace(cmax,    cmin,15,endpoint=True,base=math.e)
     log_step_sigma = np.logspace(sigmax,sigmin,15,endpoint=True,base=math.e)
     
     error_matrix = []
@@ -182,3 +182,46 @@ def grid_param_gauss(train_x, train_y, test_x, test_y, sigmin, sigmax, cmin, cma
         error_matrix.append(errors)
         
     return np.array(error_matrix)
+
+
+def roc_curve_adaboost(Y_thresholds, Y_test):
+    # function to create the TPR and FPR, for ROC curve
+    print(Y_thresholds.shape, 'hello world!')
+    Y_test = Y_test.values
+
+    TPR, FPR = ([]), ([])
+    for i in range(Y_thresholds.shape[0]):
+        tp,fn,tn,fp=0,0,0,0
+        for j in range(Y_thresholds.shape[1]):
+            if(Y_test[j] == 1  and Y_thresholds[i][j] ==  1):
+                tp+=1
+            if(Y_test[j] == 1  and Y_thresholds[i][j] == -1):
+                fn+=1
+            if(Y_test[j] == -1 and Y_thresholds[i][j] == -1):
+                tn+=1
+            if(Y_test[j] == -1 and Y_thresholds[i][j] ==  1):                
+                fp+=1
+
+        TPR = np.append(TPR, [ tp/(tp+fn) ])
+        FPR = np.append(FPR, [ fp/(tn+fp) ])
+
+        
+    TPR = np.sort(TPR,axis=None)
+    FPR = np.sort(FPR,axis=None)
+        
+    plt.figure()
+    lw = 2
+    plt.plot(FPR, TPR, color='darkorange',
+             lw=lw, label='ROC curve (area = xxx)', linestyle="-", marker="o")# % roc_auc[2])
+    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver operating characteristic example')
+    plt.legend(loc="lower right")
+    plt.show()        
+
+        
+        
+        

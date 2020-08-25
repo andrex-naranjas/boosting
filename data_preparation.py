@@ -52,9 +52,12 @@ class data_preparation:
             data_set = pd.read_csv('./data/nursery.csv')
         elif sample == 'tac_toe':
             data_set = pd.read_csv('./data/tac_toe.csv')
-        elif sample == 'belle2':
+        elif sample == 'belle2_i':
             file = uproot.open('./data/belle2_kpipi0.root')
-            data_set = file['combined'].pandas.df()            
+            data_set = file['combined'].pandas.df()
+        elif sample == 'belle2_ii':
+            file = uproot.open('./data/belle2_kpi.root')
+            data_set = file['combined'].pandas.df()           
         else:
             sys.exit('The sample name provided does not exist. Try again!')
         return data_set
@@ -93,8 +96,8 @@ class data_preparation:
             X,Y = self.nursery(data_set)
         elif sample == 'tac_toe':
             X,Y = self.tac_toe(data_set)
-        elif sample == 'belle2':
-            X,Y = self.belle2(data_set, sampling)
+        elif sample == 'belle2_i' or sample == 'belle2_ii':
+            X,Y = self.belle2(data_set, sampling, sample_name=sample)
                 
                 
         # print data after preparation
@@ -110,7 +113,7 @@ class data_preparation:
         return X_train, Y_train, X_test, Y_test
             
     # belle2 data preparation
-    def belle2(self, data_set, sampling):
+    def belle2(self, data_set, sampling, sample_name):
         
         # bin data?!?
         # Xin = data_set.drop("Class", axis=1)
@@ -125,9 +128,9 @@ class data_preparation:
         if(sampling): # sampling was already carried, don't sample again!
             return data_set.drop("Class", axis=1), data_set["Class"]
 
-        sampled_data = resample(data_set, replace = False, n_samples = 7000, random_state = 0)
-        dv.plot_hist_frame(data_set,'full')
-        dv.plot_hist_frame(sampled_data,'sampled')        
+        sampled_data = resample(data_set, replace = False, n_samples = 3500, random_state = 0)
+        dv.plot_hist_frame(data_set,'full_'+sample_name)
+        dv.plot_hist_frame(sampled_data,'sampled_'+sample_name)        
         X = sampled_data.drop("Class", axis=1)
         Y = sampled_data["Class"]
                 

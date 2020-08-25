@@ -32,13 +32,13 @@ import data_visualization as dv
 
 # start of the module
 # make directories
-sample_list = ['titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar','car','contra','nursery','tac_toe', 'belle2']
+sample_list = ['titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar','car','contra','nursery','tac_toe', 'belle2_i', 'belle2_ii']
 du.make_directories(sample_list)
 
 # get the data
-#'titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar','car','contra','nursery','tac_toe'
+#'titanic', 'two_norm', 'cancer', 'german', 'heart', 'titanic','car','titanic','nursery','tac_toe'
 data = data_preparation()
-sample = 'belle2' # heart (issues); two_norm, nursery(large)
+sample = 'titanic' # heart (issues); two_norm, nursery(large)
 X_train, Y_train, X_test, Y_test = data.dataset(sample,'',False,0.4)
 
 # run single support vector machine
@@ -53,9 +53,14 @@ du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
 #du.cv_metrics(model, X_train, Y_train)
 
 # run AdaBoost support vector machine
+print('AdaBoost')
 model = AdaBoostSVM(C = 50, gammaIni = 10)
 model.fit(X_train, Y_train)
 y_preda = model.predict(X_test)
+y_thresholds = model.decision_thresholds(X_test)
+du.roc_curve_adaboost(y_thresholds, Y_test)
+
+print('End adaboost')
 
 # check model performance
 test_pre = (model.predict(X_test) == Y_test).mean()
@@ -64,24 +69,24 @@ print(f'Test prec.: {test_pre:.1%}')
 print(f'Test error: {test_err:.1%}')
 
 
-# metrics for plots
-weights, errors, precision = model.get_metrics()
+# # metrics for plots
+# weights, errors, precision = model.get_metrics()
 
-# precision plot
-dv.plot_frame(pd.DataFrame(precision*100,np.arange(precision.shape[0])),
-                           'Classifier precision', 'Classifier', 'training precision (%)', True, 0, 100,'belle2')
-# errors plot
-dv.plot_frame(pd.DataFrame(errors*100,np.arange(errors.shape[0])),
-                           'Classifier error', 'Classifier', 'training error (%)', True, 0, 100,'belle2')
+# # precision plot
+# dv.plot_frame(pd.DataFrame(precision*100,np.arange(precision.shape[0])),
+#                            'Classifier precision', 'Classifier', 'training precision (%)', True, 0, 100,'titanic')
+# # errors plot
+# dv.plot_frame(pd.DataFrame(errors*100,np.arange(errors.shape[0])),
+#                            'Classifier error', 'Classifier', 'training error (%)', True, 0, 100,'titanic')
 
-# weights plot
-dv.plot_frame(pd.DataFrame(weights[10],np.arange(weights.shape[1])),
-                           'Sample weights', 'Sample', 'weights (a.u.)', True, -0.005, 0.01,'belle2')    
+# # weights plot
+# dv.plot_frame(pd.DataFrame(weights[10],np.arange(weights.shape[1])),
+#                            'Sample weights', 'Sample', 'weights (a.u.)', True, -0.005, 0.01,'titanic')    
 
-# grid hyper parameter 2D-plots
-matrix = du.grid_param_gauss(X_train, Y_train, X_test, Y_test, sigmin=-5, sigmax=5, cmin=0, cmax=6)
-dv.plot_2dmap(matrix,-5,5,0,6,'belle2')
+# # grid hyper parameter 2D-plots
+# matrix = du.grid_param_gauss(X_train, Y_train, X_test, Y_test, sigmin=-5, sigmax=5, cmin=0, cmax=6)
+# dv.plot_2dmap(matrix,-5,5,0,6,'titanic')
         
-# boostrap error VS number of classiffiers calculation
-frame = du.error_number('belle2',myC=50,myGammaIni=10)
-dv.plot_frame(frame, 'Classifiers error', 'No. Classifiers', 'test error', False, 0, 50,'belle2')
+# # boostrap error VS number of classiffiers calculation
+# frame = du.error_number('titanic',myC=50,myGammaIni=10)
+# dv.plot_frame(frame, 'Classifiers error', 'No. Classifiers', 'test error', False, 0, 50,'titanic')
