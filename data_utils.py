@@ -186,10 +186,9 @@ def grid_param_gauss(train_x, train_y, test_x, test_y, sigmin, sigmax, cmin, cma
 
 def roc_curve_adaboost(Y_thresholds, Y_test):
     # function to create the TPR and FPR, for ROC curve
-    print(Y_thresholds.shape, 'hello world!')
     Y_test = Y_test.values
 
-    TPR, FPR = ([]), ([])
+    TPR_list, FPR_list = [], []    
     for i in range(Y_thresholds.shape[0]):
         tp,fn,tn,fp=0,0,0,0
         for j in range(Y_thresholds.shape[1]):
@@ -202,12 +201,17 @@ def roc_curve_adaboost(Y_thresholds, Y_test):
             if(Y_test[j] == -1 and Y_thresholds[i][j] ==  1):                
                 fp+=1
 
-        TPR = np.append(TPR, [ tp/(tp+fn) ])
-        FPR = np.append(FPR, [ fp/(tn+fp) ])
+        TPR_list.append( tp/(tp+fn) )
+        FPR_list.append( fp/(tn+fp) )
 
-        
-    TPR = np.sort(TPR,axis=None)
-    FPR = np.sort(FPR,axis=None)
+    # sort the first list and map indexes of the second list to the first one
+    FPR_list, TPR_list = zip(*sorted(zip(FPR_list, TPR_list)))
+    TPR = np.array(TPR_list)
+    FPR = np.array(FPR_list)
+
+    # sort both lists
+    TPR_sorted = np.sort(TPR,axis=None)
+    FPR_sorted = np.sort(FPR,axis=None)
         
     plt.figure()
     lw = 2
@@ -220,8 +224,19 @@ def roc_curve_adaboost(Y_thresholds, Y_test):
     plt.ylabel('True Positive Rate')
     plt.title('Receiver operating characteristic example')
     plt.legend(loc="lower right")
-    plt.show()        
+    plt.savefig('real.png')
+    plt.close()
 
-        
-        
-        
+    plt.figure()
+    lw = 2
+    plt.plot(FPR_sorted, TPR_sorted, color='darkorange',
+             lw=lw, label='ROC curve (area = xxx)', linestyle="-", marker="o")# % roc_auc[2])
+    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver operating characteristic example')
+    plt.legend(loc="lower right")
+    plt.savefig('sorted.png')
+    plt.close()
