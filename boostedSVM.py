@@ -190,7 +190,7 @@ class AdaBoostSVM:
         svm_biases    = np.array([learner.intercept_ for learner in self.weak_svm])
 
         thres_decision = []
-        steps = np.linspace(-50,50,num=101)
+        steps = np.linspace(-70,70,num=1001)
         decision = ([])
         for i in range(len(steps)):
             decision = np.array([np.sign(svm_decisions[j] - svm_biases[j] + steps[i]*svm_biases[j]) for j in range(len(svm_biases))])

@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 import pandas as pd
 import math as math
-
+from sklearn.metrics import auc
 
 # frame plots
 def plot_frame(frame,name,xlabel,ylabel,yUserRange,ymin,ymax,sample):
@@ -91,18 +91,23 @@ def plot_hist_frame(frame, sample_name):
         plt.savefig('./plots/mva_'+var[i]+'_'+sample_name+'.pdf')
         plt.close()
 
-def plot_roc_curve(FPR,TPR,name):
-    
+def plot_roc_curve(TPR,FPR,sample,real):
+
+    if(real=='sorted'):
+        TPR = np.sort(TPR,axis=None)
+        FPR = np.sort(FPR,axis=None)
+        
+    area = auc(FPR,TPR)
     plt.figure()
     lw = 2
     plt.plot(FPR, TPR, color='darkorange',
-             lw=lw, label='ROC curve (area = xxx)', linestyle="-", marker="o")# % roc_auc[2])
+             lw=lw, label='ROC curve (area = %0.2f)'  % area, linestyle="-", marker="o")
     plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
     plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
+    plt.ylim([0.0, 1.05])    
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
-    plt.title('Receiver operating characteristic example')
+    plt.title('ROC curve -' + sample)
     plt.legend(loc="lower right")
-    plt.savefig('./plots/roc_curve_'+name+'.png')
+    plt.savefig('./plots/roc_curve_'+sample+'_'+real+'.png')
     plt.close()

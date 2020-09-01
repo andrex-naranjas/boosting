@@ -36,9 +36,9 @@ sample_list = ['titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar','car'
 du.make_directories(sample_list)
 
 # get the data
-#'titanic', 'two_norm', 'cancer', 'german', 'heart', 'titanic','car','titanic','nursery','tac_toe'
+#'contra', 'two_norm', 'contra', 'contra', 'contra', 'contra','car','contra','nursery','tac_toe'
 data = data_preparation()
-sample = 'titanic' # heart (issues); two_norm, nursery(large)
+sample = 'contra' # contra (issues); two_norm, nursery(large)
 X_train, Y_train, X_test, Y_test = data.dataset(sample,'',False,0.4)
 
 # run single support vector machine
@@ -48,19 +48,23 @@ svc.fit(X_train, Y_train, weights)
 Y_pred = svc.predict(X_test)
 du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
 
-# comparison with other ml models (fit, predict and metrics)
-#mc.comparison(sample, X_train, Y_train, Y_test, X_test)
-#du.cv_metrics(model, X_train, Y_train)
-
 # run AdaBoost support vector machine
 print('AdaBoost')
 model = AdaBoostSVM(C = 50, gammaIni = 10)
 model.fit(X_train, Y_train)
 y_preda = model.predict(X_test)
 y_thresholds = model.decision_thresholds(X_test)
-du.roc_curve_adaboost(y_thresholds, Y_test)
-
+TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
+dv.plot_roc_curve(TPR,FPR,sample,'sorted')
+dv.plot_roc_curve(TPR,FPR,sample,'real')
 print('End adaboost')
+
+
+# comparison with other ml models (fit, predict and metrics)
+#mc.comparison(sample, X_train, Y_train, Y_test, X_test)
+#du.cv_metrics(model, X_train, Y_train)
+
+
 
 # check model performance
 test_pre = (model.predict(X_test) == Y_test).mean()
@@ -74,19 +78,19 @@ print(f'Test error: {test_err:.1%}')
 
 # # precision plot
 # dv.plot_frame(pd.DataFrame(precision*100,np.arange(precision.shape[0])),
-#                            'Classifier precision', 'Classifier', 'training precision (%)', True, 0, 100,'titanic')
+#                            'Classifier precision', 'Classifier', 'training precision (%)', True, 0, 100,'contra')
 # # errors plot
 # dv.plot_frame(pd.DataFrame(errors*100,np.arange(errors.shape[0])),
-#                            'Classifier error', 'Classifier', 'training error (%)', True, 0, 100,'titanic')
+#                            'Classifier error', 'Classifier', 'training error (%)', True, 0, 100,'contra')
 
 # # weights plot
 # dv.plot_frame(pd.DataFrame(weights[10],np.arange(weights.shape[1])),
-#                            'Sample weights', 'Sample', 'weights (a.u.)', True, -0.005, 0.01,'titanic')    
+#                            'Sample weights', 'Sample', 'weights (a.u.)', True, -0.005, 0.01,'contra')    
 
 # # grid hyper parameter 2D-plots
 # matrix = du.grid_param_gauss(X_train, Y_train, X_test, Y_test, sigmin=-5, sigmax=5, cmin=0, cmax=6)
-# dv.plot_2dmap(matrix,-5,5,0,6,'titanic')
+# dv.plot_2dmap(matrix,-5,5,0,6,'contra')
         
 # # boostrap error VS number of classiffiers calculation
-# frame = du.error_number('titanic',myC=50,myGammaIni=10)
-# dv.plot_frame(frame, 'Classifiers error', 'No. Classifiers', 'test error', False, 0, 50,'titanic')
+# frame = du.error_number('contra',myC=50,myGammaIni=10)
+# dv.plot_frame(frame, 'Classifiers error', 'No. Classifiers', 'test error', False, 0, 50,'contra')

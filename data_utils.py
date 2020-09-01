@@ -13,7 +13,7 @@ import pandas as pd
 
 #metrics: some functions to measure the quality of the predictions
 from sklearn.model_selection import cross_val_score
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve, auc
 from sklearn.model_selection import KFold
 
 import numpy as np
@@ -204,39 +204,9 @@ def roc_curve_adaboost(Y_thresholds, Y_test):
         TPR_list.append( tp/(tp+fn) )
         FPR_list.append( fp/(tn+fp) )
 
-    # sort the first list and map indexes of the second list to the first one
+    # sort the first list and map ordered indexes to the second list
     FPR_list, TPR_list = zip(*sorted(zip(FPR_list, TPR_list)))
     TPR = np.array(TPR_list)
     FPR = np.array(FPR_list)
 
-    # sort both lists
-    TPR_sorted = np.sort(TPR,axis=None)
-    FPR_sorted = np.sort(FPR,axis=None)
-        
-    plt.figure()
-    lw = 2
-    plt.plot(FPR, TPR, color='darkorange',
-             lw=lw, label='ROC curve (area = xxx)', linestyle="-", marker="o")# % roc_auc[2])
-    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver operating characteristic example')
-    plt.legend(loc="lower right")
-    plt.savefig('real.png')
-    plt.close()
-
-    plt.figure()
-    lw = 2
-    plt.plot(FPR_sorted, TPR_sorted, color='darkorange',
-             lw=lw, label='ROC curve (area = xxx)', linestyle="-", marker="o")# % roc_auc[2])
-    plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver operating characteristic example')
-    plt.legend(loc="lower right")
-    plt.savefig('sorted.png')
-    plt.close()
+    return TPR,FPR    
