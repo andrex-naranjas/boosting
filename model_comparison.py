@@ -61,8 +61,8 @@ def comparison(sample, X_train, Y_train, Y_test, X_test):
     svc = SVC(gamma='auto', probability = True)
     svc.fit(X_train, Y_train)
     Y_pred = svc.predict(X_test)
-    temp_list = du.metrics(sample, 'SVM', svc, X_train, Y_train, Y_test, X_test, Y_pred)
-    temp_df = pd.DataFrame({'SVM': temp_list})
+    temp_list = du.metrics(sample, 'SVC', svc, X_train, Y_train, Y_test, X_test, Y_pred)
+    temp_df = pd.DataFrame({'SVC': temp_list})
     metrics_df = pd.concat([metrics_df, temp_df], axis = 1)
 
     metrics_df.to_csv('output/{}/metrics_report.csv'.format(sample), index=False)

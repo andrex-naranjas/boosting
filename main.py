@@ -38,7 +38,7 @@ du.make_directories(sample_list)
 # get the data
 #'contra', 'two_norm', 'contra', 'contra', 'contra', 'contra','car','contra','nursery','tac_toe'
 data = data_preparation()
-sample = 'contra' # contra (issues); two_norm, nursery(large)
+sample = 'solar' # contra (issues); two_norm, nursery(large)
 X_train, Y_train, X_test, Y_test = data.dataset(sample,'',False,0.4)
 
 # run single support vector machine
@@ -55,13 +55,13 @@ model.fit(X_train, Y_train)
 y_preda = model.predict(X_test)
 y_thresholds = model.decision_thresholds(X_test)
 TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
-dv.plot_roc_curve(TPR,FPR,sample,'sorted')
 dv.plot_roc_curve(TPR,FPR,sample,'real')
+dv.plot_roc_curve(TPR,FPR,sample,'sorted')
 print('End adaboost')
 
 
 # comparison with other ml models (fit, predict and metrics)
-#mc.comparison(sample, X_train, Y_train, Y_test, X_test)
+mc.comparison(sample, X_train, Y_train, Y_test, X_test)
 #du.cv_metrics(model, X_train, Y_train)
 
 
@@ -85,12 +85,12 @@ print(f'Test error: {test_err:.1%}')
 
 # # weights plot
 # dv.plot_frame(pd.DataFrame(weights[10],np.arange(weights.shape[1])),
-#                            'Sample weights', 'Sample', 'weights (a.u.)', True, -0.005, 0.01,'contra')    
+#                            'Sample weights', 'Sample', 'weights (a.u.)', True, -0.005, 0.01,'contra')
 
 # # grid hyper parameter 2D-plots
 # matrix = du.grid_param_gauss(X_train, Y_train, X_test, Y_test, sigmin=-5, sigmax=5, cmin=0, cmax=6)
 # dv.plot_2dmap(matrix,-5,5,0,6,'contra')
-        
+
 # # boostrap error VS number of classiffiers calculation
 # frame = du.error_number('contra',myC=50,myGammaIni=10)
 # dv.plot_frame(frame, 'Classifiers error', 'No. Classifiers', 'test error', False, 0, 50,'contra')
