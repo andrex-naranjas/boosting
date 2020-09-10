@@ -29,9 +29,10 @@ def load_dataset_ROC(dataset):
     MLProc = pd.read_csv('output/' + str(dataset) + '/MLProc.csv')
     Ranroc = pd.read_csv('output/' + str(dataset) + '/Ranroc.csv')
     SVCroc = pd.read_csv('output/' + str(dataset) + '/SVCroc.csv')
+    KNNroc = pd.read_csv('output/' + str(dataset) + '/KNeroc.csv')
     AB_SVMroc = pd.read_csv('output/' + str(dataset) + '/BoostSVM_ROC.csv')
 
-    return Adaroc, Graroc, MLProc, Ranroc, SVCroc, AB_SVMroc
+    return Adaroc, Graroc, MLProc, Ranroc, SVCroc, AB_SVMroc, KNNroc
 
 
 app.layout =  html.Div(children = [
@@ -112,13 +113,14 @@ def update_output(value):
     [dash.dependencies.Input('demo-dropdown', 'value')])
 def update_plot(value):
     report = load_report(value)
-    Adaroc, Graroc, MLProc, Ranroc, SVCroc, AB_SVMroc = load_dataset_ROC(value)
+    Adaroc, Graroc, MLProc, Ranroc, SVCroc, AB_SVMroc, KNNroc = load_dataset_ROC(value)
 
     Adaroc_x = Adaroc.iloc[:,0]
     Graroc_x = Graroc.iloc[:,0]
     MLProc_x = MLProc.iloc[:,0]
     Ranroc_x = Ranroc.iloc[:,0]
     SVCroc_x = SVCroc.iloc[:,0]
+    KNNroc_x = KNNroc.iloc[:,0]
     AB_SVMroc_x = AB_SVMroc.iloc[:,0]
 
 
@@ -127,6 +129,7 @@ def update_plot(value):
     MLProc_y = MLProc.iloc[:,1]
     Ranroc_y = Ranroc.iloc[:,1]
     SVCroc_y = SVCroc.iloc[:,1]
+    KNNroc_y = KNNroc.iloc[:,1]
     AB_SVMroc_y = AB_SVMroc.iloc[:,1]
 
     return [
@@ -139,7 +142,7 @@ def update_plot(value):
                 dcc.Graph(id = 'ROC_plot',
                 figure = {
                 'data':[
-                
+
                 {'x':AB_SVMroc_x, 'y':AB_SVMroc_y, 'type': 'scatter','line': {'color': '#636efa', 'dash': 'dashdot'},
                 'mode': 'lines+markers', 'name':'AB-SVM'+f'(AUC={AB_SVMroc.iloc[1,2]:.4f})'},
 
@@ -147,6 +150,7 @@ def update_plot(value):
                 {'x':Graroc_x, 'y':Graroc_y, 'type': 'line', 'name':'XGBoost'+f'(AUC={Graroc.iloc[1,2]/100:.4f})'},
                 {'x':Ranroc_x, 'y':Ranroc_y, 'type': 'line', 'name':'RandForest'+f'(AUC={Ranroc.iloc[1,2]/100:.4f})'},
                 {'x':MLProc_x, 'y':MLProc_y, 'type': 'line', 'name':'NN'+f'(AUC={MLProc.iloc[1,2]/100:.4f})'},
+                {'x':KNNroc_x, 'y':KNNroc_y, 'type': 'line', 'name':'KNN'+f'(AUC={KNNroc.iloc[1,2]/100:.4f})'},
                 {'x':SVCroc_x, 'y':SVCroc_y, 'type': 'line', 'name':'SVC'+f'(AUC={SVCroc.iloc[1,2]/100:.4f})'},
                 ],
                 'layout': {

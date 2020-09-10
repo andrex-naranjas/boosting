@@ -38,7 +38,7 @@ du.make_directories(sample_list)
 # get the data
 #'contra', 'two_norm', 'contra', 'contra', 'contra', 'contra','car','contra','nursery','tac_toe'
 data = data_preparation()
-sample = 'solar' # contra (issues); two_norm, nursery(large)
+sample = 'titanic' # contra (issues); two_norm, nursery(large)
 X_train, Y_train, X_test, Y_test = data.dataset(sample,'',False,0.4)
 
 # run single support vector machine
@@ -61,7 +61,10 @@ print('End adaboost')
 
 
 # comparison with other ml models (fit, predict and metrics)
-mc.comparison(sample, X_train, Y_train, Y_test, X_test)
+sample_list = ['titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar','car','contra','nursery','tac_toe']
+
+for sample in sample_list:
+    mc.comparison(sample, X_train, Y_train, Y_test, X_test)
 #du.cv_metrics(model, X_train, Y_train)
 
 

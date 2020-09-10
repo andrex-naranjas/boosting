@@ -202,7 +202,7 @@ class AdaBoostSVM:
         for i in range(len(steps)):
             final = np.sign(np.dot(self.alphas,thres_decision[i]))
             final_threshold_decisions.append(final)
-            
+
         return np.array(final_threshold_decisions)
 
 
@@ -279,7 +279,7 @@ class Div_AdaBoostSVM(AdaBoostSVM):
                 myGamma -= stepGamma
                 break
 
-            myGamma -= stepGamma
+            #myGamma -= stepGamma
 
         return myGamma, errorOut, y_pred, svcB
 
