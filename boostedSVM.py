@@ -67,8 +67,8 @@ class AdaBoostSVM:
                     errorOut += myWeights[i]
 
             # require an error below 50% and avoid null errors
-            if(errorOut < 0.5 and errorOut > 0.0):
-                myGamma -= stepGamma
+            if(errorOut < 0.49 and errorOut > 0.0):
+                #myGamma -= stepGamma
                 break
             
             myGamma -= stepGamma
@@ -82,7 +82,7 @@ class AdaBoostSVM:
         n = X.shape[0]
         weights= np.ones(n)/n
         
-        gammaMin, gammaStep, gammaVar = 1.0, 0.1, 0.0
+        gammaMin, gammaStep, gammaVar = 1.0, 0.5, 0.0
         cost, count, norm = 1, 0, 0.0
         h_list = []
 
@@ -118,7 +118,7 @@ class AdaBoostSVM:
             h_temp = h.tolist()
             h_list.append(h_temp)
 
-            # print("Error: {} Precision: {} Gamma: {} ".format(round(error,4), round(tp / (tp + fp),4), round(gammaVar+gammaStep,2)))
+            print("Error: {} Precision: {} Gamma: {} ".format(round(error,4), round(tp / (tp + fp),4), round(gammaVar+gammaStep,2)))
             # store errors
             self.errors = np.append(self.errors, [error])
             # store precision
