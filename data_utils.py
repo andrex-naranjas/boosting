@@ -192,14 +192,10 @@ def roc_curve_adaboost(Y_thresholds, Y_test):
     for i in range(Y_thresholds.shape[0]):
         tp,fn,tn,fp=0,0,0,0
         for j in range(Y_thresholds.shape[1]):
-            if(Y_test[j] == 1  and Y_thresholds[i][j] ==  1):
-                tp+=1
-            if(Y_test[j] == 1  and Y_thresholds[i][j] == -1):
-                fn+=1
-            if(Y_test[j] == -1 and Y_thresholds[i][j] == -1):
-                tn+=1
-            if(Y_test[j] == -1 and Y_thresholds[i][j] ==  1):                
-                fp+=1
+            if(Y_test[j] == 1  and Y_thresholds[i][j] ==  1):  tp+=1
+            if(Y_test[j] == 1  and Y_thresholds[i][j] == -1):  fn+=1
+            if(Y_test[j] == -1 and Y_thresholds[i][j] == -1):  tn+=1
+            if(Y_test[j] == -1 and Y_thresholds[i][j] ==  1):  fp+=1
 
         TPR_list.append( tp/(tp+fn) )
         FPR_list.append( fp/(tn+fp) )

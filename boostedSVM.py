@@ -13,7 +13,6 @@ import numpy as np
 # machine learning
 from sklearn.svm import SVC, LinearSVC
 
-
 # AdaBoost class
 
 class AdaBoostSVM:
@@ -93,7 +92,6 @@ class AdaBoostSVM:
                 new_weights = weights.copy()
 
             new_weights = new_weights/norm
-
             
             self.weights_list.append(new_weights)
         
@@ -109,10 +107,8 @@ class AdaBoostSVM:
             # calculate training precision
             fp,tp = 0,0
             for i in range(n):
-                if(Y_train[i]!=h[i]):    
-                    fp+=1
-                else:
-                    tp+=1      
+                if(Y_train[i]!=h[i]): fp+=1
+                else:                 tp+=1
         
             # store the predicted classes
             h_temp = h.tolist()
@@ -127,7 +123,7 @@ class AdaBoostSVM:
             # classifier weights (alpha), obtain and store
             x = (1 - error)/error
             alpha = 0.5 * np.log(x)
-            self.alphas = np.append(self.alphas, alpha)
+            self.alphas   = np.append(self.alphas, alpha)
             self.weak_svm = np.append(self.weak_svm, learner)
         
             # reset weight lists
@@ -144,9 +140,9 @@ class AdaBoostSVM:
             # do loop as long gamma > gammaMin, if gamma < 0, SVM fails exit loop
             if gammaVar <= gammaMin:#) or (gammaVar < 0):
                 break
-        
 
-        # h_list into array
+            # end of adaboot loop
+
         h_list = np.array(h_list)
 
         print(count,'number of classifiers') 
@@ -164,12 +160,10 @@ class AdaBoostSVM:
             final = np.append(final, [np.sign(suma)])
             
         # final precision calculation
-        final_fp, final_tp  = 0, 0
+        final_fp, final_tp  = 0,0
         for i in range(n):
-            if(Y_train[i]!=final[i]):
-                final_fp+=1
-            else:
-                final_tp+=1
+            if(Y_train[i]!=final[i]):  final_fp+=1
+            else:                      final_tp+=1
 
         final_precision = final_tp / (final_fp + final_tp)
         print("Final Precision: {} ".format( round(final_precision,4)) )
@@ -184,28 +178,40 @@ class AdaBoostSVM:
         print(svm_preds.shape, 'Predict function')
         return np.sign(np.dot(self.alphas, svm_preds))
 
-    def decision_thresholds(self, X):
+    def decision_thresholds(self, X, glob_dec):
         # function to threshold the svm decision, by varying the bias(intercept)
         svm_decisions = np.array([learner.decision_function(X) for learner in self.weak_svm])
         svm_biases    = np.array([learner.intercept_ for learner in self.weak_svm])
 
         thres_decision = []
-        steps = np.linspace(-70,70,num=1001)
-        decision = ([])
-        for i in range(len(steps)):
-            decision = np.array([np.sign(svm_decisions[j] - svm_biases[j] + steps[i]*svm_biases[j]) for j in range(len(svm_biases))])
-            thres_decision.append(decision)            
+        steps = np.linspace(-50,50,num=1001)
+        decision,decision_temp = ([]),([])
 
-        thres_decision = np.array(thres_decision)
-
-        final_threshold_decisions = []
-        for i in range(len(steps)):
-            final = np.sign(np.dot(self.alphas,thres_decision[i]))
-            final_threshold_decisions.append(final)
+        if not glob_dec: # threshold each individual classifier
+            for i in range(len(steps)):
+                decision = np.array([np.sign(svm_decisions[j] - svm_biases[j] + steps[i]*svm_biases[j]) for j in range(len(svm_biases))])
+                thres_decision.append(decision)
+                
+            thres_decision = np.array(thres_decision)
             
-        return np.array(final_threshold_decisions)
-    
-    
+            final_threshold_decisions = []
+            for i in range(len(steps)):
+                final = np.sign(np.dot(self.alphas,thres_decision[i]))
+                final_threshold_decisions.append(final)
+            
+            return np.array(final_threshold_decisions)
+        
+        elif glob_dec: # glob_dec == true threshold the global final classifier
+            decision = np.array([svm_decisions[j] + svm_biases[j] for j in range(len(svm_biases))])
+            decision = np.dot(self.alphas,decision)
+
+            for i in range(len(steps)):
+                decision_temp = np.array([np.sign(decision[j] + steps[i] ) for j in range(len(svm_biases))]) #*svm_biases[j]
+                thres_decision.append(decision_temp)
+                        
+            return np.array(thres_decision)
+            
+                               
     # different number of classifiers
     def number_class(self, X):
         
@@ -222,8 +228,6 @@ class AdaBoostSVM:
     def get_metrics(self):
         return np.array(self.weights_list), self.errors, self.precision
         
-
-    
 
 '''
 run main function for every dataset
