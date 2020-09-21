@@ -49,16 +49,16 @@ class AdaBoostSVM:
         if count == 0:
             myGamma = self.gammaIni
 
-        if myGamma<=0:
-            return 0,0,None,None
+        if myGamma <= 0:
+            return 0, 0, None, None
 
         while True:
-            if myGamma<=0:
-                return 0,0,None,None
+            if myGamma <= 0:
+                return 0, 0, None, None
 
             errorOut = 0.0
 
-            svcB = SVC(C = self.C, kernel='rbf', gamma=1/(2*(myGamma**2)), shrinking = True, probability = True, tol = 0.001, cache_size = 5000)
+            svcB = SVC(C=self.C, kernel='rbf', gamma=1/(2*(myGamma**2)), shrinking=True, probability=True, tol=0.001, cache_size=5000)
             svcB.fit(x_train, y_train, sample_weight=myWeights)
             y_pred = svcB.predict(x_train)
 
@@ -67,11 +67,12 @@ class AdaBoostSVM:
                     errorOut += myWeights[i]
 
             # require an error below 50% and avoid null errors
-            if(errorOut < 0.5 and errorOut > 0.0):
-                myGamma -= stepGamma
+            if(errorOut < 0.49 and errorOut > 0.0):
+                #myGamma -= stepGamma
                 break
 
             myGamma -= stepGamma
+
 
         return myGamma, errorOut, y_pred, svcB
 
@@ -82,7 +83,7 @@ class AdaBoostSVM:
         n = X.shape[0]
         weights= np.ones(n)/n
 
-        gammaMin, gammaStep, gammaVar = 1.0, 0.1, 0.0
+        gammaMin, gammaStep, gammaVar = 1.0, 0.5, 0.0
         cost, count, norm = 1, 0, 0.0
         h_list = []
 
@@ -118,7 +119,7 @@ class AdaBoostSVM:
             h_temp = h.tolist()
             h_list.append(h_temp)
 
-            # print("Error: {} Precision: {} Gamma: {} ".format(round(error,4), round(tp / (tp + fp),4), round(gammaVar+gammaStep,2)))
+            print("Error: {} Precision: {} Gamma: {} ".format(round(error,4), round(tp / (tp + fp),4), round(gammaVar+gammaStep,2)))
             # store errors
             self.errors = np.append(self.errors, [error])
             # store precision
@@ -276,10 +277,10 @@ class Div_AdaBoostSVM(AdaBoostSVM):
 
             # require an error below 50%, diversity above threshold and avoid null errors
             if errorOut < 0.5 and errorOut != 0 and Div_partial > Div_threshold:
-                myGamma -= stepGamma
+                #myGamma -= stepGamma
                 break
 
-            #myGamma -= stepGamma
+            myGamma -= stepGamma
 
         return myGamma, errorOut, y_pred, svcB
 

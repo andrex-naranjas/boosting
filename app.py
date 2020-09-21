@@ -16,11 +16,12 @@ def generate_table(dataframe, max_rows=10):
                 html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
             ]) for i in range(min(len(dataframe), max_rows))
         ])
-    ])
+    ], style= {'display': 'inline-block'})
 
 def load_report(dataset):
     dataframe = pd.read_csv('output/'+ str(dataset) +'/metrics_report.csv')
-    return dataframe
+    AB_time = pd.read_csv('output/' + str(dataset) + '/AdaBoostSVM_time.csv')
+    return dataframe, AB_time
 
 def load_dataset_ROC(dataset):
     # load dataframes for ROC plot analysis
@@ -66,7 +67,7 @@ app.layout =  html.Div(children = [
     ]),
 
 
-    html.Div(id = 'plot_layout', style = {'padding' : '30px'}, children = [
+    html.Div(id = 'plot_layout', style = {'padding' : '30px', 'text-align' : 'center'}, children = [
         html.Div(style={'padding' : '10px',
                         'box-shadow': '3px 3px 3px grey',
                         'backgroundColor': '#ffffff',
@@ -75,7 +76,7 @@ app.layout =  html.Div(children = [
             dcc.Graph(
                 id = 'ROC_plot',
                 style={'display': 'none'})
-            ], className="six columns"
+            ]
 
         ),
 
@@ -85,8 +86,7 @@ app.layout =  html.Div(children = [
                         'border-radius': '5px'
                         }, children =[
             html.H3('Output metrics'),
-            #generate_table(report)
-        ], className="six columns"),
+        ]),
     ], className="row"),
 
     html.Div(html.A(
@@ -111,10 +111,13 @@ def update_output(value):
 @app.callback(
     dash.dependencies.Output('plot_layout', 'children'),
     [dash.dependencies.Input('demo-dropdown', 'value')])
+
+# This updates plot and table when selecting a different dataset
 def update_plot(value):
-    report = load_report(value)
+    report, AB_time = load_report(value)
     Adaroc, Graroc, MLProc, Ranroc, SVCroc, AB_SVMroc, KNNroc = load_dataset_ROC(value)
 
+    # x axis data
     Adaroc_x = Adaroc.iloc[:,0]
     Graroc_x = Graroc.iloc[:,0]
     MLProc_x = MLProc.iloc[:,0]
@@ -123,7 +126,7 @@ def update_plot(value):
     KNNroc_x = KNNroc.iloc[:,0]
     AB_SVMroc_x = AB_SVMroc.iloc[:,0]
 
-
+    # y axis data
     Adaroc_y = Adaroc.iloc[:,1]
     Graroc_y = Graroc.iloc[:,1]
     MLProc_y = MLProc.iloc[:,1]
@@ -132,12 +135,15 @@ def update_plot(value):
     KNNroc_y = KNNroc.iloc[:,1]
     AB_SVMroc_y = AB_SVMroc.iloc[:,1]
 
+    # The function returns Dash divs
     return [
 
         html.Div(style={'padding' : '10px',
                         'box-shadow': '3px 3px 3px grey',
                         'backgroundColor': '#ffffff',
-                        'border-radius': '5px'}, children = [
+                        'border-radius': '5px',
+                        'display': 'inline-block',
+                        'width': '50%',}, children = [
                 html.H3('Receiver Operating Characteristic (ROC) curve'),
                 dcc.Graph(id = 'ROC_plot',
                 figure = {
@@ -153,24 +159,24 @@ def update_plot(value):
                 {'x':KNNroc_x, 'y':KNNroc_y, 'type': 'line', 'name':'KNN'+f'(AUC={KNNroc.iloc[1,2]/100:.4f})'},
                 {'x':SVCroc_x, 'y':SVCroc_y, 'type': 'line', 'name':'SVC'+f'(AUC={SVCroc.iloc[1,2]/100:.4f})'},
                 ],
-                'layout': {
+                'layout': {'title': 'Elapsed time (fitting): '+ str(AB_time.iloc[0,0]),
                 #'height': '620px',
-                #'width' : '1000px',
+                #'width' : '2000px',
                 'xaxis' : {'title': "False positive rate"},
                 'yaxis' : {'title': 'True positive rate'}
                 }
                 })
-            ], className="six columns"
+            ]
         ),
 
-        html.Div(id = 'table', style={'padding' : '10px',
+        html.Div(id = 'table', style={'padding' : '10px', 'text-align' : 'center',
                         'box-shadow': '3px 3px 3px grey',
                         'backgroundColor': '#ffffff',
-                        'border-radius': '5px'
+                        'border-radius': '5px',
                         }, children =[
             html.H3('Output metrics'),
             generate_table(report)
-        ], className="six columns")
+        ])
     ]
 
 
