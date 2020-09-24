@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Code to improve SVM (machine learning methods module)
-# authors: A. Ramirez-Morales and J. Salmon-Gamboa
+'''
+---------------------------------------------------------------
+ Code to improve SVM
+ Authors: A. Ramirez-Morales and J. Salmon-Gamboa
+ ---------------------------------------------------------------
+'''
 
 # model comparison module
 

@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# code to improve SVM
-# authors: A. Ramirez-Morales and J. Salmon-Gamboa
+'''
+---------------------------------------------------------------
+ Code to improve SVM
+ Authors: A. Ramirez-Morales and J. Salmon-Gamboa
+ ---------------------------------------------------------------
+'''
 
-# main module
+#main module
 
 # python basics
 import sys
@@ -25,7 +29,7 @@ import data_utils as du
 import model_comparison as mc
 
 # AdaBoost class
-from boostedSVM import AdaBoostSVM
+from boostedSVM import AdaBoostSVM, Div_AdaBoostSVM
 
 # data visualization module
 import data_visualization as dv
@@ -33,7 +37,7 @@ import data_visualization as dv
 
 # start of the module
 # make directories
-sample_list = ['titanic', 'two_norm', 'cancer', 'german', 'heart', 'solar','car','contra','nursery','tac_toe', 'belle2_i', 'belle2_ii']
+sample_list = ['titanic', 'cancer', 'german', 'heart', 'solar','car','contra','tac_toe', 'belle2_i', 'belle2_ii']
 du.make_directories(sample_list)
 
 
@@ -55,27 +59,27 @@ Y_pred = svc.predict(X_test)
 du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
     '''
 
-
     # run AdaBoost support vector machine
     print('AdaBoost')
-    model = AdaBoostSVM(C = 50, gammaIni = 10)
+    model = AdaBoostSVM(C=50, gammaIni=10)
+
     start = datetime.datetime.now()
     model.fit(X_train, Y_train)
     end = datetime.datetime.now()
     elapsed_time = pd.DataFrame({'Elapsed time': [end - start]})
+
     elapsed_time.to_csv('output/' + sample +  '/' + 'AdaBoostSVM_time.csv', index=False)
     y_preda = model.predict(X_test)
     y_thresholds = model.decision_thresholds(X_test)
     TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
+
     dv.plot_roc_curve(TPR,FPR,sample,'real')
     dv.plot_roc_curve(TPR,FPR,sample,'sorted')
     print('End adaboost')
 
-
     # comparison with other ml models (fit, predict and metrics)
     mc.comparison(sample, X_train, Y_train, Y_test, X_test)
     #du.cv_metrics(model, X_train, Y_train)
-
 
 
 # check model performance

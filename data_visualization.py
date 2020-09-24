@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# code to improve SVM
-# authors: A. Ramirez-Morales and J. Salmon-Gamboa
+'''
+---------------------------------------------------------------
+ Code to improve SVM
+ Authors: A. Ramirez-Morales and J. Salmon-Gamboa
+ ---------------------------------------------------------------
+'''
 
 # visualization module
 

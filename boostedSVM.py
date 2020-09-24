@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# code to improve SVM
-# authors: A. Ramirez-Morales and J. Salmon-Gamboa
+'''
+---------------------------------------------------------------
+ Code to improve SVM
+ Authors: A. Ramirez-Morales and J. Salmon-Gamboa
+ ---------------------------------------------------------------
+'''
 
 # python basics
 import sys
@@ -12,7 +16,6 @@ import numpy as np
 
 # machine learning
 from sklearn.svm import SVC, LinearSVC
-
 
 # AdaBoost class
 
@@ -53,12 +56,22 @@ class AdaBoostSVM:
             return 0, 0, None, None
 
         while True:
+
             if myGamma <= 0:
                 return 0, 0, None, None
 
             errorOut = 0.0
 
-            svcB = SVC(C=self.C, kernel='rbf', gamma=1/(2*(myGamma**2)), shrinking=True, probability=True, tol=0.001, cache_size=5000)
+            svcB = SVC(
+                    C=self.C,
+                    kernel='rbf',
+                    gamma=1/(2*(myGamma**2)),
+                    shrinking=True,
+                    probability=True,
+                    tol=0.001,
+                    cache_size=5000
+                )
+
             svcB.fit(x_train, y_train, sample_weight=myWeights)
             y_pred = svcB.predict(x_train)
 
@@ -68,11 +81,9 @@ class AdaBoostSVM:
 
             # require an error below 50% and avoid null errors
             if(errorOut < 0.49 and errorOut > 0.0):
-                #myGamma -= stepGamma
                 break
 
             myGamma -= stepGamma
-
 
         return myGamma, errorOut, y_pred, svcB
 
@@ -101,7 +112,7 @@ class AdaBoostSVM:
             # call svm, weight samples, iterate sigma(gamma), get errors, obtain predicted classifier (h as an array)
             gammaVar, error, h, learner = self.svc_train('rbf', gammaVar, gammaStep, X_train, Y_train, new_weights, count)
 
-            if(gammaVar<=0 or error<=0):# or learner == None or h == None):
+            if(gammaVar <= 0 or error <= 0):# or learner == None or h == None):
                 break
 
             # count how many times SVM runs
@@ -146,7 +157,6 @@ class AdaBoostSVM:
             if gammaVar <= gammaMin:#) or (gammaVar < 0):
                 break
 
-
         # h_list into array
         h_list = np.array(h_list)
 
@@ -157,7 +167,8 @@ class AdaBoostSVM:
         # start to calculate the final classifier
         h_alpha = np.array([h_list[i]*self.alphas[i] for i in range(count)])
 
-        final = ([]) # final classifier is an array (size of number of data points)
+        # final classifier is an array (size of number of data points)
+        final = ([])
         for j in range(len(h_alpha[0])):
             suma = 0.0
             for i in range(count):
@@ -183,7 +194,9 @@ class AdaBoostSVM:
         # Make predictions using already fitted model
         svm_preds = np.array([learner.predict(X) for learner in self.weak_svm])
         print(svm_preds.shape, 'Predict function')
+
         return np.sign(np.dot(self.alphas, svm_preds))
+
 
     def decision_thresholds(self, X):
         # function to threshold the svm decision, by varying the bias(intercept)
@@ -193,13 +206,20 @@ class AdaBoostSVM:
         thres_decision = []
         steps = np.linspace(-70,70,num=1001)
         decision = ([])
+
         for i in range(len(steps)):
-            decision = np.array([np.sign(svm_decisions[j] - svm_biases[j] + steps[i]*svm_biases[j]) for j in range(len(svm_biases))])
+            decision = np.array(
+                            [np.sign(
+                                    svm_decisions[j] - svm_biases[j] + steps[i]*svm_biases[j]) for j in range(len(svm_biases))
+                            ]
+                        )
+
             thres_decision.append(decision)
 
         thres_decision = np.array(thres_decision)
 
         final_threshold_decisions = []
+
         for i in range(len(steps)):
             final = np.sign(np.dot(self.alphas,thres_decision[i]))
             final_threshold_decisions.append(final)
@@ -241,18 +261,29 @@ class Div_AdaBoostSVM(AdaBoostSVM):
         return div
 
 
-    def svc_train(self, myKernel, myGamma, stepGamma, x_train, y_train, myWeights):
+    def svc_train(self, myKernel, myGamma, stepGamma, x_train, y_train, myWeights, count):
 
-        if self.count == 0:
+        if count == 0:
             myGamma = self.gammaIni
 
+        if myGamma <= 0:
+            return 0, 0, None, None
+
         while True:
-            if myGamma<0:
-                break
+            if myGamma <= 0:
+                return 0, 0, None, None
 
             errorOut = 0.0
 
-            svcB = SVC(C = self.C, kernel='rbf', gamma=1/(2*(myGamma**2)), shrinking = True, probability = True, tol = 0.001)
+            svcB = SVC(
+                    C=self.C,
+                    kernel='rbf',
+                    gamma=1/(2*(myGamma**2)),
+                    shrinking=True,
+                    probability=True,
+                    tol=0.001,
+                    cache_size=5000)
+
             svcB.fit(x_train, y_train, sample_weight=myWeights)
             y_pred = svcB.predict(x_train)
 
@@ -260,38 +291,24 @@ class Div_AdaBoostSVM(AdaBoostSVM):
                 if (y_train[i] != y_pred[i]):
                     errorOut += myWeights[i]
 
-            if self.count == 0:
+            if count == 0:
+
                 div = 0
                 Div_threshold = -1
                 Div_partial = 0
 
             else:
+
                 div = self.diversity(x_train, y_pred)
                 self.diversities = np.append(self.diversities, div)
                 Div_partial = np.sum(self.diversities)/(len(y_train) * len(self.diversities))
                 self.Div_total = np.append(self.Div_total, Div_partial)
                 Div_threshold = self.eta * np.max(self.Div_total)
 
-
-            #print(div/len(y_train), Div_partial, Div_threshold, len(self.diversities))
-
-            # require an error below 50%, diversity above threshold and avoid null errors
-            if errorOut < 0.5 and errorOut != 0 and Div_partial > Div_threshold:
-                #myGamma -= stepGamma
+            # require an error below 49%, diversity above threshold and avoid null errors
+            if errorOut < 0.49 and errorOut != 0 and Div_partial > Div_threshold:
                 break
 
             myGamma -= stepGamma
 
         return myGamma, errorOut, y_pred, svcB
-
-
-'''
-run main function for every dataset
-for item in sample_list:
-    main(item)
-to be pasted at the beginning of the svc_train function
-# check normalization
-check = 0.
-for i in range(len(myWeights,)):
-    check+=myWeights[i] #weights must add one, i.e. check=1.
-'''

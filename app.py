@@ -1,3 +1,12 @@
+
+'''
+---------------------------------------------------------------
+ visualization app on Dash
+ Author: Jorge Salmon-Gamboa
+ ---------------------------------------------------------------
+'''
+
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -56,9 +65,7 @@ app.layout =  html.Div(children = [
                     {'label': 'German', 'value': 'german'},
                     {'label': 'Heart', 'value': 'heart'},
                     {'label': 'Cancer', 'value': 'cancer'},
-                    {'label': 'Two norm', 'value': 'two_norm'},
                     {'label': 'Solar', 'value': 'solar'},
-                    {'label': 'Nursery', 'value': 'nursery'},
                     {'label': 'Contra', 'value': 'contra'}
                     ], style={'width': '920px'},
                 value='titanic'
