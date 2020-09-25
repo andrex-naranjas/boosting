@@ -70,11 +70,11 @@ du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
 
     elapsed_time.to_csv('output/' + sample +  '/' + 'AdaBoostSVM_time.csv', index=False)
     y_preda = model.predict(X_test)
-    y_thresholds = model.decision_thresholds(X_test)
+    y_thresholds = model.decision_thresholds(X_test, glob_dec='True')
     TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
 
-    dv.plot_roc_curve(TPR,FPR,sample,'real')
-    dv.plot_roc_curve(TPR,FPR,sample,'sorted')
+    dv.plot_roc_curve(TPR,FPR,sample,'real', glob_local='True')
+    dv.plot_roc_curve(TPR,FPR,sample,'sorted', glob_local='True')
     print('End adaboost')
 
     # comparison with other ml models (fit, predict and metrics)
