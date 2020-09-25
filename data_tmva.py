@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-#Code to improve SVM
-#authors: A. Ramirez-Morales and J. Salmon-Gamboa
+'''
+---------------------------------------------------------------
+ Code to improve SVM
+ Authors: A. Ramirez-Morales and J. Salmon-Gamboa
+ ---------------------------------------------------------------
+'''
 
 # tmva module
 

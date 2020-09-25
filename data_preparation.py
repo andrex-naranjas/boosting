@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-#Code to improve SVM
-#authors: A. Ramirez-Morales and J. Salmon-Gamboa
+'''
+---------------------------------------------------------------
+ Code to improve SVM
+ Authors: A. Ramirez-Morales and J. Salmon-Gamboa
+ ---------------------------------------------------------------
+'''
 
 #Data preparation module
 # python basics
@@ -14,6 +18,7 @@ import pandas as pd
 # uproot to import ROOT format data
 import uproot
 from sklearn.preprocessing import KBinsDiscretizer
+from sklearn.preprocessing import MinMaxScaler
 
 # machine learning
 from sklearn.model_selection import train_test_split
@@ -34,8 +39,6 @@ class data_preparation:
     def fetch_data(self, sample):
         if sample == 'titanic':
             data_set = pd.read_csv('./data/titanic.csv')
-        elif sample == 'two_norm':
-            data_set = pd.read_csv('./data/two_norm.csv')
         elif sample == 'cancer':
             data_set = pd.read_csv('./data/breast_cancer.csv')
         elif sample == 'german':
@@ -48,8 +51,6 @@ class data_preparation:
             data_set = pd.read_csv('./data/car.csv')
         elif sample == 'contra':
             data_set = pd.read_csv('./data/contra.csv')
-        elif sample == 'nursery':
-            data_set = pd.read_csv('./data/nursery.csv')
         elif sample == 'tac_toe':
             data_set = pd.read_csv('./data/tac_toe.csv')
         elif sample == 'belle2_i':
@@ -57,7 +58,7 @@ class data_preparation:
             data_set = file['combined'].pandas.df()
         elif sample == 'belle2_ii':
             file = uproot.open('./data/belle2_kpi.root')
-            data_set = file['combined'].pandas.df()           
+            data_set = file['combined'].pandas.df()
         else:
             sys.exit('The sample name provided does not exist. Try again!')
         return data_set
@@ -78,11 +79,9 @@ class data_preparation:
         # prepare data
         if sample == 'titanic':
             X,Y = self.titanic(data_set)
-        elif sample == 'two_norm':
-            X,Y = self.two_norm(data_set)
         elif sample == 'cancer':
             X,Y = self.bCancer(data_set)
-        elif sample == 'german':            
+        elif sample == 'german':
             X,Y = self.german(data_set)
         elif sample == 'heart':
             X,Y = self.heart(data_set)
@@ -92,14 +91,12 @@ class data_preparation:
             X,Y = self.car(data_set)
         elif sample == 'contra':
             X,Y = self.contra(data_set)
-        elif sample == 'nursery':
-            X,Y = self.nursery(data_set)
         elif sample == 'tac_toe':
             X,Y = self.tac_toe(data_set)
         elif sample == 'belle2_i' or sample == 'belle2_ii':
             X,Y = self.belle2(data_set, sampling, sample_name=sample)
-                
-                
+
+
         # print data after preparation
         print("After preparation shapes X and Y", X.shape, Y.shape)
         print(X.head())#, Y.head())
@@ -111,15 +108,15 @@ class data_preparation:
         print(X_test.shape, Y_test.shape)
 
         return X_train, Y_train, X_test, Y_test
-            
+
     # belle2 data preparation
     def belle2(self, data_set, sampling, sample_name):
-        
+
         # bin data?!?
         # Xin = data_set.drop("Class", axis=1)
         # est = KBinsDiscretizer(n_bins=20, encode='ordinal', strategy='uniform')
         # est.fit(Xin)
-        
+
         # XT = est.transform(Xin)
 
         # # Creating pandas dataframe from numpy array
@@ -130,15 +127,19 @@ class data_preparation:
 
         sampled_data = resample(data_set, replace = False, n_samples = 3500, random_state = 0)
         dv.plot_hist_frame(data_set,'full_'+sample_name)
-        dv.plot_hist_frame(sampled_data,'sampled_'+sample_name)        
+        dv.plot_hist_frame(sampled_data,'sampled_'+sample_name)
         X = sampled_data.drop("Class", axis=1)
         Y = sampled_data["Class"]
-                
+
         return X,Y
 
 
     #Titanic data preparation
     def titanic(self, data_set):
+
+        # column names list
+        cols = list(data_set.columns)
+
         data_set['Title'] = data_set.Name.str.extract('([A-Za-z]+)', expand=False)
         data_set = data_set.drop(['Name'], axis=1)
 
@@ -178,12 +179,23 @@ class data_preparation:
         data_set['Survived'] = data_set['Survived'].map(title_mapping)
         data_set['Survived'] = data_set['Survived'].fillna(0)
 
-        X = data_set.drop("Survived", axis=1)
         Y = data_set["Survived"]
+
+        # Data scaling [0,1]
+        data_set = pd.DataFrame(
+                                MinMaxScaler().fit_transform(data_set),
+                                columns = cols
+                                )
+
+        X = data_set.drop("Survived", axis=1)
         return X,Y
-        
+
     #Breast-cancer data preparation
     def bCancer(self, data_set):
+
+        # column names list
+        cols = list(data_set.columns)
+
         #change names
         title_mapping = {"no-recurrence-events": 1, "recurrence-events": -1}
         data_set['Class'] = data_set['Class'].map(title_mapping)
@@ -221,11 +233,17 @@ class data_preparation:
         data_set['irradiat'] = data_set['irradiat'].map(title_mapping)
         data_set['irradiat'] = data_set['irradiat'].fillna(0)
 
-        #return data_set #(for tmva preparation)        
-        X = data_set.drop("Class", axis=1)
         Y = data_set["Class"]
+
+        # Data scaling [0,1]
+        data_set = pd.DataFrame(
+                                MinMaxScaler().fit_transform(data_set),
+                                columns = cols
+                                )
+
+        X = data_set.drop("Class", axis=1)
         return X,Y
-        
+
     def two_norm(self, data_set):
         #These data are already well-formatted
 
@@ -233,14 +251,18 @@ class data_preparation:
         X = data_set.drop("Class", axis=1)
         Y = data_set["Class"]
         return X,Y
-    
+
 
     def german(self, data_set):
+
+        # column names list
+        cols = list(data_set.columns)
+
         #change names
         title_mapping = {1: 1, 2: -1}
         data_set['Class'] = data_set['Class'].map(title_mapping)
         data_set['Class'] = data_set['Class'].fillna(0)
-    
+
         title_mapping = {'A11': 0, 'A12': 1, 'A13': 2, 'A14': 3}
         data_set['Status'] = data_set['Status'].map(title_mapping)
         data_set['Status'] = data_set['Status'].fillna(0)
@@ -293,27 +315,43 @@ class data_preparation:
         data_set['Foreign'] = data_set['Foreign'].map(title_mapping)
         data_set['Foreign'] = data_set['Foreign'].fillna(0)
 
-        #return data_set #(for tmva prep)
+        Y = data_set["Class"]
+
+        # Data scaling [0,1]
+        data_set = pd.DataFrame(
+                                MinMaxScaler().fit_transform(data_set),
+                                columns = cols
+                                )
 
         X = data_set.drop("Class", axis=1)
-        Y = data_set["Class"]
 
         return X,Y
 
     # heart conditions data set
     def heart(self, data_set):
+
+        # column names list
+        cols = list(data_set.columns)
+
         #change names
         title_mapping = {0: 1, 1: -1, 2: -1, 3: -1, 4: -1}
         data_set['Class'] = data_set['Class'].map(title_mapping)
         data_set['Class'] = data_set['Class'].fillna(0)
 
-        #return data_set #(for tmva prep)
-        X = data_set.drop("Class", axis=1)
         Y = data_set["Class"]
+
+        # Data scaling [0,1]
+        data_set = pd.DataFrame(
+                                MinMaxScaler().fit_transform(data_set),
+                                columns = cols
+                                )
+
+        X = data_set.drop("Class", axis=1)
         return X,Y
 
-        
+
     def solar(self, data_set):
+
         #change names
         title_mapping = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'H': 6}
         data_set['Zurich'] = data_set['Zurich'].map(title_mapping)
@@ -361,13 +399,25 @@ class data_preparation:
         data_set.loc[(data_set['Class1'] != 0) | (data_set['Class2'] != 0) | (data_set['Class3'] != 0), 'Class'] = -1
         data_set = data_set.drop(['Class1', 'Class2', 'Class3' ], axis=1)
 
-        #return data_set #(for tmva prep)
-        X = data_set.drop("Class", axis=1)
+        # column names list
+        cols = list(data_set.columns)
+
         Y = data_set["Class"]
+
+        # Data scaling [0,1]
+        data_set = pd.DataFrame(
+                                MinMaxScaler().fit_transform(data_set),
+                                columns = cols
+                                )
+
+        X = data_set.drop("Class", axis=1)
         return X,Y
-    
+
 
     def car(self, data_set):
+
+        # column names list
+        cols = list(data_set.columns)
 
         title_mapping = {'vhigh': 0, 'high': 1, 'med': 2, 'low': 3}
         data_set['Buy'] = data_set['Buy'].map(title_mapping)
@@ -401,8 +451,15 @@ class data_preparation:
         data_set['Class'] = data_set['Class'].map(title_mapping)
         data_set['Class'] = data_set['Class'].fillna(0)
 
-        X = data_set.drop("Class", axis=1)
         Y = data_set["Class"]
+
+        # Data scaling [0,1]
+        data_set = pd.DataFrame(
+                                MinMaxScaler().fit_transform(data_set),
+                                columns = cols
+                                )
+
+        X = data_set.drop("Class", axis=1)
         return X,Y
 
 
@@ -443,14 +500,23 @@ class data_preparation:
 
         data_set = data_set.drop('Children',axis=1)
 
-        X = data_set.drop("Class", axis=1)
+        # column names list
+        cols = list(data_set.columns)
+
         Y = data_set["Class"]
-        
+
+        # Data scaling [0,1]
+        data_set = pd.DataFrame(
+                                MinMaxScaler().fit_transform(data_set),
+                                columns = cols
+                                )
+
+        X = data_set.drop("Class", axis=1)
         return X,Y
 
 
     def nursery(self, data_set):
-    
+
         title_mapping = {'usual': 0, 'pretentious': 1, 'great_pret': 2}
         data_set['Parents'] = data_set['Parents'].map(title_mapping)
         data_set['Parents'] = data_set['Parents'].fillna(0)
@@ -490,7 +556,7 @@ class data_preparation:
         X = data_set.drop("Class", axis=1)
         Y = data_set["Class"]
         return X,Y
-        
+
 
     def tac_toe(self, data_set):
 
@@ -533,8 +599,8 @@ class data_preparation:
         title_mapping = {'positive' : 1, 'negative' : -1}
         data_set['Class'] = data_set['Class'].map(title_mapping)
         data_set['Class'] = data_set['Class'].fillna(0)
-        
-        
+
+
         X = data_set.drop("Class", axis=1)
         Y = data_set["Class"]
         return X,Y

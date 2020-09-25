@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# code to improve SVM
-# authors: A. Ramirez-Morales and J. Salmon-Gamboa
+'''
+---------------------------------------------------------------
+ Code to improve SVM
+ Authors: A. Ramirez-Morales and J. Salmon-Gamboa
+ ---------------------------------------------------------------
+'''
 
 # visualization module
 
@@ -20,7 +24,7 @@ def plot_frame(frame,name,xlabel,ylabel,yUserRange,ymin,ymax,sample):
 
     plt.plot(frame,label=sample)
     if yUserRange:
-        plt.ylim(ymin,ymax)    
+        plt.ylim(ymin,ymax)
     # plt.text(0.15, 0.9,'$\mu$={}, $\sigma$={}'.format(round(1.0,1), round(1.0,1)),
     #          ha='center', va='center', transform=ax.transAxes)
     plt.legend(frameon=False)
@@ -35,7 +39,7 @@ def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name):
 
     tick_x = [math.floor(sigmin),0,math.floor(sigmax)]
     tick_y = [math.floor(cmax),math.floor(cmax/2),math.floor(cmin)]
-    
+
     fig, ax = plt.subplots()
     im = ax.imshow(matrix)
 
@@ -71,23 +75,23 @@ def plot_hist_frame(frame, sample_name):
             xlow, xhigh, xlabel = 0,8.0,'$p(D^0) [GeV/$c$]$'
         if(var[i]=='p0_p'):
             xlow, xhigh, xlabel = 0,4.5,'$p(\pi^0) [GeV/$c$]$'
-        
+
         fig, ax = plt.subplots(figsize=(8,5))
         h = ax.hist(frame[var[i]][frame.Class==1],
                     bins=100, range=(xlow,xhigh),
                     histtype='stepfilled', lw=1,
                     label="Signal", edgecolor='black')
-        
+
         h = ax.hist(frame[var[i]][frame.Class==-1],
                     bins=100, range=(xlow,xhigh),
                     histtype='step', lw=2,
                     label="Background")
-        ax.legend(loc="best")        
+        ax.legend(loc="best")
         ax.set_xlabel(xlabel, fontsize=16)
-        #ax.grid()        
+        #ax.grid()
         ax.set_xlim(xlow,xhigh)
         fig.tight_layout()
-        
+
         plt.savefig('./plots/mva_'+var[i]+'_'+sample_name+'.pdf')
         plt.close()
 
@@ -96,7 +100,7 @@ def plot_roc_curve(TPR,FPR,sample,real,glob_local):
     if(real=='sorted'):
         TPR = np.sort(TPR,axis=None)
         FPR = np.sort(FPR,axis=None)
-        
+
     area = auc(FPR,TPR)
     plt.figure()
     lw = 2
@@ -104,10 +108,12 @@ def plot_roc_curve(TPR,FPR,sample,real,glob_local):
              lw=lw, label='ROC curve (area = %0.2f)'  % area, linestyle="-", marker="o")
     plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
     plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])    
+    plt.ylim([0.0, 1.05])
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
     plt.title('ROC curve -' + sample)
     plt.legend(loc="lower right")
     plt.savefig('./plots/roc_curve_'+sample+'_'+real+'_'+glob_local+'.png')
+    output = pd.DataFrame({'False positive rate': FPR,'True positive rate': TPR, 'Area': area})
+    output.to_csv('output/' + sample +  '/' + 'BoostSVM_ROC.csv', index=False)
     plt.close()
