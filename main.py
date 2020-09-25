@@ -94,19 +94,19 @@ print(f'Test error: {test_err:.1%}')
 
 # # precision plot
 # dv.plot_frame(pd.DataFrame(precision*100,np.arange(precision.shape[0])),
-#                            'Classifier precision', 'Classifier', 'training precision (%)', True, 0, 100,'contra')
+#                            'Classifier precision', 'Classifier', 'training precision (%)', True, 0, 100,'belle2_i')
 # # errors plot
 # dv.plot_frame(pd.DataFrame(errors*100,np.arange(errors.shape[0])),
-#                            'Classifier error', 'Classifier', 'training error (%)', True, 0, 100,'contra')
+#                            'Classifier error', 'Classifier', 'training error (%)', True, 0, 100,'belle2_i')
 
 # # weights plot
 # dv.plot_frame(pd.DataFrame(weights[10],np.arange(weights.shape[1])),
-#                            'Sample weights', 'Sample', 'weights (a.u.)', True, -0.005, 0.01,'contra')
+#                            'Sample weights', 'Sample', 'weights (a.u.)', True, -0.005, 0.01,'belle2_i')    
 
 # # grid hyper parameter 2D-plots
 # matrix = du.grid_param_gauss(X_train, Y_train, X_test, Y_test, sigmin=-5, sigmax=5, cmin=0, cmax=6)
-# dv.plot_2dmap(matrix,-5,5,0,6,'contra')
-
+# dv.plot_2dmap(matrix,-5,5,0,6,'belle2_i')
+        
 # # boostrap error VS number of classiffiers calculation
-# frame = du.error_number('contra',myC=50,myGammaIni=10)
-# dv.plot_frame(frame, 'Classifiers error', 'No. Classifiers', 'test error', False, 0, 50,'contra')
+# frame = du.error_number('belle2_i',myC=50,myGammaIni=10)
+# dv.plot_frame(frame, 'Classifiers error', 'No. Classifiers', 'test error', False, 0, 50,'belle2_i')
