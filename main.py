@@ -61,7 +61,7 @@ du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
 
     # run AdaBoost support vector machine
     print('AdaBoost')
-    model = AdaBoostSVM(C=50, gammaIni=10)
+    model = AdaBoostSVM(C=50, gammaIni=100)
 
     start = datetime.datetime.now()
     model.fit(X_train, Y_train)
