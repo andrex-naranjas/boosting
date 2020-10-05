@@ -95,7 +95,7 @@ class AdaBoostSVM:
         n = X.shape[0]
         weights= np.ones(n)/n
 
-        gammaMin, gammaStep, gammaVar = 1.0, 0.5, 0.0
+        gammaMin, gammaStep, gammaVar = 1.0, 0.1, 0.0
         cost, count, norm = 1, 0, 0.0
         h_list = []
 

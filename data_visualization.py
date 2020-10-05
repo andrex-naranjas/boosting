@@ -101,6 +101,9 @@ def plot_roc_curve(TPR,FPR,sample,real,glob_local):
         TPR = np.sort(TPR,axis=None)
         FPR = np.sort(FPR,axis=None)
 
+    if glob_local: glob_local='global'
+    else:          glob_local='local'
+
     area = auc(FPR,TPR)
     plt.figure()
     lw = 2
