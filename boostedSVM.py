@@ -95,7 +95,7 @@ class AdaBoostSVM:
         n = X.shape[0]
         weights= np.ones(n)/n
 
-        gammaMin, gammaStep, gammaVar = 1.0, 0.1, 0.0
+        gammaMin, gammaStep, gammaVar = 1.0, 0.5, 0.0
         cost, count, norm = 1, 0, 0.0
         h_list = []
 
@@ -225,7 +225,7 @@ class AdaBoostSVM:
             decision = np.dot(self.alphas,decision)
 
             for i in range(len(steps)):
-                decision_temp = np.array([np.sign(decision[j] + steps[i] ) for j in range(len(svm_biases))]) #*svm_biases[j]
+                decision_temp = np.array([np.sign(decision[j] + steps[i] ) for j in range(len(decision))]) #*svm_biases[j]
                 thres_decision.append(decision_temp)
                         
             return np.array(thres_decision)
