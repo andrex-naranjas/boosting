@@ -255,12 +255,12 @@ class Div_AdaBoostSVM(AdaBoostSVM):
     diversities = ([])
     Div_total = ([])
 
-    def diversity(self, X, y):
+    def diversity(self, x_train, y_pred):
 
         div = 0
-        ensemble_pred = self.predict(X)
-        for i in range(len(y)):
-            div += 1 if (y[i] != ensemble_pred[i]) else 0
+        ensemble_pred = self.predict(x_train)
+        for i in range(len(y_pred)):
+            div += 1 if (y_pred[i] != ensemble_pred[i]) else 0
 
         return div
 
