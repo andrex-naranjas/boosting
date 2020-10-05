@@ -203,7 +203,7 @@ class AdaBoostSVM:
 
         thres_decision = []
 
-        steps = np.linspace(-5,5,num=101)
+        steps = np.linspace(-10,10,num=1001)
         decision,decision_temp = ([]),([])
 
         if not glob_dec: # threshold each individual classifier
@@ -255,12 +255,12 @@ class Div_AdaBoostSVM(AdaBoostSVM):
     diversities = ([])
     Div_total = ([])
 
-    def diversity(self, X, y):
+    def diversity(self, x_train, y_pred):
 
         div = 0
-        ensemble_pred = self.predict(X)
-        for i in range(len(y)):
-            div += 1 if (y[i] != ensemble_pred[i]) else 0
+        ensemble_pred = self.predict(x_train)
+        for i in range(len(y_pred)):
+            div += 1 if (y_pred[i] != ensemble_pred[i]) else 0
 
         return div
 
@@ -327,4 +327,3 @@ check = 0.
 for i in range(len(myWeights,)):
     check+=myWeights[i] #weights must add one, i.e. check=1.
 '''
-
