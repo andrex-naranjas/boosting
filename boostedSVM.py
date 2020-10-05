@@ -203,7 +203,7 @@ class AdaBoostSVM:
 
         thres_decision = []
 
-        steps = np.linspace(-50,50,num=1001)
+        steps = np.linspace(-5,5,num=101)
         decision,decision_temp = ([]),([])
 
         if not glob_dec: # threshold each individual classifier
