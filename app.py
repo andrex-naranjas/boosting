@@ -29,8 +29,7 @@ def generate_table(dataframe, max_rows=10):
 
 def load_report(dataset):
     dataframe = pd.read_csv('output/'+ str(dataset) +'/metrics_report.csv')
-    AB_time = pd.read_csv('output/' + str(dataset) + '/AdaBoostSVM_time.csv')
-    return dataframe, AB_time
+    return dataframe
 
 def load_dataset_ROC(dataset):
     # load dataframes for ROC plot analysis
@@ -40,9 +39,10 @@ def load_dataset_ROC(dataset):
     Ranroc = pd.read_csv('output/' + str(dataset) + '/Ranroc.csv')
     SVCroc = pd.read_csv('output/' + str(dataset) + '/SVCroc.csv')
     KNNroc = pd.read_csv('output/' + str(dataset) + '/KNeroc.csv')
-    AB_SVMroc = pd.read_csv('output/' + str(dataset) + '/BoostSVM_ROC.csv')
+    AB_SVMroc = pd.read_csv('output/' + str(dataset) + '/AB-SVM.csv')
+    DivAB_SVM = pd.read_csv('output/' + str(dataset) + '/DivAB-SVM.csv')
 
-    return Adaroc, Graroc, MLProc, Ranroc, SVCroc, AB_SVMroc, KNNroc
+    return Adaroc, Graroc, MLProc, Ranroc, SVCroc, KNNroc, AB_SVMroc, DivAB_SVM
 
 
 app.layout =  html.Div(children = [
@@ -66,7 +66,8 @@ app.layout =  html.Div(children = [
                     {'label': 'Heart', 'value': 'heart'},
                     {'label': 'Cancer', 'value': 'cancer'},
                     {'label': 'Solar', 'value': 'solar'},
-                    {'label': 'Contra', 'value': 'contra'}
+                    {'label': 'Contra', 'value': 'contra'},
+                    {'label': 'Belle 2 i', 'value': 'belle2_i'}
                     ], style={'width': '920px'},
                 value='titanic'
             ),
@@ -74,37 +75,24 @@ app.layout =  html.Div(children = [
     ]),
 
 
-    html.Div(id = 'plot_layout', style = {'padding' : '30px', 'text-align' : 'center'}, children = [
+    html.Div(id = 'plot_layout', style = {'padding' : '30px', 'text-align' : 'center'},
+                children = [
         html.Div(style={'padding' : '10px',
                         'box-shadow': '3px 3px 3px grey',
                         'backgroundColor': '#ffffff',
                         'border-radius': '5px'}, children = [
-            html.H3('Receiver Operating Characteristic (ROC) curve'),
+            html.H3('Roc curves'),
             dcc.Graph(
                 id = 'ROC_plot',
                 style={'display': 'none'})
-            ]
+            ]),
+    ]),
 
-        ),
+    html.Div(id = 'table'),
 
-        html.Div(id = 'table', style={'padding' : '10px',
-                        'box-shadow': '3px 3px 3px grey',
-                        'backgroundColor': '#ffffff',
-                        'border-radius': '5px'
-                        }, children =[
-            html.H3('Output metrics'),
-        ]),
-    ], className="row"),
-
-    html.Div(html.A(
-            'Click here to see the repository on Github.',
-            href='https://github.com/andrex-naranjas/boosting',
-            style={
-                'textAlign': 'center',
-                'color': '#3399ff',
-                }
-            ),
-        )
+    html.Div(html.A('Click here to see the repository on Github.', href='https://github.com/andrex-naranjas/boosting',
+                style={'textAlign': 'center','color': '#3399ff'})
+             )
 
 ])
 
@@ -121,8 +109,8 @@ def update_output(value):
 
 # This updates plot and table when selecting a different dataset
 def update_plot(value):
-    report, AB_time = load_report(value)
-    Adaroc, Graroc, MLProc, Ranroc, SVCroc, AB_SVMroc, KNNroc = load_dataset_ROC(value)
+    report = load_report(value)
+    Adaroc, Graroc, MLProc, Ranroc, SVCroc, KNNroc, AB_SVMroc, DivAB_SVM = load_dataset_ROC(value)
 
     # x axis data
     Adaroc_x = Adaroc.iloc[:,0]
@@ -132,6 +120,7 @@ def update_plot(value):
     SVCroc_x = SVCroc.iloc[:,0]
     KNNroc_x = KNNroc.iloc[:,0]
     AB_SVMroc_x = AB_SVMroc.iloc[:,0]
+    DivAB_SVM_x = DivAB_SVM.iloc[:,0]
 
     # y axis data
     Adaroc_y = Adaroc.iloc[:,1]
@@ -141,6 +130,7 @@ def update_plot(value):
     SVCroc_y = SVCroc.iloc[:,1]
     KNNroc_y = KNNroc.iloc[:,1]
     AB_SVMroc_y = AB_SVMroc.iloc[:,1]
+    DivAB_SVM_y = DivAB_SVM.iloc[:,1]
 
     # The function returns Dash divs
     return [
@@ -156,8 +146,11 @@ def update_plot(value):
                 figure = {
                 'data':[
 
-                {'x':AB_SVMroc_x, 'y':AB_SVMroc_y, 'type': 'scatter','line': {'color': '#636efa', 'dash': 'dashdot'},
-                'mode': 'lines+markers', 'name':'AB-SVM'+f'(AUC={AB_SVMroc.iloc[1,2]:.4f})'},
+                {'x':AB_SVMroc_x, 'y':AB_SVMroc_y, 'type': 'scatter','line': {'color': 'black', 'dash': 'dashdot'},
+                'mode': 'lines+markers', 'name':'<b>AB-SVM</b>'+f'(AUC={AB_SVMroc.iloc[1,2]:.4f})'},
+
+                {'x':DivAB_SVM_x, 'y':DivAB_SVM_y, 'type': 'scatter','line': {'color': '#636efa', 'dash': 'dashdot'},
+                'mode': 'lines+markers', 'name':'<b>DivAB-SVM</b>'+f'(AUC={DivAB_SVM.iloc[1,2]:.4f})'},
 
                 {'x':Adaroc_x, 'y':Adaroc_y, 'type': 'line', 'name':'AdaBoost'+f'(AUC={Adaroc.iloc[1,2]/100:.4f})'},
                 {'x':Graroc_x, 'y':Graroc_y, 'type': 'line', 'name':'XGBoost'+f'(AUC={Graroc.iloc[1,2]/100:.4f})'},
@@ -166,7 +159,7 @@ def update_plot(value):
                 {'x':KNNroc_x, 'y':KNNroc_y, 'type': 'line', 'name':'KNN'+f'(AUC={KNNroc.iloc[1,2]/100:.4f})'},
                 {'x':SVCroc_x, 'y':SVCroc_y, 'type': 'line', 'name':'SVC'+f'(AUC={SVCroc.iloc[1,2]/100:.4f})'},
                 ],
-                'layout': {'title': 'Elapsed time (fitting): '+ str(AB_time.iloc[0,0]),
+                'layout': {
                 #'height': '620px',
                 #'width' : '2000px',
                 'xaxis' : {'title': "False positive rate"},
@@ -185,8 +178,6 @@ def update_plot(value):
             generate_table(report)
         ])
     ]
-
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)

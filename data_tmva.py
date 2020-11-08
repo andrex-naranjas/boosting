@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 
 '''
----------------------------------------------------------------
- Code to improve SVM
- Authors: A. Ramirez-Morales and J. Salmon-Gamboa
- ---------------------------------------------------------------
-'''
+---------------------------------------------------------
+Code to improve Adaptive Boosted Support Vector Machines
+Authors: A. Ramirez-Morales and J. Salmon-Gamboa
 
-# tmva module
+TMVA module
+---------------------------------------------------------
+'''
 
 from root_pandas import to_root
 

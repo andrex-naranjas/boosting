@@ -2,16 +2,15 @@
 # -*- coding: utf-8 -*-
 
 '''
----------------------------------------------------------------
- Code to improve SVM
- Authors: A. Ramirez-Morales and J. Salmon-Gamboa
- ---------------------------------------------------------------
+---------------------------------------------------------
+Code to improve Adaptive Boosted Support Vector Machines
+Authors: A. Ramirez-Morales and J. Salmon-Gamboa
+
+AdaBoost Algorithm module
+---------------------------------------------------------
 '''
 
-# python basics
 import sys
-
-# data analysis and wrangling
 import numpy as np
 
 # machine learning
@@ -20,6 +19,45 @@ from sklearn.svm import SVC, LinearSVC
 # AdaBoost class
 
 class AdaBoostSVM:
+    '''
+    Adaptive Boosting with Support Vector Machines as base classifiers
+
+    ...
+
+    Attributes
+    ----------
+
+    C : float or int
+        Hyperparameter from Support Vector Machines definition of Kernel
+
+    gammaIni : float
+        Initial value for Gamma, hyperparameter from Support Vector Machines definition of Kernel
+
+
+    Methods
+    -------
+
+    _check_X_y()
+        Validate assumptions about format of input data. Expecting response variable to be formatted as ±1
+
+    svc_train()
+        Trains SVM classifiers to include in the ensebmle
+
+    fit()
+        Fits the Adaptive Boosted SVM model to training data
+
+    predict()
+        Make predictions with the fitted model
+
+    decision_thresholds()
+        Function to threshold the SVM decision, by varying the bias (intercept)
+
+    number_class()
+        Gives the number of different classifiers??? - ANDRES
+
+    get_metrics()
+        Returns weights, errors and precisions from the ensemble
+    '''
 
     def __init__(self, C, gammaIni):
 
@@ -34,7 +72,6 @@ class AdaBoostSVM:
 
     def _check_X_y(self, X, y):
 
-        # Validate assumptions about format of input data. Expecting response variable to be formatted as ±1
         assert set(y) == {-1, 1}
 
         # If input data already is numpy array, do nothing
@@ -95,7 +132,7 @@ class AdaBoostSVM:
         n = X.shape[0]
         weights= np.ones(n)/n
 
-        gammaMin, gammaStep, gammaVar = 1.0, 0.5, 0.0
+        gammaMin, gammaStep, gammaVar = 1.0, 0.1, 0.0
         cost, count, norm = 1, 0, 0.0
         h_list = []
 
@@ -123,8 +160,8 @@ class AdaBoostSVM:
             for i in range(n):
                 if(Y_train[i]!=h[i]): fp+=1
                 else:                 tp+=1
-        
-        
+
+
             # store the predicted classes
             h_temp = h.tolist()
             h_list.append(h_temp)
@@ -189,15 +226,13 @@ class AdaBoostSVM:
 
 
     def predict(self, X):
-        # Make predictions using already fitted model
         svm_preds = np.array([learner.predict(X) for learner in self.weak_svm])
         print(svm_preds.shape, 'Predict function')
 
         return np.sign(np.dot(self.alphas, svm_preds))
 
-    
+
     def decision_thresholds(self, X, glob_dec):
-        # function to threshold the svm decision, by varying the bias(intercept)
         svm_decisions = np.array([learner.decision_function(X) for learner in self.weak_svm])
         svm_biases    = np.array([learner.intercept_ for learner in self.weak_svm])
 
@@ -210,16 +245,16 @@ class AdaBoostSVM:
             for i in range(len(steps)):
                 decision = np.array([np.sign(svm_decisions[j] - svm_biases[j] + steps[i]*svm_biases[j]) for j in range(len(svm_biases))])
                 thres_decision.append(decision)
-                
+
             thres_decision = np.array(thres_decision)
-            
+
             final_threshold_decisions = []
             for i in range(len(steps)):
                 final = np.sign(np.dot(self.alphas,thres_decision[i]))
                 final_threshold_decisions.append(final)
-            
+
             return np.array(final_threshold_decisions)
-        
+
         elif glob_dec: # glob_dec == true threshold the global final classifier
             decision = np.array([svm_decisions[j] + svm_biases[j] for j in range(len(svm_biases))])
             decision = np.dot(self.alphas,decision)
@@ -227,9 +262,9 @@ class AdaBoostSVM:
             for i in range(len(steps)):
                 decision_temp = np.array([np.sign(decision[j] + steps[i] ) for j in range(len(decision))]) #*svm_biases[j]
                 thres_decision.append(decision_temp)
-                        
+
             return np.array(thres_decision)
-            
+
     # different number of classifiers
     def number_class(self, X):
 
@@ -245,10 +280,31 @@ class AdaBoostSVM:
 
     def get_metrics(self):
         return np.array(self.weights_list), self.errors, self.precision
-      
+
 
 # Diverse AdaBoostSVM
 class Div_AdaBoostSVM(AdaBoostSVM):
+    '''
+    Adaptive Boosting with Support Vector Machines as base classifiers and ensemble pruning based on diversity
+
+    ...
+
+    Attributes
+    ----------
+
+    eta : float
+        Constant inherent to diversity threshold
+
+
+    Methods
+    -------
+
+    diversity()
+        Returns the value of diversity of a base learner
+
+    svc_train()
+        Trains the SVM classifiers, with diversity-based pruning, to include in the ensemble
+    '''
 
     # Diversity threshold-constant and empty list
     eta = 0.74
@@ -322,7 +378,7 @@ run main function for every dataset
 for item in sample_list:
     main(item)
 to be pasted at the beginning of the svc_train function
-# check normalization 
+# check normalization
 check = 0.
 for i in range(len(myWeights,)):
     check+=myWeights[i] #weights must add one, i.e. check=1.

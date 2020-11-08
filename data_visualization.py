@@ -2,19 +2,20 @@
 # -*- coding: utf-8 -*-
 
 '''
----------------------------------------------------------------
- Code to improve SVM
- Authors: A. Ramirez-Morales and J. Salmon-Gamboa
- ---------------------------------------------------------------
+---------------------------------------------------------
+Code to improve Adaptive Boosted Support Vector Machines
+Authors: A. Ramirez-Morales and J. Salmon-Gamboa
+
+Visualization module
+--------------------------------------------------------
 '''
 
-# visualization module
-
 import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import norm
 import pandas as pd
 import math as math
+
+import matplotlib.pyplot as plt
+from scipy.stats import norm
 from sklearn.metrics import auc
 
 # frame plots
@@ -95,7 +96,7 @@ def plot_hist_frame(frame, sample_name):
         plt.savefig('./plots/mva_'+var[i]+'_'+sample_name+'.pdf')
         plt.close()
 
-def plot_roc_curve(TPR,FPR,sample,real,glob_local):
+def plot_roc_curve(model,TPR,FPR,sample,real,glob_local):
 
     if(real=='sorted'):
         TPR = np.sort(TPR,axis=None)
@@ -118,5 +119,5 @@ def plot_roc_curve(TPR,FPR,sample,real,glob_local):
     plt.legend(loc="lower right")
     plt.savefig('./plots/roc_curve_'+sample+'_'+real+'_'+glob_local+'.png')
     output = pd.DataFrame({'False positive rate': FPR,'True positive rate': TPR, 'Area': area})
-    output.to_csv('output/' + sample +  '/' + 'BoostSVM_ROC.csv', index=False)
+    output.to_csv('output/' + sample +  '/' + f'{model}.csv', index=False)
     plt.close()

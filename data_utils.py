@@ -2,38 +2,35 @@
 # -*- coding: utf-8 -*-
 
 '''
----------------------------------------------------------------
- Code to improve SVM
- Authors: A. Ramirez-Morales and J. Salmon-Gamboa
- ---------------------------------------------------------------
+---------------------------------------------------------
+Code to improve Adaptive Boosted Support Vector Machines
+Authors: A. Ramirez-Morales and J. Salmon-Gamboa
+
+Utilities module
+---------------------------------------------------------
 '''
 
 import os
-
-# visualization
-import seaborn as sns
-import matplotlib.pyplot as plt
 import pandas as pd
-
-#metrics: some functions to measure the quality of the predictions
-from sklearn.model_selection import cross_val_score
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve, auc
-from sklearn.model_selection import KFold
-
 import numpy as np
 import math as math
 
+#metrics: some functions to measure the quality of the predictions
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve
+from sklearn.model_selection import KFold
+
 # import class for data preparation
 from data_preparation import data_preparation
-
-# import boostedSVM class
-from boostedSVM import AdaBoostSVM
 
 # machine learning
 from sklearn.svm import SVC, LinearSVC
 
 # bootstrap
 from sklearn.utils import resample
+
+# import boostedSVM class
+from boostedSVM import AdaBoostSVM, Div_AdaBoostSVM
 
 # makes a directory for each dataset
 def make_directories(sample_list):
@@ -43,13 +40,14 @@ def make_directories(sample_list):
         except FileExistsError:
             pass
 
+
 def cv_scores(model, x,y):
     scores = cross_val_score(model, x, y, cv=5)
     print("Cross-validation score: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
     return ["%0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2)]
 
 
-# Makeshift metric for predictors
+# cross validated metrics
 def cv_metrics(model, X, y):
 
     X = X.values
@@ -68,15 +66,15 @@ def cv_metrics(model, X, y):
         model.fit(X_train, y_train)
         y_predicted = model.predict(X_test)
 
-        acc = accuracy_score(y_test, y_predicted)
-        prec = precision_score(y_test, y_predicted)
+        acc    = accuracy_score(y_test, y_predicted)
+        prec   = precision_score(y_test, y_predicted)
         recall = recall_score(y_test, y_predicted)
-        f1 = f1_score(y_test, y_predicted)
+        f1     = f1_score(y_test, y_predicted)
 
-        acc_scores = np.append(acc_scores, acc)
-        prec_scores = np.append(prec_scores, prec)
+        acc_scores    = np.append(acc_scores, acc)
+        prec_scores   = np.append(prec_scores, prec)
         recall_scores = np.append(recall_scores, recall)
-        f1_scores = np.append(f1_scores, f1)
+        f1_scores     = np.append(f1_scores, f1)
 
     print("Cross-validation Accuracy Score: %0.2f (+/- %0.2f)" % (acc_scores.mean(), acc_scores.std() * 2))
     print("Cross-validation Precision Score: %0.2f (+/- %0.2f)" % (prec_scores.mean(), prec_scores.std() * 2))
@@ -98,22 +96,24 @@ def generate_report(y_val, y_pred, verbose):
 
     return [acc, prec, recall, f1]
 
-def generate_auc_roc_curve(sample, model, X_val, Y_test, name):
+
+def generate_auc_roc_curve(sample, model, X_val, Y_test):
     Y_pred_prob = model.predict_proba(X_val)[:, 1]
     fpr, tpr, thresholds = roc_curve(Y_test, Y_pred_prob)
     auc = round(roc_auc_score(Y_test, Y_pred_prob) *100 ,2)
     string_model= str(model)
-    #plt.plot(fpr, tpr, label = 'AUC ROC ' + string_model[:3] + '=' + str(auc))
-    #plt.legend(loc = 4)
-    #plt.savefig(name+'.pdf')
     output = pd.DataFrame({'False positive rate': fpr,'True positive rate': tpr, 'Area': auc})
     output.to_csv('output/' + sample +  '/' + string_model[:3] + 'roc.csv', index=False)
     return
 
+
 def metrics(sample, name, method, X_train, Y_train, Y_test, X_test, Y_pred):
-    generate_auc_roc_curve(sample, method, X_test,Y_test, name)
-    print('\n '+name+': ')
-    return cv_scores(method, X_train, Y_train) + generate_report(Y_test, Y_pred, verbose=True)
+    if name == 'AB-SVM' or name == 'DivAB-SVM':
+        return generate_report(Y_test, Y_pred, verbose=True)
+    else:
+        generate_auc_roc_curve(sample, method, X_test,Y_test)
+        print('\n '+name+': ')
+        return generate_report(Y_test, Y_pred, verbose=True)
 
 
 # function to get average errors via bootstrap, for 1-n classifiers
@@ -177,7 +177,7 @@ def grid_param_gauss(train_x, train_y, test_x, test_y, sigmin, sigmax, cmin, cma
     for i in range(len(log_step_c)): # C loop
         errors = ([])
         for j in range(len(log_step_sigma)): # sigma loop
-            svc = SVC(C= log_step_c[i], kernel='rbf', gamma=1/(2*((log_step_sigma[j])**2)), shrinking = True, probability = True, tol = 0.001)
+            svc = SVC(C=log_step_c[i], kernel='rbf', gamma=1/(2*((log_step_sigma[j])**2)), shrinking = True, probability = True, tol = 0.001)
             svc.fit(train_x, train_y)
             pred_y = svc.predict(test_x)
             acc, prec, recall, f1 = generate_report(test_y, pred_y, verbose=False)
@@ -195,7 +195,7 @@ def roc_curve_adaboost(Y_thresholds, Y_test):
     TPR_list, FPR_list = [], []
     for i in range(Y_thresholds.shape[0]):
         tp,fn,tn,fp=0,0,0,0
-        for j in range(Y_thresholds.shape[1]):             
+        for j in range(Y_thresholds.shape[1]):
             if(Y_test[j] == 1  and Y_thresholds[i][j] ==  1):  tp+=1
             if(Y_test[j] == 1  and Y_thresholds[i][j] == -1):  fn+=1
             if(Y_test[j] == -1 and Y_thresholds[i][j] == -1):  tn+=1

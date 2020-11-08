@@ -2,17 +2,15 @@
 # -*- coding: utf-8 -*-
 
 '''
----------------------------------------------------------------
- Code to improve SVM
- Authors: A. Ramirez-Morales and J. Salmon-Gamboa
- ---------------------------------------------------------------
+---------------------------------------------------------
+Code to improve Adaptive Boosted Support Vector Machines
+Authors: A. Ramirez-Morales and J. Salmon-Gamboa
+
+Data preparation Module
+---------------------------------------------------------
 '''
 
-#Data preparation module
-# python basics
 import sys
-
-# data analysis and wrangling
 import pandas as pd
 
 # uproot to import ROOT format data
@@ -31,6 +29,7 @@ import data_visualization as dv
 
 
 class data_preparation:
+    '''Read datasets and prepare them for model fitting'''
 
     def __init__(self):
         dummy = 0
