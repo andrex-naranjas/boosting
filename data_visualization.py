@@ -95,7 +95,7 @@ def plot_hist_frame(frame, sample_name):
         plt.savefig('./plots/mva_'+var[i]+'_'+sample_name+'.pdf')
         plt.close()
 
-def plot_roc_curve(TPR,FPR,sample,real,glob_local):
+def plot_roc_curve(TPR,FPR,sample,real,glob_local,name):
 
     if(real=='sorted'):
         TPR = np.sort(TPR,axis=None)
@@ -116,7 +116,7 @@ def plot_roc_curve(TPR,FPR,sample,real,glob_local):
     plt.ylabel('True Positive Rate')
     plt.title('ROC curve -' + sample)
     plt.legend(loc="lower right")
-    plt.savefig('./plots/roc_curve_'+sample+'_'+real+'_'+glob_local+'.png')
+    plt.savefig('./plots/roc_curve_'+sample+'_'+real+'_'+glob_local+'_'+name+'.png')
     output = pd.DataFrame({'False positive rate': FPR,'True positive rate': TPR, 'Area': area})
     output.to_csv('output/' + sample +  '/' + 'BoostSVM_ROC.csv', index=False)
     plt.close()

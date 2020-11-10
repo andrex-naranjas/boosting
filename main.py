@@ -40,11 +40,15 @@ import data_visualization as dv
 sample_list = ['titanic', 'cancer', 'german', 'heart', 'solar','car','contra','tac_toe', 'belle2_i', 'belle2_ii']
 du.make_directories(sample_list)
 
+# kernel selection
+kernel_list = ['linear', 'poly', 'rbf', 'sigmoid']
+myKernel = 'rbf'
 
 # get the data
 data = data_preparation()
 
 sample_list = ['titanic', 'cancer', 'german', 'heart', 'solar','car','contra','tac_toe']
+sample_list = ['cancer']
 
 # initialise loop running over datasets in sample_list for AdaBoostSVM and the other classifiers. Generates ROC curves and metrics
 for sample in sample_list:
@@ -61,10 +65,11 @@ du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
 
     # run AdaBoost support vector machine
     print('AdaBoost')
-    model = AdaBoostSVM(C=50, gammaIni=100)
+    model = AdaBoostSVM(C=50, gammaIni=100, myKernel=myKernel)
 
     start = datetime.datetime.now()
     model.fit(X_train, Y_train)
+    print(len(model.alphas), "DAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLLIIIIIIIIIIIIIIIIIIIIIIi")
     end = datetime.datetime.now()
     elapsed_time = pd.DataFrame({'Elapsed time': [end - start]})
 
@@ -74,10 +79,25 @@ du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
     y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
     TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
 
-    dv.plot_roc_curve(TPR,FPR,sample,'real',   glob_local=True)
-    dv.plot_roc_curve(TPR,FPR,sample,'sorted', glob_local=True)
+    dv.plot_roc_curve(TPR,FPR,sample,'real',   glob_local=True, name='nom')
+    dv.plot_roc_curve(TPR,FPR,sample,'sorted', glob_local=True, name='nom')
     print('End adaboost')
 
+    # # run AdaBoost Diversity support vector machine
+    print("DIVERSE!!!!!!!!!!!!!!!!")
+    model_a = AdaBoostSVM(C=50, gammaIni=100, myKernel=myKernel, Diversity=True)
+    model_a.fit(X_train, Y_train)
+    print(len(model_a.alphas), "DAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLLIIIIIIIIIIIIIIIIIIIIIIi")
+    y_preda_a = model_a.predict(X_test)
+    print('Analysing sample: ',sample)
+    y_thresholds_a = model_a.decision_thresholds(X_test, glob_dec=True)
+    TPR_a, FPR_a = du.roc_curve_adaboost(y_thresholds_a, Y_test)
+
+    dv.plot_roc_curve(TPR_a,FPR_a,sample,'real',   glob_local=True, name='div')
+    dv.plot_roc_curve(TPR_a,FPR_a,sample,'sorted', glob_local=True, name='div')
+    print('End adaboost')
+
+    
     # comparison with other ml models (fit, predict and metrics)
     mc.comparison(sample, X_train, Y_train, Y_test, X_test)
     #du.cv_metrics(model, X_train, Y_train)
