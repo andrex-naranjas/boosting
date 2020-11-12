@@ -29,7 +29,7 @@ import data_utils as du
 import model_comparison as mc
 
 # AdaBoost class
-from boostedSVM import AdaBoostSVM, Div_AdaBoostSVM
+from boostedSVM import AdaBoostSVM
 
 # data visualization module
 import data_visualization as dv
@@ -48,7 +48,7 @@ myKernel = 'rbf'
 data = data_preparation()
 
 sample_list = ['titanic', 'cancer', 'german', 'heart', 'solar','car','contra','tac_toe']
-sample_list = ['cancer']
+sample_list = ['titanic']
 
 # initialise loop running over datasets in sample_list for AdaBoostSVM and the other classifiers. Generates ROC curves and metrics
 for sample in sample_list:
@@ -92,6 +92,8 @@ du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
     print('Analysing sample: ',sample)
     y_thresholds_a = model_a.decision_thresholds(X_test, glob_dec=True)
     TPR_a, FPR_a = du.roc_curve_adaboost(y_thresholds_a, Y_test)
+
+    print(model_a.diversities)
 
     dv.plot_roc_curve(TPR_a,FPR_a,sample,'real',   glob_local=True, name='div')
     dv.plot_roc_curve(TPR_a,FPR_a,sample,'sorted', glob_local=True, name='div')

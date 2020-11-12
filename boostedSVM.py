@@ -33,38 +33,38 @@ class AdaBoostSVM:
         self.precision = ([])
         # Diversity threshold-constant and empty list
         self.div_flag = Diversity
-        self.eta = 0.999
+        self.eta = 0.1
         self.diversities = ([])
         self.Div_total = ([])
-        self.Div_threshold = ([])
         self.Div_partial = ([])
+        
     
-    def diversity(self, x_train, y_pred):
+    def diversity(self, x_train, y_pred, count):
+        if count==1: return len(y_pred) # for first selected classifer, set max diversity
         div = 0
-        ensemble_pred = self.predict(x_train)
+        ensemble_pred = self.predict(x_train) # uses the already selected classifiers in ensemble
         for i in range(len(y_pred)):
             if  (y_pred[i] != ensemble_pred[i]):  div += 1
             elif(y_pred[i] == ensemble_pred[i]):  div += 0                        
         return div
     
 
-    def pass_diversity(self, flag_div, val_div, y_pred, count):
+    def pass_diversity(self, flag_div, val_div, count, pass_error):
+        threshold_div = 0
+        if not flag_div:   return True, threshold_div
+        if not pass_error: return True, threshold_div        
+        if not count != 0: return True, threshold_div
 
-        if not flag_div: return True
-        
-        if count == 0: return True
-        else:
+        if(len(self.diversities)==0):
             self.diversities = np.append(self.diversities, val_div)
-            self.Div_partial = np.sum(self.diversities)/(len(y_pred) * len(self.diversities))                
-            self.Div_total = np.append(self.Div_total, self.Div_partial)
-            self.Div_threshold = self.eta * np.max(self.Div_total)
-            
-        # if(self.Div_threshold > 0 and self.Div_partial > 0):
-        if(count!=0):
-            print("Local value: ", val_div, len(y_pred), self.Div_partial, self.Div_threshold, count, "Diversity check", self.Div_partial > self.Div_threshold)#, "ratio: ", self.Div_partial/self.Div_threshold)
-
-        return self.Div_partial > self.Div_threshold
-            
+        
+        threshold_div = self.eta * np.max(self.diversities)
+        
+        if val_div >= threshold_div:
+            self.diversities = np.append(self.diversities, val_div)                
+            return True, threshold_div
+        else:
+            return False, threshold_div
             
     
     def _check_X_y(self, X, y):
@@ -92,7 +92,7 @@ class AdaBoostSVM:
             if myGamma <= 0: return 0, 0, None, None
 
             errorOut = 0.0
-
+            
             svcB = SVC(C=self.C,
                     kernel=self.myKernel,
                     degree=3,
@@ -106,21 +106,24 @@ class AdaBoostSVM:
 
             svcB.fit(x_train, y_train, sample_weight=myWeights)
             y_pred = svcB.predict(x_train)
-
-            # Diverse_AdaBoost, if Diversity=False, all classifiers are added
-            div_pass = True
-            if flag_div:
-                div_pass = self.pass_diversity(flag_div, value_div, y_pred, count)
-                
-            div_pass = True
-                
+                                        
             # error calculation
             for i in range(len(y_pred)):
                 if (y_train[i] != y_pred[i]):
                     errorOut += myWeights[i]
 
+
+            error_pass = errorOut < 0.49 and errorOut > 0.0
+
+            # Diverse_AdaBoost, if Diversity=False, diversity plays no role in classifier selection
+            div_pass,tres = self.pass_diversity(flag_div, value_div, count, error_pass)
+            # if(error_pass and not div_pass): value_div = self.diversity(x_train, y_pred, count)
+                    
+            print("error flag:", error_pass, "   div flag:", div_pass, "   div value:", value_div,  "   Threshold:",tres, "   no. data:", len(y_pred),
+                  "   count:", count, "   error:", errorOut, "   gamma:", myGamma, "   size of divsersities:", len(self.diversities))
+            
             # require an error below 50%, avoid null errors and diversity requirement
-            if(errorOut < 0.49 and errorOut > 0.0 and div_pass):
+            if(error_pass and div_pass):
                 #myGamma -= stepGamma
                 break
 
@@ -151,6 +154,7 @@ class AdaBoostSVM:
             new_weights = new_weights/norm
 
             self.weights_list.append(new_weights)
+            print("**************************************************************************************************************************************************")
 
             # call svm, weight samples, iterate sigma(gamma), get errors, obtain predicted classifier (h as an array)
             gammaVar, error, h, learner = self.svc_train(gammaVar, gammaStep, X_train, Y_train, new_weights, count, div_flag, div_value)
@@ -158,7 +162,7 @@ class AdaBoostSVM:
             if(gammaVar <= 0 or error <= 0):# or learner == None or h == None):
                 break
 
-            # count how many times SVM runs
+            # count how many times SVM we add the ensemble
             count += 1
 
             # calculate training precision
@@ -176,17 +180,16 @@ class AdaBoostSVM:
             self.errors = np.append(self.errors, [error])
             # store precision
             self.precision = np.append(self.precision, [tp / (tp + fp)])
-
+            
+            # calculate diversity
+            div_value = self.diversity(X_train, h, count) # cf. h == y_pred
+        
             # classifier weights (alpha), obtain and store
             x = (1 - error)/error
             alpha = 0.5 * np.log(x)
             self.alphas   = np.append(self.alphas, alpha)
             self.weak_svm = np.append(self.weak_svm, learner)
-
-            # calculate diversity
-            div_value = self.diversity(X_train, h) # c.f. h == y_pred
-            print(div_value, 'nominal diversity', len(h))            
-
+            
             # reset weight lists
             weights = new_weights.copy()
             new_weights = ([])
@@ -236,7 +239,7 @@ class AdaBoostSVM:
 
     def predict(self, X):
         # Make predictions using already fitted model
-        # print(len(self.alphas), len(self.weak_svm), "how many alphas we have")
+        print(len(self.alphas), len(self.weak_svm), "how many alphas we have")
         svm_preds = np.array([learner.predict(X) for learner in self.weak_svm])
         return np.sign(np.dot(self.alphas, svm_preds))
 
@@ -297,3 +300,21 @@ check = 0.
 for i in range(len(myWeights,)):
     check+=myWeights[i] #weights must add one, i.e. check=1.
 '''
+
+
+    # def pass_diversity(self, flag_div, val_div, y_pred, count):
+
+    #     if not flag_div: return True
+        
+    #     if count == 0: return True
+    #     else:
+    #         self.diversities = np.append(self.diversities, val_div)
+    #         self.Div_partial = np.sum(self.diversities)/(len(y_pred) * len(self.diversities))                
+    #         self.Div_total = np.append(self.Div_total, self.Div_partial)
+    #         self.Div_threshold = self.eta * np.max(self.Div_total)
+            
+    #     # # if(self.Div_threshold > 0 and self.Div_partial > 0):
+    #     # if(count!=0):
+    #     #     print("Local value: ", val_div, len(y_pred), self.Div_partial, self.Div_threshold, count, "Diversity check", self.Div_partial > self.Div_threshold)#, "ratio: ", self.Div_partial/self.Div_threshold)
+
+    #     return self.Div_partial > self.Div_threshold
