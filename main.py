@@ -52,16 +52,7 @@ sample_list = ['titanic']
 
 # initialise loop running over datasets in sample_list for AdaBoostSVM and the other classifiers. Generates ROC curves and metrics
 for sample in sample_list:
-    X_train, Y_train, X_test, Y_test = data.dataset(sample,'',False,0.4)
-
-    '''
-# run single support vector machine
-weights= np.ones(len(Y_train))/len(Y_train)
-svc = SVC(C=150.0, kernel='rbf', gamma=1/(2*(10**2)), shrinking = True, probability = True, tol = 0.001)
-svc.fit(X_train, Y_train, weights)
-Y_pred = svc.predict(X_test)
-du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
-    '''
+    X_train, Y_train, X_test, Y_test = data.dataset(sample,'',sampling=False,split_sample=0.4)
 
     # run AdaBoost support vector machine
     print('AdaBoost')
@@ -69,7 +60,6 @@ du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
 
     start = datetime.datetime.now()
     model.fit(X_train, Y_train)
-    print(len(model.alphas), "DAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLLIIIIIIIIIIIIIIIIIIIIIIi")
     end = datetime.datetime.now()
     elapsed_time = pd.DataFrame({'Elapsed time': [end - start]})
 
@@ -79,29 +69,29 @@ du.metrics(sample,'svm', svc, X_train, Y_train, Y_test, X_test, Y_pred)
     y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
     TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
 
-    dv.plot_roc_curve(TPR,FPR,sample,'real',   glob_local=True, name='nom')
-    dv.plot_roc_curve(TPR,FPR,sample,'sorted', glob_local=True, name='nom')
+    # dv.plot_roc_curve(TPR,FPR,sample,'real',   glob_local=True, name='nom')
+    dv.plot_roc_curve(TPR,FPR,sample,'sorted', glob_local=True, name='nom', kernel=myKernel)
     print('End adaboost')
 
     # # run AdaBoost Diversity support vector machine
-    print("DIVERSE!!!!!!!!!!!!!!!!")
-    model_a = AdaBoostSVM(C=50, gammaIni=100, myKernel=myKernel, Diversity=True)
-    model_a.fit(X_train, Y_train)
-    print(len(model_a.alphas), "DAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLLIIIIIIIIIIIIIIIIIIIIIIi")
-    y_preda_a = model_a.predict(X_test)
-    print('Analysing sample: ',sample)
-    y_thresholds_a = model_a.decision_thresholds(X_test, glob_dec=True)
-    TPR_a, FPR_a = du.roc_curve_adaboost(y_thresholds_a, Y_test)
+    # print("DIVERSE!!!!!!!!!!!!!!!!")
+    # model_a = AdaBoostSVM(C=50, gammaIni=100, myKernel=myKernel, Diversity=True)
+    # model_a.fit(X_train, Y_train)
+    # print(len(model_a.alphas), "DAAAAAAAAAAAAAAAAAAAAAALLLLLLLLLLLLIIIIIIIIIIIIIIIIIIIIIIi")
+    # y_preda_a = model_a.predict(X_test)
+    # print('Analysing sample: ',sample)
+    # y_thresholds_a = model_a.decision_thresholds(X_test, glob_dec=True)
+    # TPR_a, FPR_a = du.roc_curve_adaboost(y_thresholds_a, Y_test)
 
-    print(model_a.diversities)
+    # print(model_a.diversities)
 
-    dv.plot_roc_curve(TPR_a,FPR_a,sample,'real',   glob_local=True, name='div')
-    dv.plot_roc_curve(TPR_a,FPR_a,sample,'sorted', glob_local=True, name='div')
-    print('End adaboost')
+    # # dv.plot_roc_curve(TPR_a,FPR_a,sample,'real',   glob_local=True, name='div')
+    # dv.plot_roc_curve(TPR_a,FPR_a,sample,'sorted', glob_local=True, name='div', kernel=myKernel)
+    # print('End adaboost')
 
     
     # comparison with other ml models (fit, predict and metrics)
-    mc.comparison(sample, X_train, Y_train, Y_test, X_test)
+    # mc.comparison(sample, X_train, Y_train, Y_test, X_test)
     #du.cv_metrics(model, X_train, Y_train)
 
 
@@ -122,9 +112,9 @@ print(f'Test error: {test_err:.1%}')
 # dv.plot_frame(pd.DataFrame(errors*100,np.arange(errors.shape[0])),
 #                            'Classifier error', 'Classifier', 'training error (%)', True, 0, 100,'belle2_i')
 
-# # weights plot
+# weights plot
 # dv.plot_frame(pd.DataFrame(weights[10],np.arange(weights.shape[1])),
-#                            'Sample weights', 'Sample', 'weights (a.u.)', True, -0.005, 0.01,'belle2_i')    
+#                           'Sample weights', 'Sample', 'weights (a.u.)', True, -0.005, 0.01,'belle2_i')    
 
 # # grid hyper parameter 2D-plots
 # matrix = du.grid_param_gauss(X_train, Y_train, X_test, Y_test, sigmin=-5, sigmax=5, cmin=0, cmax=6)

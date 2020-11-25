@@ -33,54 +33,11 @@ class AdaBoostSVM:
         self.precision = ([])
         # Diversity threshold-constant and empty list
         self.div_flag = Diversity
-        self.eta = 0.1
+        self.eta = 0.5
         self.diversities = ([])
         self.Div_total = ([])
         self.Div_partial = ([])
-        
-    
-    def diversity(self, x_train, y_pred, count):
-        if count==1: return len(y_pred) # for first selected classifer, set max diversity
-        div = 0
-        ensemble_pred = self.predict(x_train) # uses the already selected classifiers in ensemble
-        for i in range(len(y_pred)):
-            if  (y_pred[i] != ensemble_pred[i]):  div += 1
-            elif(y_pred[i] == ensemble_pred[i]):  div += 0                        
-        return div
-    
-
-    def pass_diversity(self, flag_div, val_div, count, pass_error):
-        threshold_div = 0
-        if not flag_div:   return True, threshold_div
-        if not pass_error: return True, threshold_div        
-        if not count != 0: return True, threshold_div
-
-        if(len(self.diversities)==0):
-            self.diversities = np.append(self.diversities, val_div)
-        
-        threshold_div = self.eta * np.max(self.diversities)
-        
-        if val_div >= threshold_div:
-            self.diversities = np.append(self.diversities, val_div)                
-            return True, threshold_div
-        else:
-            return False, threshold_div
-            
-    
-    def _check_X_y(self, X, y):
-
-        # Validate assumptions about format of input data. Expecting response variable to be formatted as ±1
-        assert set(y) == {-1, 1}
-
-        # If input data already is numpy array, do nothing
-        if type(X) == type(np.array([])) and type(y) == type(np.array([])):
-            return X, y
-        else:
-            # convert pandas into numpy arrays
-            X = X.values
-            y = y.values
-            return X, y
-        
+                                
 
     def svc_train(self, myGamma, stepGamma, x_train, y_train, myWeights, count, flag_div, value_div):
 
@@ -95,8 +52,8 @@ class AdaBoostSVM:
             
             svcB = SVC(C=self.C,
                     kernel=self.myKernel,
-                    degree=3,
-                    coef0=10,
+                    degree=1,
+                    coef0=1,
                     gamma=1/(2*(myGamma**2)),
                     shrinking=True,
                     probability=True,
@@ -113,7 +70,7 @@ class AdaBoostSVM:
                     errorOut += myWeights[i]
 
 
-            error_pass = errorOut < 0.49 and errorOut > 0.0
+            error_pass = errorOut < 0.49 and errorOut > 0.25
 
             # Diverse_AdaBoost, if Diversity=False, diversity plays no role in classifier selection
             div_pass,tres = self.pass_diversity(flag_div, value_div, count, error_pass)
@@ -135,8 +92,8 @@ class AdaBoostSVM:
     def fit(self, X, y):
 
         X_train, Y_train = self._check_X_y(X, y)
-        n = X.shape[0]
-        weights= np.ones(n)/n
+        n = X_train.shape[0]
+        weights = np.ones(n)/n
 
         div_flag = self.div_flag
         div_value = 0
@@ -239,10 +196,51 @@ class AdaBoostSVM:
 
     def predict(self, X):
         # Make predictions using already fitted model
-        print(len(self.alphas), len(self.weak_svm), "how many alphas we have")
+        # print(len(self.alphas), len(self.weak_svm), "how many alphas we have")
         svm_preds = np.array([learner.predict(X) for learner in self.weak_svm])
         return np.sign(np.dot(self.alphas, svm_preds))
+    
 
+    def diversity(self, x_train, y_pred, count):
+        if count==1: return len(y_pred) # for first selected classifer, set max diversity
+        div = 0
+        ensemble_pred = self.predict(x_train) # uses the already selected classifiers in ensemble
+        for i in range(len(y_pred)):
+            if  (y_pred[i] != ensemble_pred[i]):  div += 1
+            elif(y_pred[i] == ensemble_pred[i]):  div += 0                        
+        return div
+    
+
+    def pass_diversity(self, flag_div, val_div, count, pass_error):
+        threshold_div = 0
+        if not flag_div:   return True, threshold_div
+        if not pass_error: return True, threshold_div        
+        if not count != 0: return True, threshold_div
+
+        if(len(self.diversities)==0):
+            self.diversities = np.append(self.diversities, val_div)
+        
+        threshold_div = self.eta * np.max(self.diversities)
+        
+        if val_div >= threshold_div:
+            self.diversities = np.append(self.diversities, val_div)                
+            return True, threshold_div
+        else:
+            return False, threshold_div
+
+
+    def _check_X_y(self, X, y):
+        # Validate assumptions about format of input data. Expecting response variable to be formatted as ±1
+        assert set(y) == {-1, 1}
+        # If input data already is numpy array, do nothing
+        if type(X) == type(np.array([])) and type(y) == type(np.array([])):
+            return X, y
+        else:
+            # convert pandas into numpy arrays
+            X = X.values
+            y = y.values
+            return X, y
+        
     
     def decision_thresholds(self, X, glob_dec):
         # function to threshold the svm decision, by varying the bias(intercept)

@@ -135,7 +135,7 @@ def error_number(sample_name, myC, myGammaIni):
         X_train, Y_train, X_test, Y_test = data.dataset(sample_name,sampled_data,sampling=True,split_sample=0.4)
 
         # run AdaBoostSVM (train the model)
-        model = AdaBoostSVM(C = myC, gammaIni = myGammaIni)
+        model = AdaBoostSVM(C = myC, gammaIni = myGammaIni, myKernel='rbf')
         model.fit(X_train, Y_train)
 
         # compute test samples

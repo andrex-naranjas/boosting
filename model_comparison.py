@@ -22,7 +22,7 @@ from sklearn.svm import SVC
 import data_utils as du
 import pandas as pd
 import datetime
-
+import numpy as np
 
 # perform the ml algos and generate report (fit , predict and metrics)
 def comparison(sample, X_train, Y_train, Y_test, X_test):
@@ -32,6 +32,18 @@ def comparison(sample, X_train, Y_train, Y_test, X_test):
     # creating the dataframe containing the output metrics
     metrics_list = ['Cross Validation', 'Accuracy', 'Precision', 'Recall', 'F1 Score']
     metrics_df = pd.DataFrame({'Metric': metrics_list})
+
+    # support vector machine (single case)
+    weights= np.ones(len(Y_train))/len(Y_train)
+    svc = SVC(C=150.0, kernel='rbf', gamma=1/(2*(10**2)), shrinking = True, probability = True, tol = 0.001)
+    start = datetime.datetime.now()
+    svc.fit(X_train, Y_train, weights)
+    end = datetime.datetime.now()
+    times_list.append(end - start)
+    Y_pred = svc.predict(X_test)
+    temp_list = du.metrics(sample, 'SVC', svc, X_train, Y_train, Y_test, X_test, Y_pred)
+    temp_df = pd.DataFrame({'SVC': temp_list})
+    metrics_df = pd.concat([metrics_df, temp_df], axis = 1)
 
     # RANDOM forest classifier
     random_forest = RandomForestClassifier(n_estimators=100)
@@ -56,7 +68,7 @@ def comparison(sample, X_train, Y_train, Y_test, X_test):
     metrics_df = pd.concat([metrics_df, temp_df], axis = 1)
 
     # Neural Network Multi Layer Perceptron classifier
-    NeuralNet = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
+    NeuralNet = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(2, 2), random_state=1)
     start = datetime.datetime.now()
     NeuralNet.fit(X_train, Y_train)
     end = datetime.datetime.now()
@@ -75,17 +87,6 @@ def comparison(sample, X_train, Y_train, Y_test, X_test):
     Y_pred=model_GBC.predict(X_test)
     temp_list = du.metrics(sample, 'XGBoost', model_GBC, X_train, Y_train, Y_test, X_test, Y_pred)
     temp_df = pd.DataFrame({'XGBoost': temp_list})
-    metrics_df = pd.concat([metrics_df, temp_df], axis = 1)
-
-    # support vector machine
-    svc = SVC(gamma='auto', probability = True)
-    start = datetime.datetime.now()
-    svc.fit(X_train, Y_train)
-    end = datetime.datetime.now()
-    times_list.append(end - start)
-    Y_pred = svc.predict(X_test)
-    temp_list = du.metrics(sample, 'SVC', svc, X_train, Y_train, Y_test, X_test, Y_pred)
-    temp_df = pd.DataFrame({'SVC': temp_list})
     metrics_df = pd.concat([metrics_df, temp_df], axis = 1)
 
     # K neighbors classifier. n_neighbors=3 because there are 2 classes

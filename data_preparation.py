@@ -112,25 +112,27 @@ class data_preparation:
     # belle2 data preparation
     def belle2(self, data_set, sampling, sample_name):
 
-        # bin data?!?
-        # Xin = data_set.drop("Class", axis=1)
-        # est = KBinsDiscretizer(n_bins=20, encode='ordinal', strategy='uniform')
-        # est.fit(Xin)
-
-        # XT = est.transform(Xin)
-
-        # # Creating pandas dataframe from numpy array
-        # X = pd.DataFrame({'D0_m': XT[:, 0], 'D0_p': XT[:, 1], 'p0_p': XT[:, 2]})
+        # column names list
+        cols = list(data_set.columns)
 
         if(sampling): # sampling was already carried, don't sample again!
-            return data_set.drop("Class", axis=1), data_set["Class"]
+            Y = data_set["Class"]
+            # Data scaling [0,1]
+            data_set = pd.DataFrame(MinMaxScaler().fit_transform(data_set),columns = cols)            
+            X = data_set.drop("Class", axis=1)            
+            return X,Y 
 
         sampled_data = resample(data_set, replace = False, n_samples = 3500, random_state = 0)
+
+        Y = sampled_data["Class"]
+        # Data scaling [0,1]
+        # sampled_data = pd.DataFrame(MinMaxScaler().fit_transform(sampled_data),columns = cols)
+
+        # plot variables for visualization (now only for HEP)
         dv.plot_hist_frame(data_set,'full_'+sample_name)
         dv.plot_hist_frame(sampled_data,'sampled_'+sample_name)
-        X = sampled_data.drop("Class", axis=1)
-        Y = sampled_data["Class"]
 
+        X = sampled_data.drop("Class", axis=1)        
         return X,Y
 
 
@@ -604,3 +606,14 @@ class data_preparation:
         X = data_set.drop("Class", axis=1)
         Y = data_set["Class"]
         return X,Y
+
+
+    # bin data?!?
+    # Xin = data_set.drop("Class", axis=1)
+    # est = KBinsDiscretizer(n_bins=20, encode='ordinal', strategy='uniform')
+    # est.fit(Xin)
+    
+    # XT = est.transform(Xin)
+    
+    # # Creating pandas dataframe from numpy array
+    # X = pd.DataFrame({'D0_m': XT[:, 0], 'D0_p': XT[:, 1], 'p0_p': XT[:, 2]})
