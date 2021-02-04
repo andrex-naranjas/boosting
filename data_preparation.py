@@ -8,7 +8,7 @@
  ---------------------------------------------------------------
 '''
 
-#Data preparation module
+# data preparation module
 # python basics
 import sys
 
@@ -59,54 +59,63 @@ class data_preparation:
         elif sample == 'belle2_ii':
             file = uproot.open('./data/belle2_kpi.root')
             data_set = file['combined'].pandas.df()
+        elif sample == 'belle2_iii':
+            file_train = uproot.open('./data/train_D02k3pi.root')
+            data_train = file_train['d0tree'].pandas.df()
+            file_test  = uproot.open('./data/test_D02k3pi.root')
+            data_test  = file_train['d0tree'].pandas.df()
+            return data_train, data_test
         else:
             sys.exit('The sample name provided does not exist. Try again!')
         return data_set
 
     # call data
-    def dataset(self, sample, data_set, sampling, split_sample):
+    def dataset(self, sample_name='', data_set=None, data_train=None, data_test=None,
+                sampling=False, split_sample=0, train_test=False):
+        
+        # if sampling = True, sampling is done outside data_preparation,
+        # sample is fetched externally
 
-        # fetch data set (from available list)
-        if(sampling != True):
-            data_set = self.fetch_data(sample)
-            # check data
-            print("Before preparation", data_set.shape)
-            print(data_set.columns.values)
-            print(data_set.head())
-            print(data_set.tail())
-            print(data_set.describe())
-
+        # fetch data_set if NOT externally provided
+        if not sampling:
+            if not train_test:
+                data_set = self.fetch_data(sample_name)
+            else: # there is separte data samples for training and testing
+                data_train,data_test = self.fetch_data(sample_name)
+            
         # prepare data
-        if sample == 'titanic':
+        if sample_name == 'titanic':
             X,Y = self.titanic(data_set)
-        elif sample == 'cancer':
+        elif sample_name == 'cancer':
             X,Y = self.bCancer(data_set)
-        elif sample == 'german':
+        elif sample_name == 'german':
             X,Y = self.german(data_set)
-        elif sample == 'heart':
+        elif sample_name == 'heart':
             X,Y = self.heart(data_set)
-        elif sample == 'solar':
+        elif sample_name == 'solar':
             X,Y = self.solar(data_set)
-        elif sample == 'car':
+        elif sample_name == 'car':
             X,Y = self.car(data_set)
-        elif sample == 'contra':
+        elif sample_name == 'contra':
             X,Y = self.contra(data_set)
-        elif sample == 'tac_toe':
+        elif sample_name == 'tac_toe':
             X,Y = self.tac_toe(data_set)
-        elif sample == 'belle2_i' or sample == 'belle2_ii':
-            X,Y = self.belle2(data_set, sampling, sample_name=sample)
-
+        elif sample_name == 'belle2_i' or sample_name == 'belle2_ii':
+            X,Y = self.belle2(data_set, sampling, sample_name=sample_name)
+        elif sample_name == 'belle2_iii':
+            X_train, Y_train, X_test, Y_test = self.belle2_3pi(data_train, data_test, sampling, sample_name=sample_name)
 
         # print data after preparation
-        print("After preparation shapes X and Y", X.shape, Y.shape)
-        print(X.head())#, Y.head())
-        print(Y.head())#, Y.head())
-
+        print("After preparation shapes X and Y")#, X.shape, Y.shape)
+        if(sample_name!='belle2_iii'): print(X.head())#, Y.head())
+        if(sample_name!='belle2_iii'): print(Y.head())#, Y.head())
+        if(sample_name=='belle2_iii'): print(X_train.head())#, Y.head())
+        if(sample_name=='belle2_iii'): print(Y_train.head())#, Y.head())
+                                  
         # divide sample into train and test sample
-        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=split_sample)
-        print(X_train.shape, Y_train.shape)
-        print(X_test.shape, Y_test.shape)
-
+        if not train_test:
+            X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=split_sample)
+        
         return X_train, Y_train, X_test, Y_test
 
     # belle2 data preparation
@@ -118,7 +127,7 @@ class data_preparation:
         if(sampling): # sampling was already carried, don't sample again!
             Y = data_set["Class"]
             # Data scaling [0,1]
-            data_set = pd.DataFrame(MinMaxScaler().fit_transform(data_set),columns = cols)            
+            data_set = pd.DataFrame(MinMaxScaler().fit_transform(data_set),columns = cols)
             X = data_set.drop("Class", axis=1)            
             return X,Y 
 
@@ -132,8 +141,54 @@ class data_preparation:
         dv.plot_hist_frame(data_set,'full_'+sample_name)
         dv.plot_hist_frame(sampled_data,'sampled_'+sample_name)
 
-        X = sampled_data.drop("Class", axis=1)        
+        X = sampled_data.drop("Class", axis=1)
         return X,Y
+
+
+    # belle2 data preparation
+    def belle2_3pi(self, data_train, data_test, sampling, sample_name):
+
+        # change value labels
+        title_mapping = {0: -1, 1: 1}
+        data_train['isSignal'] = data_train['isSignal'].map(title_mapping)
+        data_train['isSignal'] = data_train['isSignal'].fillna(0)        
+        data_test['isSignal']  = data_test['isSignal'].map(title_mapping)
+        data_test['isSignal']  = data_test['isSignal'].fillna(0)
+
+        if(sampling): # sampling was already carried, don't sample again!
+            Y_train = data_train["isSignal"]
+            Y_test  = data_test["isSignal"]
+            # Data scaling [0,1]
+            cols = list(data_train.columns)        
+            data_train = pd.DataFrame(MinMaxScaler().fit_transform(data_train),columns = cols)
+            data_train = data_train.drop("M", axis=1)            
+
+            data_test  = pd.DataFrame(MinMaxScaler().fit_transform(data_test) ,columns = cols)
+            data_test  = data_test.drop("M", axis=1)
+            
+            X_test  = data_test.drop("isSignal", axis=1)
+            X_train = data_train.drop("isSignal", axis=1)
+            return X_train, Y_train, X_test, Y_test
+
+        sampled_data_train = resample(data_train, replace = True, n_samples = 1000, random_state=0)
+        sampled_data_test  = resample(data_test,  replace = False, n_samples = 10000, random_state=0)
+
+        Y_train = sampled_data_train["isSignal"]
+        Y_test  = sampled_data_test["isSignal"]
+
+        sampled_data_train = sampled_data_train.drop("M", axis=1)
+        sampled_data_test  = sampled_data_test.drop("M", axis=1)
+
+        # column names list
+        cols = list(sampled_data_train.columns)
+        
+        # data scaling [0,1]
+        sampled_data_train = pd.DataFrame(MinMaxScaler().fit_transform(sampled_data_train),columns = cols)
+        sampled_data_test  = pd.DataFrame(MinMaxScaler().fit_transform(sampled_data_test), columns = cols)
+        
+        X_train = sampled_data_train.drop("isSignal", axis=1)
+        X_test  = sampled_data_test.drop("isSignal", axis=1)
+        return X_train, Y_train, X_test, Y_test
 
 
     #Titanic data preparation
@@ -184,10 +239,7 @@ class data_preparation:
         Y = data_set["Survived"]
 
         # Data scaling [0,1]
-        data_set = pd.DataFrame(
-                                MinMaxScaler().fit_transform(data_set),
-                                columns = cols
-                                )
+        data_set = pd.DataFrame(MinMaxScaler().fit_transform(data_set), columns = cols)
 
         X = data_set.drop("Survived", axis=1)
         return X,Y
@@ -238,10 +290,7 @@ class data_preparation:
         Y = data_set["Class"]
 
         # Data scaling [0,1]
-        data_set = pd.DataFrame(
-                                MinMaxScaler().fit_transform(data_set),
-                                columns = cols
-                                )
+        data_set = pd.DataFrame(MinMaxScaler().fit_transform(data_set), columns = cols)
 
         X = data_set.drop("Class", axis=1)
         return X,Y

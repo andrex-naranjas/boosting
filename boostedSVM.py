@@ -70,14 +70,12 @@ class AdaBoostSVM:
                     errorOut += myWeights[i]
 
 
-            error_pass = errorOut < 0.49 and errorOut > 0.25
-
+            error_pass = errorOut < 0.49 and errorOut > 0.0
             # Diverse_AdaBoost, if Diversity=False, diversity plays no role in classifier selection
             div_pass,tres = self.pass_diversity(flag_div, value_div, count, error_pass)
-            if(error_pass and not div_pass): value_div = self.diversity(x_train, y_pred, count)
-                    
-            print("error flag:", error_pass, "   div flag:", div_pass, "   div value:", value_div,  "   Threshold:",tres, "   no. data:", len(y_pred),
-                  "   count:", count, "   error:", errorOut, "   gamma:", myGamma, "   size of divsersities:", len(self.diversities))
+            if(error_pass and not div_pass): value_div = self.diversity(x_train, y_pred, count)                    
+            print('error flag: %5s | div flag: %5s | div value: %5s | Threshold: %5s | no. data: %5s | count: %5s | error: %5.2f | gamma: %5.2f | diversities  %3s '
+                  %(error_pass, div_pass, value_div, tres, len(y_pred), count, errorOut, myGamma, len(self.diversities)))
             
             # require an error below 50%, avoid null errors and diversity requirement
             if(error_pass and div_pass):
@@ -98,7 +96,7 @@ class AdaBoostSVM:
         div_flag = self.div_flag
         div_value = 0
         
-        gammaMin, gammaStep, gammaVar = 1.0, 0.5, 0.0
+        gammaMin, gammaStep, gammaVar = 0.1, 0.1, 0.0
         cost, count, norm = 1, 0, 0.0
         h_list = []
 
@@ -111,7 +109,7 @@ class AdaBoostSVM:
             new_weights = new_weights/norm
 
             self.weights_list.append(new_weights)
-            print("**************************************************************************************************************************************************")
+            print("----------------------------------------------------------------------------------------------------------------------------------------------------------------")
 
             # call svm, weight samples, iterate sigma(gamma), get errors, obtain predicted classifier (h as an array)
             gammaVar, error, h, learner = self.svc_train(gammaVar, gammaStep, X_train, Y_train, new_weights, count, div_flag, div_value)
@@ -188,7 +186,7 @@ class AdaBoostSVM:
             else:                      final_tp+=1
 
         final_precision = final_tp / (final_fp + final_tp)
-        print("Final Precision: {} ".format( round(final_precision,4)) )
+        print("Final training precision: {} ".format( round(final_precision,4)) )
         #du.metrics(sample,'svmBoosted', svcB, X_train, Y_train, Y_test, X_test, Y_predB)
 
         return self
