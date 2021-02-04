@@ -117,25 +117,35 @@ def metrics(sample, name, method, X_train, Y_train, Y_test, X_test, Y_pred):
 
 
 # function to get average errors via bootstrap, for 1-n classifiers
-def error_number(sample_name, myC, myGammaIni):
+def error_number(sample_name, myC, myGammaIni, train_test):
     print('Start of error number')
 
     # fetch data_frame without preparation
     data_df   = data_preparation()
-    sample_df = data_df.fetch_data(sample_name)
-
+    if not train_test: sample_df = data_df.fetch_data(sample_name)
+    else: sample_train_df, sample_test_df = data_df.fetch_data(sample_name)
+        
     # prepare bootstrap sample
     total = []
     number = ([])
 
     for _ in range(100): # arbitrary number of samples to produce
-        sampled_data = resample(sample_df, replace = True, n_samples = 3500, random_state = 0)
-        data = data_preparation()
 
-        X_train, Y_train, X_test, Y_test = data.dataset(sample_name,sampled_data,sampling=True,split_sample=0.4)
+        data = data_preparation()
+        
+        if not train_test:
+            sampled_data = resample(sample_df, replace = True, n_samples = 100, random_state = 0)
+            X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, data_set=sampled_data,
+                                                            sampling=True, split_sample=0.4, train_test=True)
+        else:
+            sampled_data_train = resample(sample_train_df, replace = True, n_samples = 5000,  random_state = 0)
+            sampled_data_test  = resample(sample_test_df,  replace = True, n_samples = 10000, random_state = 0)
+            X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, data_set='',
+                                                            data_train=sampled_data_train, data_test = sampled_data_test,
+                                                            sampling=True, split_sample=0.4, train_test=True)
 
         # run AdaBoostSVM (train the model)
-        model = AdaBoostSVM(C = myC, gammaIni = myGammaIni)
+        model = AdaBoostSVM(C = myC, gammaIni = myGammaIni, myKernel='rbf')
         model.fit(X_train, Y_train)
 
         # compute test samples

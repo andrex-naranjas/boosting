@@ -21,66 +21,64 @@ from sklearn.svm import SVC, LinearSVC
 
 class AdaBoostSVM:
 
-    def __init__(self, C, gammaIni):
+    def __init__(self, C, gammaIni, myKernel, Diversity=False):
 
         self.C = C
         self.gammaIni = gammaIni
+        self.myKernel = myKernel
         self.weak_svm = ([])
         self.alphas = ([])
         self.weights_list = []
         self.errors    = ([])
         self.precision = ([])
+        # Diversity threshold-constant and empty list
+        self.div_flag = Diversity
+        self.eta = 0.5
+        self.diversities = ([])
+        self.Div_total = ([])
+        self.Div_partial = ([])
+                                
 
+    def svc_train(self, myGamma, stepGamma, x_train, y_train, myWeights, count, flag_div, value_div):
 
-    def _check_X_y(self, X, y):
+        if count == 0: myGamma = self.gammaIni
 
-        # Validate assumptions about format of input data. Expecting response variable to be formatted as ±1
-        assert set(y) == {-1, 1}
-
-        # If input data already is numpy array, do nothing
-        if type(X) == type(np.array([])) and type(y) == type(np.array([])):
-            return X, y
-        else:
-            # convert pandas into numpy arrays
-            X = X.values
-            y = y.values
-            return X, y
-
-
-    def svc_train(self, myKernel, myGamma, stepGamma, x_train, y_train, myWeights, count):
-
-        if count == 0:
-            myGamma = self.gammaIni
-
-        if myGamma <= 0:
-            return 0, 0, None, None
+        if myGamma <= 0:  return 0, 0, None, None
 
         while True:
-
-            if myGamma <= 0:
-                return 0, 0, None, None
+            if myGamma <= 0: return 0, 0, None, None
 
             errorOut = 0.0
-
-            svcB = SVC(
-                    C=self.C,
-                    kernel='rbf',
+            
+            svcB = SVC(C=self.C,
+                    kernel=self.myKernel,
+                    degree=1,
+                    coef0=1,
                     gamma=1/(2*(myGamma**2)),
                     shrinking=True,
                     probability=True,
                     tol=0.001,
-                    cache_size=5000
+                    cache_size=10000
                 )
 
             svcB.fit(x_train, y_train, sample_weight=myWeights)
             y_pred = svcB.predict(x_train)
-
+                                        
+            # error calculation
             for i in range(len(y_pred)):
                 if (y_train[i] != y_pred[i]):
                     errorOut += myWeights[i]
 
-            # require an error below 50% and avoid null errors
-            if(errorOut < 0.49 and errorOut > 0.0):
+
+            error_pass = errorOut < 0.49 and errorOut > 0.0
+            # Diverse_AdaBoost, if Diversity=False, diversity plays no role in classifier selection
+            div_pass,tres = self.pass_diversity(flag_div, value_div, count, error_pass)
+            if(error_pass and not div_pass): value_div = self.diversity(x_train, y_pred, count)                    
+            print('error flag: %5s | div flag: %5s | div value: %5s | Threshold: %5s | no. data: %5s | count: %5s | error: %5.2f | gamma: %5.2f | diversities  %3s '
+                  %(error_pass, div_pass, value_div, tres, len(y_pred), count, errorOut, myGamma, len(self.diversities)))
+            
+            # require an error below 50%, avoid null errors and diversity requirement
+            if(error_pass and div_pass):
                 #myGamma -= stepGamma
                 break
 
@@ -92,10 +90,13 @@ class AdaBoostSVM:
     def fit(self, X, y):
 
         X_train, Y_train = self._check_X_y(X, y)
-        n = X.shape[0]
-        weights= np.ones(n)/n
+        n = X_train.shape[0]
+        weights = np.ones(n)/n
 
-        gammaMin, gammaStep, gammaVar = 1.0, 0.5, 0.0
+        div_flag = self.div_flag
+        div_value = 0
+        
+        gammaMin, gammaStep, gammaVar = 0.1, 0.1, 0.0
         cost, count, norm = 1, 0, 0.0
         h_list = []
 
@@ -108,14 +109,15 @@ class AdaBoostSVM:
             new_weights = new_weights/norm
 
             self.weights_list.append(new_weights)
+            print("----------------------------------------------------------------------------------------------------------------------------------------------------------------")
 
             # call svm, weight samples, iterate sigma(gamma), get errors, obtain predicted classifier (h as an array)
-            gammaVar, error, h, learner = self.svc_train('rbf', gammaVar, gammaStep, X_train, Y_train, new_weights, count)
+            gammaVar, error, h, learner = self.svc_train(gammaVar, gammaStep, X_train, Y_train, new_weights, count, div_flag, div_value)
 
             if(gammaVar <= 0 or error <= 0):# or learner == None or h == None):
                 break
 
-            # count how many times SVM runs
+            # count how many times SVM we add the ensemble
             count += 1
 
             # calculate training precision
@@ -124,23 +126,25 @@ class AdaBoostSVM:
                 if(Y_train[i]!=h[i]): fp+=1
                 else:                 tp+=1
         
-        
             # store the predicted classes
             h_temp = h.tolist()
             h_list.append(h_temp)
 
-            print("Error: {} Precision: {} Gamma: {} ".format(round(error,4), round(tp / (tp + fp),4), round(gammaVar+gammaStep,2)))
+            # print("Error: {} Precision: {} Gamma: {} ".format(round(error,4), round(tp / (tp + fp),4), round(gammaVar+gammaStep,2)))
             # store errors
             self.errors = np.append(self.errors, [error])
             # store precision
             self.precision = np.append(self.precision, [tp / (tp + fp)])
-
+            
+            # calculate diversity
+            div_value = self.diversity(X_train, h, count) # cf. h == y_pred
+        
             # classifier weights (alpha), obtain and store
             x = (1 - error)/error
             alpha = 0.5 * np.log(x)
             self.alphas   = np.append(self.alphas, alpha)
             self.weak_svm = np.append(self.weak_svm, learner)
-
+            
             # reset weight lists
             weights = new_weights.copy()
             new_weights = ([])
@@ -182,7 +186,7 @@ class AdaBoostSVM:
             else:                      final_tp+=1
 
         final_precision = final_tp / (final_fp + final_tp)
-        print("Final Precision: {} ".format( round(final_precision,4)) )
+        print("Final training precision: {} ".format( round(final_precision,4)) )
         #du.metrics(sample,'svmBoosted', svcB, X_train, Y_train, Y_test, X_test, Y_predB)
 
         return self
@@ -190,11 +194,51 @@ class AdaBoostSVM:
 
     def predict(self, X):
         # Make predictions using already fitted model
+        # print(len(self.alphas), len(self.weak_svm), "how many alphas we have")
         svm_preds = np.array([learner.predict(X) for learner in self.weak_svm])
-        print(svm_preds.shape, 'Predict function')
-
         return np.sign(np.dot(self.alphas, svm_preds))
+    
 
+    def diversity(self, x_train, y_pred, count):
+        if count==1: return len(y_pred) # for first selected classifer, set max diversity
+        div = 0
+        ensemble_pred = self.predict(x_train) # uses the already selected classifiers in ensemble
+        for i in range(len(y_pred)):
+            if  (y_pred[i] != ensemble_pred[i]):  div += 1
+            elif(y_pred[i] == ensemble_pred[i]):  div += 0                        
+        return div
+    
+
+    def pass_diversity(self, flag_div, val_div, count, pass_error):
+        threshold_div = 0
+        if not flag_div:   return True, threshold_div
+        if not pass_error: return True, threshold_div        
+        if not count != 0: return True, threshold_div
+
+        if(len(self.diversities)==0):
+            self.diversities = np.append(self.diversities, val_div)
+        
+        threshold_div = self.eta * np.max(self.diversities)
+        
+        if val_div >= threshold_div:
+            self.diversities = np.append(self.diversities, val_div)                
+            return True, threshold_div
+        else:
+            return False, threshold_div
+
+
+    def _check_X_y(self, X, y):
+        # Validate assumptions about format of input data. Expecting response variable to be formatted as ±1
+        assert set(y) == {-1, 1}
+        # If input data already is numpy array, do nothing
+        if type(X) == type(np.array([])) and type(y) == type(np.array([])):
+            return X, y
+        else:
+            # convert pandas into numpy arrays
+            X = X.values
+            y = y.values
+            return X, y
+        
     
     def decision_thresholds(self, X, glob_dec):
         # function to threshold the svm decision, by varying the bias(intercept)
@@ -244,86 +288,29 @@ class AdaBoostSVM:
         return np.sign(number)
 
     def get_metrics(self):
-        return np.array(self.weights_list), self.errors, self.precision
-      
-
-# Diverse AdaBoostSVM
-class Div_AdaBoostSVM(AdaBoostSVM):
-
-    # Diversity threshold-constant and empty list
-    eta = 0.74
-    diversities = ([])
-    Div_total = ([])
-
-    def diversity(self, x_train, y_pred):
-
-        div = 0
-        ensemble_pred = self.predict(x_train)
-        for i in range(len(y_pred)):
-            div += 1 if (y_pred[i] != ensemble_pred[i]) else 0
-
-        return div
-
-
-    def svc_train(self, myKernel, myGamma, stepGamma, x_train, y_train, myWeights, count):
-
-        if count == 0:
-            myGamma = self.gammaIni
-
-        if myGamma <= 0:
-            return 0, 0, None, None
-
-        while True:
-            if myGamma <= 0:
-                return 0, 0, None, None
-
-            errorOut = 0.0
-
-            svcB = SVC(
-                    C=self.C,
-                    kernel='rbf',
-                    gamma=1/(2*(myGamma**2)),
-                    shrinking=True,
-                    probability=True,
-                    tol=0.001,
-                    cache_size=5000)
-
-            svcB.fit(x_train, y_train, sample_weight=myWeights)
-            y_pred = svcB.predict(x_train)
-
-            for i in range(len(y_pred)):
-                if (y_train[i] != y_pred[i]):
-                    errorOut += myWeights[i]
-
-            if count == 0:
-
-                div = 0
-                Div_threshold = -1
-                Div_partial = 0
-
-            else:
-
-                div = self.diversity(x_train, y_pred)
-                self.diversities = np.append(self.diversities, div)
-                Div_partial = np.sum(self.diversities)/(len(y_train) * len(self.diversities))
-                self.Div_total = np.append(self.Div_total, Div_partial)
-                Div_threshold = self.eta * np.max(self.Div_total)
-
-            # require an error below 49%, diversity above threshold and avoid null errors
-            if errorOut < 0.49 and errorOut != 0 and Div_partial > Div_threshold:
-                break
-
-            myGamma -= stepGamma
-
-        return myGamma, errorOut, y_pred, svcB
+        return np.array(self.weights_list), self.errors, self.precision      
 
 '''
-run main function for every dataset
-for item in sample_list:
-    main(item)
-to be pasted at the beginning of the svc_train function
 # check normalization 
 check = 0.
 for i in range(len(myWeights,)):
     check+=myWeights[i] #weights must add one, i.e. check=1.
 '''
+
+
+    # def pass_diversity(self, flag_div, val_div, y_pred, count):
+
+    #     if not flag_div: return True
+        
+    #     if count == 0: return True
+    #     else:
+    #         self.diversities = np.append(self.diversities, val_div)
+    #         self.Div_partial = np.sum(self.diversities)/(len(y_pred) * len(self.diversities))                
+    #         self.Div_total = np.append(self.Div_total, self.Div_partial)
+    #         self.Div_threshold = self.eta * np.max(self.Div_total)
+            
+    #     # # if(self.Div_threshold > 0 and self.Div_partial > 0):
+    #     # if(count!=0):
+    #     #     print("Local value: ", val_div, len(y_pred), self.Div_partial, self.Div_threshold, count, "Diversity check", self.Div_partial > self.Div_threshold)#, "ratio: ", self.Div_partial/self.Div_threshold)
+
+    #     return self.Div_partial > self.Div_threshold
