@@ -17,10 +17,10 @@ class model_performance:
 
     def __init__(self, model, X_train, Y_train, X_test, Y_test):
         self.model = model
-        self.X_train  = X_train
-        self.Y_train  = Y_train
-        self.X_test   = X_test
-        self.Y_test   = Y_test            
+        self.X_train = X_train
+        self.Y_train = Y_train
+        self.X_test  = X_test
+        self.Y_test  = Y_test            
         self.weights, self.errors, self.precision = model.get_metrics()
 
 
