@@ -27,36 +27,38 @@ from data_preparation import data_preparation
 # Genetic algorithm for training sub-dataset selection
 class genetic_selection:
 
-    def __init__(self, model, X_train, Y_train, X_test, Y_test, pop_size, chrom_len, n_gen, coef, mut_rate):
+  
+    def __init__(self, model, isAB_SVM, X_train, Y_train, X_test, Y_test, pop_size, chrom_len, n_gen, coef, mut_rate):
         self.model = model
+        self.AB_SVM = isAB_SVM
         self.X_train = X_train
         self.Y_train = Y_train
         self.X_test  = X_test
         self.Y_test  = Y_test
         self.population_size=pop_size
         self.chrom_len = chrom_len
-        self.n_generations = n_gen
+        self.n_generations = n_gen # maximum number of iterations
         self.coef = coef
         self.mutation_rate=mut_rate 
         
 
-    def execute(self):
-    
+    def execute(self): # run_genetic_algorithm(X_train, Y_train, population_size=5, chrom_len=100, n_generations=10, coef=0.5)
+        #execute(X, y, population_size=10, chrom_len=10, n_generations=20, coef=0.5, mutation_rate=0.3)
         best_chromo = np.array([])
         best_score  = np.array([])
     
-        next_generation_x, next_generation_y = self.initialize_population(X, y, size=population_size, chromosome_length=chrom_len)
+        next_generation_x, next_generation_y = self.initialize_population(self.X_train, self.Y_train,
+                                                                          self.population_size, self.chrom_len)
     
-    
-        for generation in tqdm(range(n_generations)):
+        for generation in tqdm(range(self.n_generations)):
             #print(np.unique(next_generation_y))
-            scores, popx, popy                   = fitness_score(next_generation_x, next_generation_y)
-            scores, popx, popy                   = set_population_size(scores, popx, popy, generation, size=population_size)
+            scores, popx, popy                   = self.fitness_score(next_generation_x, next_generation_y)
+            scores, popx, popy                   = self.set_population_size(scores, popx, popy, generation, self.population_size)
             # termination_criterion()
-            pa_x, pa_y, pb_x, pb_y               = selection(popx, popy, coef)
-            new_population_x , new_population_y  = crossover(pa_x, pa_y, pb_x, pb_y, num_children=population_size)
-            new_offspring_x, new_offspring_y     = mutation(new_population_x, new_population_y, mutation_rate=mutation_rate)
-            next_generation_x, next_generation_y = append_offspring(next_generation_x, next_generation_y, new_offspring_x, new_offspring_y)
+            pa_x, pa_y, pb_x, pb_y               = self.selection(popx, popy, self.coef)
+            new_population_x , new_population_y  = self.crossover(pa_x, pa_y, pb_x, pb_y, self.population_size)
+            new_offspring_x, new_offspring_y     = self.mutation(new_population_x, new_population_y, self.mutation_rate)
+            next_generation_x, next_generation_y = self.append_offspring(next_generation_x, next_generation_y, new_offspring_x, new_offspring_y)
     
             print(f"Best score achieved in generation {generation} is {scores[-1::]}")
         return None
@@ -90,24 +92,29 @@ class genetic_selection:
 
     def initialize_population(self, X, y, size, chromosome_length):
         population_x, population_y = [], []
-        for i in range(size):
-            chromosome_x, chromosome_y = get_subset(X, y, size=chromosome_length)
-            population_x.append(chromosome_x)
-            population_y.append(chromosome_y)
+
+        for i in range(size):            
+            chromosome_x, chromosome_y = self.get_subset(X, y, size=chromosome_length)            
+            population_x.append(chromosome_x.values)
+            population_y.append(chromosome_y.values)
+            
         return np.array(population_x), np.array(population_y)
 
 
     def fitness_score(self, population_x, population_y):
         scores = np.array([])
         for chromosome_x, chromosome_y in zip(population_x, population_y):
-            model.fit(chromosome_x, chromosome_y) # change to AdaBoostSVM
-            predictions = model.predict(X_test)
-            scores      = np.append(scores, accuracy_score(Y_test, predictions))
 
-        sorted_indexes  = np.argsort(scores) # indexes sorted by score
+            self.model.fit(chromosome_x, chromosome_y) # change to AdaBoostSVM
+            predictions = self.model.predict(self.X_test)
+            if self.AB_SVM:  self.model.clean() # needed for AdaBoostSVM
+            scores      = np.append(scores, accuracy_score(self.Y_test, predictions))            
+
+        sorted_indexes  = np.argsort(scores) # indexes sorted by score, see the cross check!
         return scores[sorted_indexes], population_x[sorted_indexes], population_y[sorted_indexes]
+    
 
-    def set_population_size(scores, popx, popy, generation, size):
+    def set_population_size(self, scores, popx, popy, generation, size):
         '''Gets rid of lower part of population, restoring original size'''
         if generation == 0:
             pass
@@ -118,6 +125,7 @@ class genetic_selection:
 
         return scores, popx, popy
 
+      
     def selection(self, pop_x, pop_y, coef):
         '''High-Low-fit selection'''
         
@@ -197,47 +205,28 @@ class genetic_selection:
     
         return  next_generation_x, next_generation_y
     
+
     def termination_criterion(self):
         if generation == 0:
             pass
         else:
             pass
             
-
     
 # Experiments
 data = data_preparation()
 X_train, Y_train, X_test, Y_test = data.dataset('titanic','',sampling=False,split_sample=0.4)
 
-model_test = AdaBoostSVM(C=50, gammaIni=10, myKernel='rbf')
+model_test = AdaBoostSVM(C=50, gammaIni=5, myKernel='rbf', Diversity=True, debug=False)
 #model_test = SVC()
-
-X, y, population_size=10, chrom_len=10, n_generations=20, coef=0.5, mutation_rate=0.3
 
 # Start training
 start = datetime.datetime.now()
-
-model_test.fit(X_train,Y_train)
+#model_test.fit(X_train,Y_train)
+test_gen = genetic_selection(model_test, True, X_train, Y_train, X_test, Y_test,
+                             pop_size=10, chrom_len=100, n_gen=20, coef=0.5, mut_rate=0.3)
+test_gen.execute()
 
 end = datetime.datetime.now()
 elapsed_time = end - start
-
 print("Elapsed training time = " + str(elapsed_time))
-
-# Start predicting
-start = datetime.datetime.now()
-
-predictions = model_test.predict(X_test)
-print("Accuracy = "+ str(accuracy_score(Y_test,predictions)))
-end = datetime.datetime.now()
-elapsed_time = end - start
-print("Elapsed fitting time = " + str(elapsed_time))
-
-model = AdaBoostSVM(C=50, gammaIni=10, myKernel='rbf')
-
-start = datetime.datetime.now()
-#run_genetic_algorithm(X_train, Y_train, population_size=5, chrom_len=100, n_generations=10, coef=0.5)
-
-end = datetime.datetime.now()
-elapsed_time = end - start
-print("Elapsed total time = " + str(elapsed_time))

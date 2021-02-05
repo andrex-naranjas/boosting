@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 '''
 ---------------------------------------------------------------
  Code to improve SVM
@@ -16,12 +15,12 @@ import numpy as np
 
 # machine learning
 from sklearn.svm import SVC, LinearSVC
-
+from sklearn import svm
 # AdaBoost class
 
 class AdaBoostSVM:
 
-    def __init__(self, C, gammaIni, myKernel, Diversity=False):
+    def __init__(self, C, gammaIni, myKernel, Diversity=False, debug=False):
 
         self.C = C
         self.gammaIni = gammaIni
@@ -37,7 +36,9 @@ class AdaBoostSVM:
         self.diversities = ([])
         self.Div_total = ([])
         self.Div_partial = ([])
-                                
+        self.debug = debug
+        self.count_warning = 1
+        
 
     def svc_train(self, myGamma, stepGamma, x_train, y_train, myWeights, count, flag_div, value_div):
 
@@ -74,7 +75,7 @@ class AdaBoostSVM:
             # Diverse_AdaBoost, if Diversity=False, diversity plays no role in classifier selection
             div_pass,tres = self.pass_diversity(flag_div, value_div, count, error_pass)
             if(error_pass and not div_pass): value_div = self.diversity(x_train, y_pred, count)                    
-            print('error flag: %5s | div flag: %5s | div value: %5s | Threshold: %5s | no. data: %5s | count: %5s | error: %5.2f | gamma: %5.2f | diversities  %3s '
+            if self.debug: print('error_flag: %5s | div_flag: %5s | div_value: %5s | Threshold: %5s | no. data: %5s | count: %5s | error: %5.2f | gamma: %5.2f | diversities  %3s '
                   %(error_pass, div_pass, value_div, tres, len(y_pred), count, errorOut, myGamma, len(self.diversities)))
             
             # require an error below 50%, avoid null errors and diversity requirement
@@ -109,7 +110,7 @@ class AdaBoostSVM:
             new_weights = new_weights/norm
 
             self.weights_list.append(new_weights)
-            print("----------------------------------------------------------------------------------------------------------------------------------------------------------------")
+            if self.debug : print("----------------------------------------------------------------------------------------------------------------------------------------------------------------")
 
             # call svm, weight samples, iterate sigma(gamma), get errors, obtain predicted classifier (h as an array)
             gammaVar, error, h, learner = self.svc_train(gammaVar, gammaStep, X_train, Y_train, new_weights, count, div_flag, div_value)
@@ -161,13 +162,17 @@ class AdaBoostSVM:
                 break
 
             # end of adaboot loop
-
-        h_list = np.array(h_list)
+        
 
         print(count,'number of classifiers')
+        self.count_warning == count
         if(count==0):
-            sys.exit('No classifiers in the ensemble, try again!')
+            print(' WARNING: No classifiers in the ensemble!')
+            self.count_warning = 0
+            return self
 
+        h_list = np.array(h_list)
+        
         # start to calculate the final classifier
         h_alpha = np.array([h_list[i]*self.alphas[i] for i in range(count)])
 
@@ -195,6 +200,8 @@ class AdaBoostSVM:
     def predict(self, X):
         # Make predictions using already fitted model
         # print(len(self.alphas), len(self.weak_svm), "how many alphas we have")
+        # print(type(X.shape[0]), 'check size ada-boost' )
+        if self.count_warning == 0: return np.zeros(X.shape[0])
         svm_preds = np.array([learner.predict(X) for learner in self.weak_svm])
         return np.sign(np.dot(self.alphas, svm_preds))
     
@@ -286,9 +293,26 @@ class AdaBoostSVM:
         number = np.array(number)
         number = np.cumsum(number,axis=0)
         return np.sign(number)
+    
 
     def get_metrics(self):
-        return np.array(self.weights_list), self.errors, self.precision      
+        return np.array(self.weights_list), self.errors, self.precision
+
+    
+    def clean(self):
+        # clean in case running several times is needed
+        # when creating only one instance 
+        self.weak_svm = ([])
+        self.alphas = ([])
+        self.weights_list = []
+        self.errors    = ([])
+        self.precision = ([])
+        self.eta = 0.5
+        self.diversities = ([])
+        self.Div_total = ([])
+        self.Div_partial = ([])
+        self.count_warning = 1
+
 
 '''
 # check normalization 
