@@ -6,7 +6,6 @@
  Authors: A. Ramirez-Morales and J. Salmon-Gamboa
  ---------------------------------------------------------------
 '''
-
 import numpy as np
 import random
 from random import randint
@@ -23,11 +22,9 @@ from boostedSVM import AdaBoostSVM
 from data_preparation import data_preparation
 
 
-
 # Genetic algorithm for training sub-dataset selection
 class genetic_selection:
 
-  
     def __init__(self, model, isAB_SVM, X_train, Y_train, X_test, Y_test, pop_size, chrom_len, n_gen, coef, mut_rate):
         self.model = model
         self.AB_SVM = isAB_SVM
@@ -215,16 +212,16 @@ class genetic_selection:
     
 # Experiments
 data = data_preparation()
-X_train, Y_train, X_test, Y_test = data.dataset('titanic','',sampling=False,split_sample=0.4)
+X_train, Y_train, X_test, Y_test = data.dataset('belle2_ii','',sampling=False,split_sample=0.4)
 
-model_test = AdaBoostSVM(C=50, gammaIni=5, myKernel='rbf', Diversity=True, debug=False)
+model_test = AdaBoostSVM(C=50, gammaIni=5, myKernel='rbf', Diversity=False, debug=False)
 #model_test = SVC()
 
 # Start training
 start = datetime.datetime.now()
 #model_test.fit(X_train,Y_train)
 test_gen = genetic_selection(model_test, True, X_train, Y_train, X_test, Y_test,
-                             pop_size=10, chrom_len=100, n_gen=20, coef=0.5, mut_rate=0.3)
+                             pop_size=5000, chrom_len=100, n_gen=20, coef=0.5, mut_rate=0.3)
 test_gen.execute()
 
 end = datetime.datetime.now()
