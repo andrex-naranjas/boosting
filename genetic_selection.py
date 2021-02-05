@@ -27,6 +27,7 @@ from data_preparation import data_preparation
 # Genetic algorithm for training sub-dataset selection
 class genetic_selection:
 
+  
     def __init__(self, model, isAB_SVM, X_train, Y_train, X_test, Y_test, pop_size, chrom_len, n_gen, coef, mut_rate):
         self.model = model
         self.AB_SVM = isAB_SVM
@@ -91,6 +92,7 @@ class genetic_selection:
 
     def initialize_population(self, X, y, size, chromosome_length):
         population_x, population_y = [], []
+
         for i in range(size):            
             chromosome_x, chromosome_y = self.get_subset(X, y, size=chromosome_length)            
             population_x.append(chromosome_x.values)
@@ -102,6 +104,7 @@ class genetic_selection:
     def fitness_score(self, population_x, population_y):
         scores = np.array([])
         for chromosome_x, chromosome_y in zip(population_x, population_y):
+
             self.model.fit(chromosome_x, chromosome_y) # change to AdaBoostSVM
             predictions = self.model.predict(self.X_test)
             if self.AB_SVM:  self.model.clean() # needed for AdaBoostSVM
@@ -121,8 +124,8 @@ class genetic_selection:
             popy   = popy[size:]
 
         return scores, popx, popy
-    
 
+      
     def selection(self, pop_x, pop_y, coef):
         '''High-Low-fit selection'''
         
@@ -202,7 +205,7 @@ class genetic_selection:
     
         return  next_generation_x, next_generation_y
     
-    
+
     def termination_criterion(self):
         if generation == 0:
             pass
