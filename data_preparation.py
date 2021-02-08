@@ -131,7 +131,7 @@ class data_preparation:
             X = data_set.drop("Class", axis=1)            
             return X,Y 
 
-        sampled_data = resample(data_set, replace = False, n_samples = 3500, random_state = 0)
+        sampled_data = resample(data_set, replace = False, n_samples = 5000, random_state = 0)
 
         Y = sampled_data["Class"]
         # Data scaling [0,1]

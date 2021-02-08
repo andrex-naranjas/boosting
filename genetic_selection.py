@@ -61,7 +61,7 @@ class genetic_selection:
         return None
 
     
-    def get_subset(self, X, y, size):
+    def get_subset(self, X, y, size): #size==chromo_size
         # separate indices by class
         y0_index = y[y == -1].index
         y1_index = y[y == 1].index
@@ -87,7 +87,7 @@ class genetic_selection:
         return X_balanced.sample(frac=1, random_state=rand_st), y_balanced.sample(frac=1, random_state=rand_st) # checar random_state
 
 
-    def initialize_population(self, X, y, size, chromosome_length):
+    def initialize_population(self, X, y, size, chromosome_length): # size==pop_size
         population_x, population_y = [], []
 
         for i in range(size):            
@@ -105,7 +105,8 @@ class genetic_selection:
             self.model.fit(chromosome_x, chromosome_y) # change to AdaBoostSVM
             predictions = self.model.predict(self.X_test)
             if self.AB_SVM:  self.model.clean() # needed for AdaBoostSVM
-            scores      = np.append(scores, accuracy_score(self.Y_test, predictions))            
+            scores      = np.append(scores, accuracy_score(self.Y_test, predictions))
+            print('Final test prediction:   ', accuracy_score(self.Y_test, predictions))
 
         sorted_indexes  = np.argsort(scores) # indexes sorted by score, see the cross check!
         return scores[sorted_indexes], population_x[sorted_indexes], population_y[sorted_indexes]
@@ -214,14 +215,14 @@ class genetic_selection:
 data = data_preparation()
 X_train, Y_train, X_test, Y_test = data.dataset('belle2_ii','',sampling=False,split_sample=0.4)
 
-model_test = AdaBoostSVM(C=50, gammaIni=5, myKernel='rbf', Diversity=False, debug=False)
+model_test = AdaBoostSVM(C=50, gammaIni=5, myKernel='rbf', Diversity=True, debug=False)
 #model_test = SVC()
 
 # Start training
 start = datetime.datetime.now()
 #model_test.fit(X_train,Y_train)
 test_gen = genetic_selection(model_test, True, X_train, Y_train, X_test, Y_test,
-                             pop_size=5000, chrom_len=100, n_gen=20, coef=0.5, mut_rate=0.3)
+                             pop_size=10, chrom_len=500, n_gen=10, coef=0.5, mut_rate=0.3)
 test_gen.execute()
 
 end = datetime.datetime.now()

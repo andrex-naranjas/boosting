@@ -21,6 +21,7 @@ import model_comparison as mc
 import data_visualization as dv
 from boostedSVM import AdaBoostSVM
 from model_performance import model_performance
+from sklearn.metrics import accuracy_score
 
 
 # make directories
@@ -33,7 +34,7 @@ myKernel = 'rbf'
 
 # get the data
 data = data_preparation()
-sample_list = ['titanic']
+sample_list = ['belle2_ii']
 
 # loop over datasets in sample_list for AdaBoostSVM and other classifiers. get ROC curves & metrics
 for name in sample_list:
@@ -56,6 +57,7 @@ for name in sample_list:
 
     elapsed_time.to_csv('output/' + name +  '/' + 'AdaBoostSVM_time.csv', index=False)
     y_preda = model.predict(X_test)
+    print('Final test prediction:   ', accuracy_score(Y_test, y_preda))
     y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
     TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
 
@@ -70,6 +72,7 @@ for name in sample_list:
     model_a.fit(X_train, Y_train)
     nWeaks=len(model_a.alphas)
     y_preda_a = model_a.predict(X_test)
+    print('Final test prediction:   ', accuracy_score(Y_test, y_preda_a))
     y_thresholds_a = model_a.decision_thresholds(X_test, glob_dec=True)
     TPR_a, FPR_a = du.roc_curve_adaboost(y_thresholds_a, Y_test)
 
