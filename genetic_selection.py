@@ -15,11 +15,12 @@ import datetime
 
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score,auc
 
 # framework includes
 from boostedSVM import AdaBoostSVM
 from data_preparation import data_preparation
+import data_utils as du
 
 
 # Genetic algorithm for training sub-dataset selection
@@ -103,10 +104,11 @@ class genetic_selection:
         for chromosome_x, chromosome_y in zip(population_x, population_y):
 
             self.model.fit(chromosome_x, chromosome_y) # change to AdaBoostSVM
-            predictions = self.model.predict(self.X_test)
-            if self.AB_SVM:  self.model.clean() # needed for AdaBoostSVM
+            predictions = self.model.predict(self.X_test)            
             scores      = np.append(scores, accuracy_score(self.Y_test, predictions))
             print('Final test prediction:   ', accuracy_score(self.Y_test, predictions), len(self.Y_test), len(predictions))
+            #area = self.area_roc(self.model, self.X_test, self.Y_test)
+            if self.AB_SVM:  self.model.clean() # needed for AdaBoostSVM
 
         sorted_indexes  = np.argsort(scores) # indexes sorted by score, see the cross check!
         return scores[sorted_indexes], population_x[sorted_indexes], population_y[sorted_indexes]
@@ -209,6 +211,11 @@ class genetic_selection:
             pass
         else:
             pass
+
+    def area_roc(self, model, X_test, Y_test):
+        y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
+        TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
+        return auc(FPR,TPR)
             
     
 # Experiments
@@ -223,7 +230,7 @@ model_test = AdaBoostSVM(C=50, gammaIni=5, myKernel='rbf', Diversity=True, debug
 start = datetime.datetime.now()
 #model_test.fit(X_train,Y_train)
 test_gen = genetic_selection(model_test, True, X_train, Y_train, X_test, Y_test,
-                             pop_size=10, chrom_len=10, n_gen=3, coef=0.5, mut_rate=0.3)
+                             pop_size=10, chrom_len=100, n_gen=3, coef=0.5, mut_rate=0.3)
 test_gen.execute()
 
 end = datetime.datetime.now()

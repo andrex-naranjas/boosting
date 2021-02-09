@@ -271,11 +271,12 @@ class AdaBoostSVM:
             
             return np.array(final_threshold_decisions)
         
-        elif glob_dec: # glob_dec == true threshold the global final classifier
+        elif glob_dec: # glob_dec == true threshold the global final classifier         
             decision = np.array([svm_decisions[j] + svm_biases[j] for j in range(len(svm_biases))])
             decision = np.dot(self.alphas,decision)
 
             for i in range(len(steps)):
+                print('daaaaaaaaaaaaaaaaaaaaaliiiii: ', len(steps), len(decision))
                 decision_temp = np.array([np.sign(decision[j] + steps[i] ) for j in range(len(decision))]) #*svm_biases[j]
                 thres_decision.append(decision_temp)
                         
