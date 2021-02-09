@@ -32,8 +32,8 @@ import data_visualization as dv
 
 class data_preparation:
 
-    def __init__(self):
-        dummy = 0
+    def __init__(self, GA_selection=False):
+        self.genetic = GA_selection
 
     # fetch data
     def fetch_data(self, sample):
@@ -120,13 +120,13 @@ class data_preparation:
 
     # belle2 data preparation
     def belle2(self, data_set, sampling, sample_name):
+        
 
-        # column names list
-        cols = list(data_set.columns)
-
-        if(sampling): # sampling was already carried, don't sample again!
+        if(sampling or self.genetic): # sampling was already carried, don't sample again!
             Y = data_set["Class"]
             # Data scaling [0,1]
+            # column names list            
+            cols = list(data_set.columns)
             data_set = pd.DataFrame(MinMaxScaler().fit_transform(data_set),columns = cols)
             X = data_set.drop("Class", axis=1)            
             return X,Y 
@@ -134,14 +134,16 @@ class data_preparation:
         sampled_data = resample(data_set, replace = False, n_samples = 5000, random_state = 0)
 
         Y = sampled_data["Class"]
+        # column names list
+        cols = list(sampled_data.columns)
         # Data scaling [0,1]
-        # sampled_data = pd.DataFrame(MinMaxScaler().fit_transform(sampled_data),columns = cols)
+        #sampled_data = pd.DataFrame(MinMaxScaler().fit_transform(sampled_data),columns = cols)
+        X = sampled_data.drop("Class", axis=1)
 
-        # plot variables for visualization (now only for HEP)
+        # # plot variables for visualization (now only for HEP)
         dv.plot_hist_frame(data_set,'full_'+sample_name)
         dv.plot_hist_frame(sampled_data,'sampled_'+sample_name)
-
-        X = sampled_data.drop("Class", axis=1)
+            
         return X,Y
 
 
@@ -155,7 +157,7 @@ class data_preparation:
         data_test['isSignal']  = data_test['isSignal'].map(title_mapping)
         data_test['isSignal']  = data_test['isSignal'].fillna(0)
 
-        if(sampling): # sampling was already carried, don't sample again!
+        if(sampling or self.genetic): # sampling already done or not needed, don't sample again!
             Y_train = data_train["isSignal"]
             Y_test  = data_test["isSignal"]
             # Data scaling [0,1]
@@ -169,6 +171,7 @@ class data_preparation:
             X_test  = data_test.drop("isSignal", axis=1)
             X_train = data_train.drop("isSignal", axis=1)
             return X_train, Y_train, X_test, Y_test
+        
 
         sampled_data_train = resample(data_train, replace = True, n_samples = 1000, random_state=0)
         sampled_data_test  = resample(data_test,  replace = False, n_samples = 10000, random_state=0)

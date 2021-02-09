@@ -34,7 +34,7 @@ myKernel = 'rbf'
 
 # get the data
 data = data_preparation()
-sample_list = ['belle2_ii']
+sample_list = ['belle2_iii']
 
 # loop over datasets in sample_list for AdaBoostSVM and other classifiers. get ROC curves & metrics
 for name in sample_list:
