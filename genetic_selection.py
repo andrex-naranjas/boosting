@@ -101,7 +101,7 @@ class genetic_selection:
 
 
     @lru_cache(maxsize = 1000)
-    def memoization_score(tuple_chrom_x , tuple_chrom_y):
+    def memoization_score(self, tuple_chrom_x , tuple_chrom_y):
         chromosome_x, chromosome_y = np.asarray(tuple_chrom_x), np.asarray(tuple_chrom_y)
         self.model.fit(chromosome_x, chromosome_y[0])
         predictions = self.model.predict(self.X_test)
@@ -116,9 +116,9 @@ class genetic_selection:
             array_tuple_y = map(tuple, chromosome_y.reshape((1, len(chromosome_y))))
             tuple_tuple_x = tuple(array_tuple_x)
             tuple_tuple_y = tuple(array_tuple_y)
-            acc_score     = memoization_score(tuple_tuple_x , tuple_tuple_y)
+            acc_score     = self.memoization_score(tuple_tuple_x , tuple_tuple_y)
             scores        = np.append(scores, acc_score)
-            print('Final test prediction:   ', accuracy_score(self.Y_test, predictions), len(self.Y_test), len(predictions))
+            #print('Final test prediction:   ', accuracy_score(self.Y_test, predictions), len(self.Y_test), len(predictions))
             #area = self.area_roc(self.model, self.X_test, self.Y_test)
             if self.AB_SVM:  self.model.clean() # needed for AdaBoostSVM
 
