@@ -134,12 +134,12 @@ def error_number(sample_name, myC, myGammaIni, train_test):
         data = data_preparation()
         
         if not train_test:
-            sampled_data = resample(sample_df, replace = True, n_samples = 100, random_state = 0)
+            sampled_data = resample(sample_df, replace = True, n_samples = 100, random_state = None)
             X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, data_set=sampled_data,
                                                             sampling=True, split_sample=0.4, train_test=True)
         else:
-            sampled_data_train = resample(sample_train_df, replace = True, n_samples = 5000,  random_state = 0)
-            sampled_data_test  = resample(sample_test_df,  replace = True, n_samples = 10000, random_state = 0)
+            sampled_data_train = resample(sample_train_df, replace = True, n_samples = 5000,  random_state = None)
+            sampled_data_test  = resample(sample_test_df,  replace = True, n_samples = 10000, random_state = None)
             X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, data_set='',
                                                             data_train=sampled_data_train, data_test = sampled_data_test,
                                                             sampling=True, split_sample=0.4, train_test=True)
@@ -200,7 +200,10 @@ def grid_param_gauss(train_x, train_y, test_x, test_y, sigmin, sigmax, cmin, cma
 
 def roc_curve_adaboost(Y_thresholds, Y_test):
     # function to create the TPR and FPR, for ROC curve
-    Y_test = Y_test.values
+
+    # check data format
+    if type(Y_test) != type(np.array([])):
+        Y_test = Y_test.values
 
     TPR_list, FPR_list = [], []
     for i in range(Y_thresholds.shape[0]):

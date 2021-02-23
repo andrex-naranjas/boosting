@@ -13,15 +13,24 @@ import numpy as np
 import pandas as pd
 import datetime
 from sklearn.svm import SVC, LinearSVC # machine learning
+from sklearn.metrics import accuracy_score,auc
 
 # framework includes
 from data_preparation import data_preparation
 import data_utils as du
+import model_maker as mm
 import model_comparison as mc
 import data_visualization as dv
-from boostedSVM import AdaBoostSVM
 from model_performance import model_performance
-from sklearn.metrics import accuracy_score,auc
+import stats_summary as ss
+
+
+if len(sys.argv) != 2:
+    sys.exit('Provide charm states group name. Try again!')
+
+#states = 'omega' # All, omega, cascades, sigmaLamb
+sample_input = sys.argv[1]
+
 
 # make directories
 sample_list = ['titanic', 'cancer', 'german', 'heart', 'solar','car','contra','tac_toe', 'belle2_i', 'belle2_ii','belle_iii']
@@ -33,7 +42,8 @@ myKernel = 'rbf'
 
 # get the data
 data = data_preparation()
-sample_list = ['belle2_iii']
+sample_list = ['titanic']
+sample_list = [sample_input]
 
 # loop over datasets in sample_list for AdaBoostSVM and other classifiers. get ROC curves & metrics
 for name in sample_list:
@@ -45,47 +55,61 @@ for name in sample_list:
     data.dataset(sample_name=name,
                  sampling=False,split_sample=0.4,train_test=split_flag)
 
-    # run AdaBoost support vector machine
-    print('AdaBoost-support vector machines')
-    model = AdaBoostSVM(C=50, gammaIni=5, myKernel=myKernel)
+    # # run AdaBoost support vector machine
+    # print('AdaBoost-support vector machines')
+    # model = mm.adaboost_svm()
+    # #model = AdaBoostSVM(C=50, gammaIni=5, myKernel=myKernel)
 
-    start = datetime.datetime.now()
-    model.fit(X_train, Y_train)
-    end = datetime.datetime.now()
-    elapsed_time = pd.DataFrame({'Elapsed time': [end - start]})
+    # start = datetime.datetime.now()
+    # model.fit(X_train, Y_train)
+    # end = datetime.datetime.now()
+    # elapsed_time = pd.DataFrame({'Elapsed time': [end - start]})
 
-    elapsed_time.to_csv('output/' + name +  '/' + 'AdaBoostSVM_time.csv', index=False)
-    y_preda = model.predict(X_test)
-    print('Final test prediction:   ', accuracy_score(Y_test, y_preda))
-    y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
-    TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
+    # elapsed_time.to_csv('output/' + name +  '/' + 'AdaBoostSVM_time.csv', index=False)
+    # y_preda = model.predict(X_test)
+    # print('Final test prediction:   ', accuracy_score(Y_test, y_preda))
+    # y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
+    # TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
 
-    nWeaks = len(model.alphas) # print on plot no. classifiers
-    # dv.plot_roc_curve(TPR,FPR,sample,'real',   glob_local=True, name='nom')
-    dv.plot_roc_curve(TPR,FPR,name,'sorted', glob_local=True, name='nom', kernel=myKernel, nClass=nWeaks)
-    print('End adaboost')
+    # nWeaks = len(model.alphas) # print on plot no. classifiers
+    # # dv.plot_roc_curve(TPR,FPR,sample,'real',   glob_local=True, name='nom')
+    # dv.plot_roc_curve(TPR,FPR,name,'sorted', glob_local=True, name='nom', kernel=myKernel, nClass=nWeaks)        
+    # print('End adaboost')
 
-    # run Diverse-AdaBoost Diversity support vector machine
-    print('Diverse-AdaBoost-support vector machines')
-    model_a = AdaBoostSVM(C=50, gammaIni=5, myKernel=myKernel, Diversity=True)
-    model_a.fit(X_train, Y_train)
-    nWeaks=len(model_a.alphas)
-    y_preda_a = model_a.predict(X_test)
-    y_thresholds_a = model_a.decision_thresholds(X_test, glob_dec=True)
-    TPR_a, FPR_a = du.roc_curve_adaboost(y_thresholds_a, Y_test)
-    area = auc(FPR,TPR)
-    print('Final test prediction:   ', accuracy_score(Y_test, y_preda_a), 'AUC: ', area)
+    
+    # # run Diverse-AdaBoost Diversity support vector machine
+    # print('Diverse-AdaBoost-support vector machines')
+    # #model_a = AdaBoostSVM(C=50, gammaIni=5, myKernel=myKernel, Diversity=True)
+    # model_a = mm.adaboost_svm(True)
+    # model_a.fit(X_train, Y_train)
+    # nWeaks=len(model_a.alphas)
+    # y_preda_a = model_a.predict(X_test)
+    # y_thresholds_a = model_a.decision_thresholds(X_test, glob_dec=True)
+    # TPR_a, FPR_a = du.roc_curve_adaboost(y_thresholds_a, Y_test)
+    # area = auc(FPR_a,TPR_a)
+    # print('Final test prediction:   ', accuracy_score(Y_test, y_preda_a), 'AUC: ', area)
 
+    # # dv.plot_roc_curve(TPR_a,FPR_a,sample,'real',   glob_local=True, name='div')
+    # dv.plot_roc_curve(TPR_a,FPR_a,name,'sorted', glob_local=True, name='div', kernel=myKernel, nClass=nWeaks)
+    # print('End adaboost')
 
-    # print(model_a.diversities)
-
-    # dv.plot_roc_curve(TPR_a,FPR_a,sample,'real',   glob_local=True, name='div')
-    dv.plot_roc_curve(TPR_a,FPR_a,name,'sorted', glob_local=True, name='div', kernel=myKernel, nClass=nWeaks)
-    print('End adaboost')
     
     # comparison with other ml models (fit, predict and metrics)
-    mc.comparison(name, X_train, Y_train, Y_test, X_test)
+    # mc.comparison(name, X_train, Y_train, Y_test, X_test)
     # metrics (via cross-validation)
     # du.cv_metrics(model, X_train, Y_train)
 
-performance = model_performance(model, X_train, Y_train, X_test, Y_test)
+    start = datetime.datetime.now()
+    # do the statistical analysis of the performance across different models
+    # bootstrap
+    ss.stats_results(name, n_cycles=100, kfolds=10, n_reps=10, boot_kfold ="bootstrap")
+    # kfold cross-validation
+    ss.stats_results(name, n_cycles=10, kfolds=10, n_reps=10, boot_kfold ="kfold")    
+    end = datetime.datetime.now()
+    elapsed_time = end - start
+    print("Elapsed total time = " + str(elapsed_time))
+
+        
+#performance = model_performance(model, X_train, Y_train, X_test, Y_test)
+
+

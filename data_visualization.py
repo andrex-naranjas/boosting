@@ -120,3 +120,132 @@ def plot_roc_curve(TPR,FPR,sample,real,glob_local,name,kernel,nClass):
     output = pd.DataFrame({'False positive rate': FPR,'True positive rate': TPR, 'Area': area})
     output.to_csv('output/' + sample +  '/' + 'BoostSVM_ROC.csv', index=False)
     plt.close()
+    
+
+def latex_table_tukey(isDiverse, auc_val, auc_test, prc_val,  prc_test, f1_val,  f1_test,
+                                 rec_val, rec_test, acc_val,  acc_test, gmn_val, gmn_test,  f_out):
+                      
+    print("\\begin{tabular}{c | c  c  c | c c c | c c c | c c c | c c c | c c c }\hline \hline", file=f_out)
+    print("Model & $\mu_{AUC}$  & p-val  &  Reject $H_{0}$ & $\mu_{prc}$  & p-val  &  Rjct. $H_{0}$ & $\mu_{f1}$  & p-val  &  Rjct. $H_{0}$ & $\mu_{rec}$  & p-val  &  Rjct. $H_{0}$ & $\mu_{acc}$  & p-val  &  Rjct. $H_{0}$ & $\mu_{gmn}$  & p-val  &  Rjct. $H_{0}$   \\\  \hline", file=f_out)
+
+    nAlgos = len(auc_val)-1
+    off_set = nAlgos
+
+    reject_auc = ''
+    reject_prc = ''
+    reject_f1  = ''
+    reject_rec = ''
+    reject_acc = ''
+    reject_gmn = ''
+    
+    for i in range(nAlgos):
+        k=0,0
+        j = i + 1
+        if isDiverse:
+            if i==0:
+                k = i
+                j = i
+            else: k = i + off_set
+        else: k = i
+        
+            
+        if auc_test.reject[k]: reject_auc = '\\checkmark'
+        elif not auc_test.reject[k]: reject_auc = '\\xmark'        
+        if prc_test.reject[k]: reject_prc = '\\checkmark'
+        elif not prc_test.reject[k]: reject_prc = '\\xmark'
+        if f1_test.reject[k]: reject_f1 = '\\checkmark'
+        elif not f1_test.reject[k]: reject_f1 = '\\xmark'
+        if rec_test.reject[k]: reject_rec = '\\checkmark'
+        elif not rec_test.reject[k]: reject_rec = '\\xmark'
+        if acc_test.reject[k]: reject_acc = '\\checkmark'
+        elif not acc_test.reject[k]: reject_acc = '\\xmark'
+        if gmn_test.reject[k]: reject_gmn = '\\checkmark'
+        elif not gmn_test.reject[k]: reject_gmn = '\\xmark'        
+        
+        print('model:',i, ' & ',
+              round(auc_val[j],2),' & ', round(auc_test.pvalues[k],3), ' & ', reject_auc,' & ',
+              round(prc_val[j],2),' & ', round(prc_test.pvalues[k],3), ' & ', reject_prc,' & ',
+              round(f1_val[j],2), ' & ', round(f1_test.pvalues[k],3),  ' & ', reject_f1, ' & ',
+              round(rec_val[j],2),' & ', round(rec_test.pvalues[k],3), ' & ', reject_rec,' & ',
+              round(acc_val[j],2),' & ', round(acc_test.pvalues[k],3), ' & ', reject_acc,' & ',
+              round(gmn_val[j],2),' & ', round(gmn_test.pvalues[k],3), ' & ', reject_gmn,
+              ' \\\ ', file=f_out)
+        
+                
+    print('\hline \hline', file=f_out)
+    print('\end{tabular}', file=f_out)
+    print("\caption{Tukey statistics test. Scores of current classifier  --AUC:", round(auc_val[0],2), "-- prc:", round(prc_val[0],2), "-- f1:", round(f1_val[0],2), '-- REC' ,round(rec_val[0],2), "-- acc:", round(acc_val[0],2), "-- gmn:", round(gmn_val[0],2),"}", file=f_out)
+    print("\label{tab:tukey}", file=f_out)
+
+
+    # print(test.pvalues, type(test.pvalues), len(test.pvalues))
+    # print(test.reject, type(test.reject), len(test.reject))
+    # print(test.confint, type(test.confint), len(test.confint))
+    # print(test.std_pairs, type(test.std_pairs), len(test.std_pairs))
+
+
+
+
+
+    
+                
+#             if not self.asymmetric or not bootstrap:
+#                 print(quantum[i], round(mass,1), '$\\pm',round(error,1), '$ &', exp[i], '$\\pm', delta_exp[i], '$ &', round(decay,3), ' & $xx\pm xx$ \\\ ', file=f_paper)
+#             else:
+#                 if not np.isnan(up_decay):
+#                     if exp[i]!=0.:
+#                         print(quantum[i],'$',round(mass,1),'^{+',round(error_up,1),'}_{',round(error_dn,1),'}$',  '& $',exp[i],'\\pm',delta_exp[i], '$ & $',
+#                               round(decay,3),'^{+', round(up_decay,3),'}_{', round(dn_decay,3),'}$', ' & $ xx\pm xx$ \\\ ', file=f_paper)
+#                     else:
+#                         print(quantum[i],'$',round(mass,1),'^{+',round(error_up,1),'}_{',round(error_dn,1),'}$',  '& $\\dagger $ & $',
+#                               round(decay,3),'^{+', round(up_decay,3),'}_{', round(dn_decay,3),'}$', ' & $ xx\pm xx$ \\\ ', file=f_paper)                        
+#                 else:
+#                     if exp[i]!=0.:
+#                         print(quantum[i],'$',round(mass,1),'^{+',round(error_up,1),'}_{',round(error_dn,1),'}$',  '& $',exp[i],'\\pm',delta_exp[i], '$ & ',
+#                               '$\\dagger\\dagger$', '& $ xx\pm xx$  \\\ ', file=f_paper)
+#                     else:
+#                         print(quantum[i],'$',round(mass,1),'^{+',round(error_up,1),'}_{',round(error_dn,1),'}$',  '& $\\dagger$ & ',
+#                               '$\\dagger\\dagger$', '& $ xx\pm xx$  \\\ ', file=f_paper)
+
+
+
+#     def latex_header(self,table_file,paper):        
+#         if not paper:
+#         else:
+#             print("\\begin{tabular}{c | c  c c c }\hline \hline", file=table_file)
+#             print(" State     & Predicted Mass   & Experimental Mass & Predicted Width & Experimental Width   \\\ ", file=table_file)
+#             print("           &      (MeV)       &    (MeV)          &      (MeV)      & $\Gamma_{tot}$ (MeV) \\\ \hline", file=table_file)
+                    
+
+#     def latex_bottom(self, table_file,diff_pred, diff_sample,paper):
+#         label = 'paper'
+#         if not paper:
+#             print('\hline', file=table_file)
+#             print("  &  &  & Total diff & ",round(diff_pred), " &" ,round(diff_sample,1),"\\\ ", file=table_file)
+#             label = 'note'
+            
+
+
+    
+    
+# def decay_table_channels(baryons, channel_widths, sym_errors, f_out):
+
+#     channel_widths = np.array(channel_widths)
+
+#     name_decays=[]
+#     name_decays.append('State')
+#     for i in range(len(channel_widths[0])):
+#         name_decays.append(du.latex_decay_label(baryons,i+1))
+        
+#     name_decays.append('Tot $\\Gamma$')                   
+#     du.print_header_latex(name_decays, f_out)    
+    
+#     for i in range(len(channel_widths)):
+#         if sym_errors is not None:
+#             error = sym_errors[i]
+#         else: error = 0
+        
+#         du.print_row_latex(state_name=str(i+1), state_decays=channel_widths[i],
+#                            errors=error, f_out=f_out)
+        
+#     du.print_bottom_latex(baryons,f_out)

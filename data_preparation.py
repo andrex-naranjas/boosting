@@ -106,11 +106,16 @@ class data_preparation:
             X_train, Y_train, X_test, Y_test = self.belle2_3pi(data_train, data_test, sampling, sample_name=sample_name)
 
         # print data after preparation
-        print("After preparation shapes X and Y")#, X.shape, Y.shape)
-        if(sample_name!='belle2_iii'): print(X.head())#, Y.head())
-        if(sample_name!='belle2_iii'): print(Y.head())#, Y.head())
-        if(sample_name=='belle2_iii'): print(X_train.head())#, Y.head())
-        if(sample_name=='belle2_iii'): print(Y_train.head())#, Y.head())
+        if not sampling:
+            print("After preparation shapes X and Y")#, X.shape, Y.shape)
+            if(sample_name!='belle2_iii'): print(X.head())#, Y.head())
+            if(sample_name!='belle2_iii'): print(Y.head())#, Y.head())
+            if(sample_name=='belle2_iii'): print(X_train.head())#, Y.head())
+            if(sample_name=='belle2_iii'): print(Y_train.head())#, Y.head())
+
+        # return X,Y without any spliting (for bootstrap)
+        if sampling:
+            return X,Y
                                   
         # divide sample into train and test sample
         if not train_test:
@@ -196,11 +201,12 @@ class data_preparation:
 
     #Titanic data preparation
     def titanic(self, data_set):
+        data_set = data_set.copy()
 
         # column names list
         cols = list(data_set.columns)
 
-        data_set['Title'] = data_set.Name.str.extract('([A-Za-z]+)', expand=False)
+        data_set.loc[:,'Title'] = data_set.Name.str.extract('([A-Za-z]+)', expand=False)
         data_set = data_set.drop(['Name'], axis=1)
 
         #change names
@@ -250,51 +256,102 @@ class data_preparation:
     #Breast-cancer data preparation
     def bCancer(self, data_set):
 
-        # column names list
-        cols = list(data_set.columns)
+        # change names
+        # title_mapping = {"no-recurrence-events": 1, "recurrence-events": -1}
+        # data_set['Class'] = data_set['Class'].map(title_mapping)
+        # data_set['Class'] = data_set['Class'].fillna(0)
+        data_set = data_set.copy()
+        data_set.loc[data_set['Class'] == "no-recurrence-events", 'Class'] = 1
+        data_set.loc[data_set['Class'] == "recurrence-events", 'Class'] = -1
+        
+        # title_mapping = {'10-19': 0, '20-29': 1, '30-39': 2, '40-49': 3, '50-59': 4, '60-69': 5, '70-79': 6, '80-89': 7, '90-99': 8}
+        # data_set['age'] = data_set['age'].map(title_mapping)
+        # data_set['age'] = data_set['age'].fillna(0)
+        data_set.loc[data_set['age']=='10-19', 'age']  = 0
+        data_set.loc[data_set['age']=='20-29', 'age']  = 1
+        data_set.loc[data_set['age']=='30-39', 'age']  = 2
+        data_set.loc[data_set['age']=='40-49', 'age']  = 3
+        data_set.loc[data_set['age']=='50-59', 'age']  = 4
+        data_set.loc[data_set['age']=='60-69', 'age']  = 5
+        data_set.loc[data_set['age']=='70-79', 'age']  = 6
+        data_set.loc[data_set['age']=='80-89', 'age']  = 7
+        data_set.loc[data_set['age']=='90-99', 'age']  = 8
+        
+        # title_mapping = {'lt40': 0, 'ge40': 1, 'premeno': 2}
+        # data_set['menopause'] = data_set['menopause'].map(title_mapping)
+        # data_set['menopause'] = data_set['menopause'].fillna(0)
+        data_set.loc[data_set['menopause']=='lt40',    'menopause']  = 0
+        data_set.loc[data_set['menopause']=='ge40',    'menopause']  = 1
+        data_set.loc[data_set['menopause']=='premeno', 'menopause']  = 2
+        
+        # title_mapping = {'0-4': 0,'5-9': 1, '10-14': 2, '15-19': 3, '20-24': 4, '25-29': 5, '30-34': 6, '35-39': 7, '40-44': 8, '45-49': 9, '50-54': 10, '55-59': 11}
+        # data_set['tumorSize'] = data_set['tumorSize'].map(title_mapping)
+        # data_set['tumorSize'] = data_set['tumorSize'].fillna(0)
+        data_set.loc[data_set['tumorSize']=='0-4',   'tumorSize']  = 0
+        data_set.loc[data_set['tumorSize']=='5-9',   'tumorSize']  = 1
+        data_set.loc[data_set['tumorSize']=='10-14', 'tumorSize']  = 2
+        data_set.loc[data_set['tumorSize']=='15-19', 'tumorSize']  = 3
+        data_set.loc[data_set['tumorSize']=='20-24', 'tumorSize']  = 4
+        data_set.loc[data_set['tumorSize']=='25-29', 'tumorSize']  = 5
+        data_set.loc[data_set['tumorSize']=='30-34', 'tumorSize']  = 6
+        data_set.loc[data_set['tumorSize']=='35-39', 'tumorSize']  = 7
+        data_set.loc[data_set['tumorSize']=='40-44', 'tumorSize']  = 8
+        data_set.loc[data_set['tumorSize']=='45-49', 'tumorSize']  = 9
+        data_set.loc[data_set['tumorSize']=='50-54', 'tumorSize']  = 10
+        data_set.loc[data_set['tumorSize']=='55-59', 'tumorSize']  = 11
 
-        #change names
-        title_mapping = {"no-recurrence-events": 1, "recurrence-events": -1}
-        data_set['Class'] = data_set['Class'].map(title_mapping)
-        data_set['Class'] = data_set['Class'].fillna(0)
+        # title_mapping = {'0-2': 0, '3-5': 1, '6-8': 2, '9-11': 3, '12-14': 4, '15-17': 5, '18-20': 6, '21-23': 7, '24-26': 8, '27-29': 9, '30-32': 10, '33-35': 11, '36-39': 12}
+        # data_set['invNodes'] = data_set['invNodes'].map(title_mapping)
+        # data_set['invNodes'] = data_set['invNodes'].fillna(0)
+        data_set.loc[data_set['invNodes']=='0-2',   'invNodes']  = 0
+        data_set.loc[data_set['invNodes']=='3-5',   'invNodes']  = 1
+        data_set.loc[data_set['invNodes']=='6-8',   'invNodes']  = 2
+        data_set.loc[data_set['invNodes']=='9-11',  'invNodes']  = 3
+        data_set.loc[data_set['invNodes']=='12-14', 'invNodes']  = 4
+        data_set.loc[data_set['invNodes']=='15-17', 'invNodes']  = 5
+        data_set.loc[data_set['invNodes']=='18-20', 'invNodes']  = 6
+        data_set.loc[data_set['invNodes']=='21-23', 'invNodes']  = 7
+        data_set.loc[data_set['invNodes']=='24-26', 'invNodes']  = 8
+        data_set.loc[data_set['invNodes']=='27-29', 'invNodes']  = 9
+        data_set.loc[data_set['invNodes']=='30-32', 'invNodes']  = 10
+        data_set.loc[data_set['invNodes']=='33-35', 'invNodes']  = 11
+        data_set.loc[data_set['invNodes']=='36-39', 'invNodes']  = 12
 
-        title_mapping = {'10-19': 0, '20-29': 1, '30-39': 2, '40-49': 3, '50-59': 4, '60-69': 5, '70-79': 6, '80-89': 7, '90-99': 8}
-        data_set['age'] = data_set['age'].map(title_mapping)
-        data_set['age'] = data_set['age'].fillna(0)
+        # title_mapping = {'yes': 0, 'no': 1}
+        # data_set['nodeCaps'] = data_set['nodeCaps'].map(title_mapping)
+        # data_set['nodeCaps'] = data_set['nodeCaps'].fillna(0)
+        data_set.loc[data_set['nodeCaps']=='yes',   'nodeCaps']  = 0
+        data_set.loc[data_set['nodeCaps']=='no',   'nodeCaps']  = 1
+        data_set.loc[data_set['nodeCaps']=='?',   'nodeCaps']  = 2
 
-        title_mapping = {'lt40': 0, 'ge40': 1, 'premeno': 2}
-        data_set['menopause'] = data_set['menopause'].map(title_mapping)
-        data_set['menopause'] = data_set['menopause'].fillna(0)
+        # title_mapping ={'left': 0, 'right': 1}
+        # data_set['breast'] = data_set['breast'].map(title_mapping)
+        # data_set['breast'] = data_set['breast'].fillna(0)
+        data_set.loc[data_set['breast']=='left',  'breast']  = 0
+        data_set.loc[data_set['breast']=='right', 'breast']  = 1
+        
+        # title_mapping = {'left-up': 0, 'left-low': 1, 'right-up': 2, 'right-low': 3, 'central': 4}
+        # data_set['breastQuad'] = data_set['breastQuad'].map(title_mapping)
+        # data_set['breastQuad'] = data_set['breastQuad'].fillna(0)
+        data_set.loc[data_set['breastQuad']=='left_up',   'breastQuad']  = 0
+        data_set.loc[data_set['breastQuad']=='left_low',  'breastQuad']  = 1
+        data_set.loc[data_set['breastQuad']=='right_up',  'breastQuad']  = 2
+        data_set.loc[data_set['breastQuad']=='right_low', 'breastQuad']  = 3
+        data_set.loc[data_set['breastQuad']=='central',   'breastQuad']  = 4
+        data_set.loc[data_set['breastQuad']=='?',   'breastQuad']  = 5
 
-        title_mapping = {'0-4': 0,'5-9': 1, '10-14': 2, '15-19': 3, '20-24': 4, '25-29': 5, '30-34': 6, '35-39': 7, '40-44': 8, '45-49': 9, '50-54': 10, '55-59': 11}
-        data_set['tumorSize'] = data_set['tumorSize'].map(title_mapping)
-        data_set['tumorSize'] = data_set['tumorSize'].fillna(0)
+        # title_mapping = {'yes': 0, 'no': 1}
+        # data_set['irradiat'] = data_set['irradiat'].map(title_mapping)
+        # data_set['irradiat'] = data_set['irradiat'].fillna(0)
+        data_set.loc[data_set['irradiat']=='yes',   'irradiat']  = 0
+        data_set.loc[data_set['irradiat']=='no',   'irradiat']  = 1
 
-        title_mapping = {'0-2': 0, '3-5': 1, '6-8': 2, '9-11': 3, '12-14': 4, '15-17': 5, '18-20': 6, '21-23': 7, '24-26': 8, '27-29': 9, '30-32': 10, '33-35': 11, '36-39': 12}
-        data_set['invNodes'] = data_set['invNodes'].map(title_mapping)
-        data_set['invNodes'] = data_set['invNodes'].fillna(0)
-
-        title_mapping = {'yes': 0, 'no': 1}
-        data_set['nodeCaps'] = data_set['nodeCaps'].map(title_mapping)
-        data_set['nodeCaps'] = data_set['nodeCaps'].fillna(0)
-
-        title_mapping ={'left': 0, 'right': 1}
-        data_set['breast'] = data_set['breast'].map(title_mapping)
-        data_set['breast'] = data_set['breast'].fillna(0)
-
-        title_mapping = {'left-up': 0, 'left-low': 1, 'right-up': 2, 'right-low': 3, 'central': 4}
-        data_set['breastQuad'] = data_set['breastQuad'].map(title_mapping)
-        data_set['breastQuad'] = data_set['breastQuad'].fillna(0)
-
-        title_mapping = {'yes': 0, 'no': 1}
-        data_set['irradiat'] = data_set['irradiat'].map(title_mapping)
-        data_set['irradiat'] = data_set['irradiat'].fillna(0)
-
-        Y = data_set["Class"]
+        Y = data_set.loc[:,"Class"]
 
         # Data scaling [0,1]
-        data_set = pd.DataFrame(MinMaxScaler().fit_transform(data_set), columns = cols)
-
+        cols = list(data_set.columns)
+        data_set_final = pd.DataFrame(MinMaxScaler().fit_transform(data_set), columns = cols)
+        
         X = data_set.drop("Class", axis=1)
         return X,Y
 
@@ -308,6 +365,7 @@ class data_preparation:
 
 
     def german(self, data_set):
+        data_set = data_set.copy()
 
         # column names list
         cols = list(data_set.columns)
