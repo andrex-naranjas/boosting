@@ -122,8 +122,8 @@ def plot_roc_curve(TPR,FPR,sample,real,glob_local,name,kernel,nClass):
     plt.close()
     
 
-def latex_table_tukey(isDiverse, auc_val, auc_test, prc_val,  prc_test, f1_val,  f1_test,
-                                 rec_val, rec_test, acc_val,  acc_test, gmn_val, gmn_test,  f_out):
+def latex_table_tukey(isDiverse, auc_val, auc_error, auc_test, prc_val, prc_error,  prc_test, f1_val,  f1_error,  f1_test,
+                                 rec_val, rec_error, rec_test, acc_val, acc_error,  acc_test, gmn_val, gmn_error, gmn_test,  f_out):
                       
     print("\\begin{tabular}{c | c  c  c | c c c | c c c | c c c | c c c | c c c }\hline \hline", file=f_out)
     print("Model & $\mu_{AUC}$  & p-val  &  Reject $H_{0}$ & $\mu_{prc}$  & p-val  &  Rjct. $H_{0}$ & $\mu_{f1}$  & p-val  &  Rjct. $H_{0}$ & $\mu_{rec}$  & p-val  &  Rjct. $H_{0}$ & $\mu_{acc}$  & p-val  &  Rjct. $H_{0}$ & $\mu_{gmn}$  & p-val  &  Rjct. $H_{0}$   \\\  \hline", file=f_out)
@@ -137,11 +137,13 @@ def latex_table_tukey(isDiverse, auc_val, auc_test, prc_val,  prc_test, f1_val, 
     reject_rec = ''
     reject_acc = ''
     reject_gmn = ''
-    
+
+    i_cf = 0
     for i in range(nAlgos):
         k=0,0
         j = i + 1
         if isDiverse:
+            i_cf = 1
             if i==0:
                 k = i
                 j = i
@@ -174,78 +176,10 @@ def latex_table_tukey(isDiverse, auc_val, auc_test, prc_val,  prc_test, f1_val, 
                 
     print('\hline \hline', file=f_out)
     print('\end{tabular}', file=f_out)
-    print("\caption{Tukey statistics test. Scores of current classifier  --AUC:", round(auc_val[0],2), "-- prc:", round(prc_val[0],2), "-- f1:", round(f1_val[0],2), '-- REC' ,round(rec_val[0],2), "-- acc:", round(acc_val[0],2), "-- gmn:", round(gmn_val[0],2),"}", file=f_out)
+    print("\caption{Tukey statistics test. Scores of current classifier  --AUC:",round(auc_val[i_cf], 3),'$\\pm',round(auc_error[i_cf],3), "$",
+                                                                        "--prc:",round(prc_val[i_cf], 3),'$\\pm',round(prc_error[i_cf],3), "$",
+                                                                        "--f1s:",round( f1_val[i_cf], 3),'$\\pm',round( f1_error[i_cf],3), "$",
+                                                                        "--REC:",round(rec_val[i_cf], 3),'$\\pm',round(rec_error[i_cf],3), "$",
+                                                                       "-- acc:",round(acc_val[i_cf], 3),'$\\pm',round(acc_error[i_cf],3), "$",
+                                                                        "--gmn:",round(gmn_val[i_cf], 3),'$\\pm',round(gmn_error[i_cf],3), "$","}", file=f_out)
     print("\label{tab:tukey}", file=f_out)
-
-
-    # print(test.pvalues, type(test.pvalues), len(test.pvalues))
-    # print(test.reject, type(test.reject), len(test.reject))
-    # print(test.confint, type(test.confint), len(test.confint))
-    # print(test.std_pairs, type(test.std_pairs), len(test.std_pairs))
-
-
-
-
-
-    
-                
-#             if not self.asymmetric or not bootstrap:
-#                 print(quantum[i], round(mass,1), '$\\pm',round(error,1), '$ &', exp[i], '$\\pm', delta_exp[i], '$ &', round(decay,3), ' & $xx\pm xx$ \\\ ', file=f_paper)
-#             else:
-#                 if not np.isnan(up_decay):
-#                     if exp[i]!=0.:
-#                         print(quantum[i],'$',round(mass,1),'^{+',round(error_up,1),'}_{',round(error_dn,1),'}$',  '& $',exp[i],'\\pm',delta_exp[i], '$ & $',
-#                               round(decay,3),'^{+', round(up_decay,3),'}_{', round(dn_decay,3),'}$', ' & $ xx\pm xx$ \\\ ', file=f_paper)
-#                     else:
-#                         print(quantum[i],'$',round(mass,1),'^{+',round(error_up,1),'}_{',round(error_dn,1),'}$',  '& $\\dagger $ & $',
-#                               round(decay,3),'^{+', round(up_decay,3),'}_{', round(dn_decay,3),'}$', ' & $ xx\pm xx$ \\\ ', file=f_paper)                        
-#                 else:
-#                     if exp[i]!=0.:
-#                         print(quantum[i],'$',round(mass,1),'^{+',round(error_up,1),'}_{',round(error_dn,1),'}$',  '& $',exp[i],'\\pm',delta_exp[i], '$ & ',
-#                               '$\\dagger\\dagger$', '& $ xx\pm xx$  \\\ ', file=f_paper)
-#                     else:
-#                         print(quantum[i],'$',round(mass,1),'^{+',round(error_up,1),'}_{',round(error_dn,1),'}$',  '& $\\dagger$ & ',
-#                               '$\\dagger\\dagger$', '& $ xx\pm xx$  \\\ ', file=f_paper)
-
-
-
-#     def latex_header(self,table_file,paper):        
-#         if not paper:
-#         else:
-#             print("\\begin{tabular}{c | c  c c c }\hline \hline", file=table_file)
-#             print(" State     & Predicted Mass   & Experimental Mass & Predicted Width & Experimental Width   \\\ ", file=table_file)
-#             print("           &      (MeV)       &    (MeV)          &      (MeV)      & $\Gamma_{tot}$ (MeV) \\\ \hline", file=table_file)
-                    
-
-#     def latex_bottom(self, table_file,diff_pred, diff_sample,paper):
-#         label = 'paper'
-#         if not paper:
-#             print('\hline', file=table_file)
-#             print("  &  &  & Total diff & ",round(diff_pred), " &" ,round(diff_sample,1),"\\\ ", file=table_file)
-#             label = 'note'
-            
-
-
-    
-    
-# def decay_table_channels(baryons, channel_widths, sym_errors, f_out):
-
-#     channel_widths = np.array(channel_widths)
-
-#     name_decays=[]
-#     name_decays.append('State')
-#     for i in range(len(channel_widths[0])):
-#         name_decays.append(du.latex_decay_label(baryons,i+1))
-        
-#     name_decays.append('Tot $\\Gamma$')                   
-#     du.print_header_latex(name_decays, f_out)    
-    
-#     for i in range(len(channel_widths)):
-#         if sym_errors is not None:
-#             error = sym_errors[i]
-#         else: error = 0
-        
-#         du.print_row_latex(state_name=str(i+1), state_decays=channel_widths[i],
-#                            errors=error, f_out=f_out)
-        
-#     du.print_bottom_latex(baryons,f_out)
