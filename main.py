@@ -102,9 +102,9 @@ for name in sample_list:
     start = datetime.datetime.now()
     # do the statistical analysis of the performance across different models
     # bootstrap
-    ss.stats_results(name, n_cycles=10, kfolds=10, n_reps=10, boot_kfold ="bootstrap")
+    ss.stats_results(name, n_cycles=200, kfolds=10, n_reps=10, boot_kfold ="bootstrap")
     # kfold cross-validation
-    ss.stats_results(name, n_cycles=10, kfolds=2, n_reps=1, boot_kfold ="kfold")    
+    ss.stats_results(name, n_cycles=10, kfolds=20, n_reps=10, boot_kfold ="kfold")    
     end = datetime.datetime.now()
     elapsed_time = end - start
     print("Elapsed total time = " + str(elapsed_time))
