@@ -26,7 +26,7 @@ import stats_summary as ss
 
 
 if len(sys.argv) != 2:
-    sys.exit('Provide charm states group name. Try again!')
+    sys.exit('Provide data sample name. Try again!')
 
 #states = 'omega' # All, omega, cascades, sigmaLamb
 sample_input = sys.argv[1]
@@ -100,11 +100,14 @@ for name in sample_list:
     # du.cv_metrics(model, X_train, Y_train)
 
     start = datetime.datetime.now()
+    ss.mcnemar_test(name, model='diverse', train_test=False)
+    ss.mcnemar_test(name, model='no_div',  train_test=False)
     # do the statistical analysis of the performance across different models
     # bootstrap
-    ss.stats_results(name, n_cycles=200, kfolds=10, n_reps=10, boot_kfold ="bootstrap")
+    #ss.stats_results(name, n_cycles=5, kfolds=3, n_reps=2, boot_kfold ="bootstrap")
+    ss.stats_results(name, n_cycles=100, kfolds=10, n_reps=10, boot_kfold ="bootstrap")
     # kfold cross-validation
-    ss.stats_results(name, n_cycles=10, kfolds=20, n_reps=10, boot_kfold ="kfold")    
+    ss.stats_results(name, n_cycles=10, kfolds=10, n_reps=10, boot_kfold ="kfold")    
     end = datetime.datetime.now()
     elapsed_time = end - start
     print("Elapsed total time = " + str(elapsed_time))

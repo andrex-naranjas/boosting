@@ -276,7 +276,7 @@ class AdaBoostSVM:
             decision = np.dot(self.alphas,decision)
 
             for i in range(len(steps)):
-                print('daaaaaaaaaaaaaaaaaaaaaliiiii: ', len(steps), len(decision))
+                # print('daaaaaaaaaaaaaaaaaaaaaliiiii: ', len(steps), len(decision))
                 decision_temp = np.array([np.sign(decision[j] + steps[i] ) for j in range(len(decision))]) #*svm_biases[j]
                 thres_decision.append(decision_temp)
                         

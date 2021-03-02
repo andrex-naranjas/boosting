@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 '''
 ---------------------------------------------------------------
  Code to improve SVM
@@ -16,6 +15,7 @@ from scipy.stats import norm
 import pandas as pd
 import math as math
 from sklearn.metrics import auc
+
 
 # frame plots
 def plot_frame(frame,name,xlabel,ylabel,yUserRange,ymin,ymax,sample):
@@ -122,7 +122,7 @@ def plot_roc_curve(TPR,FPR,sample,real,glob_local,name,kernel,nClass):
     plt.close()
     
 
-def latex_table_tukey(isDiverse, auc_val, auc_error, auc_test, prc_val, prc_error,  prc_test, f1_val,  f1_error,  f1_test,
+def latex_table_tukey(names, isDiverse, auc_val, auc_error, auc_test, prc_val, prc_error,  prc_test, f1_val,  f1_error,  f1_test,
                                  rec_val, rec_error, rec_test, acc_val, acc_error,  acc_test, gmn_val, gmn_error, gmn_test,  f_out):
                       
     print("\\begin{tabular}{c | c  c  c | c c c | c c c | c c c | c c c | c c c }\hline \hline", file=f_out)
@@ -140,7 +140,7 @@ def latex_table_tukey(isDiverse, auc_val, auc_error, auc_test, prc_val, prc_erro
 
     i_cf = 0
     for i in range(nAlgos):
-        k=0,0
+        k=0
         j = i + 1
         if isDiverse:
             i_cf = 1
@@ -164,7 +164,7 @@ def latex_table_tukey(isDiverse, auc_val, auc_error, auc_test, prc_val, prc_erro
         if gmn_test.reject[k]: reject_gmn = '\\checkmark'
         elif not gmn_test.reject[k]: reject_gmn = '\\xmark'        
         
-        print('model:',i, ' & ',
+        print(names[j], ' & ',
               round(auc_val[j],2),' & ', round(auc_test.pvalues[k],3), ' & ', reject_auc,' & ',
               round(prc_val[j],2),' & ', round(prc_test.pvalues[k],3), ' & ', reject_prc,' & ',
               round(f1_val[j],2), ' & ', round(f1_test.pvalues[k],3),  ' & ', reject_f1, ' & ',
@@ -182,4 +182,35 @@ def latex_table_tukey(isDiverse, auc_val, auc_error, auc_test, prc_val, prc_erro
                                                                         "--REC:",round(rec_val[i_cf], 3),'$\\pm',round(rec_error[i_cf],3), "$",
                                                                        "-- acc:",round(acc_val[i_cf], 3),'$\\pm',round(acc_error[i_cf],3), "$",
                                                                         "--gmn:",round(gmn_val[i_cf], 3),'$\\pm',round(gmn_error[i_cf],3), "$","}", file=f_out)
+    print("\label{tab:tukey}", file=f_out)
+
+
+
+def latex_table_mcnemar(names, p_values,stats,rejects, area2s, prec2s, f1_2s, recall2s, acc2s, gmean2s,
+                                                area1,  prec1,  f1_1, recall1,  acc1,  gmean1, f_out):
+
+    print("\\begin{tabular}{c | c  c  c  c  c  c  c  c  c}\hline \hline", file=f_out)
+    print("Model & $stats$  & p-val  &  Reject $H_{0}$ &  AUC  & PREC  &  F1S  & RECA  &  ACC  &  G-MEAN  \\\  \hline", file=f_out)
+
+    print('model:-1',' & ', "--",' & ', "--",' & ', "--",  ' & ',
+              round(area1,2),   ' & ', round(prec1,2), ' & ', round(f1_1,2),' & ',
+              round(recall1,2),' & ', round(acc1,2),  ' & ', round(gmean1,2),
+              ' \\\ ', file=f_out)
+
+    nAlgos = len(p_values)
+    reject_h0 = ''
+
+    for i in range(nAlgos):                    
+        if rejects[i]: reject_h0 = '\\checkmark'
+        elif not rejects[i]: reject_h0 = '\\xmark'                
+        print(names[i], ' & ',
+              round(stats[i],3),   ' & ', round(p_values[i],3),' & ', reject_h0,        ' & ',
+              round(area2s[i],2),  ' & ', round(prec2s[i],2), ' & ', round(f1_2s[i],2),' & ',
+              round(recall2s[i],2),' & ', round(acc2s[i],2),  ' & ', round(gmean2s[i],2),
+              ' \\\ ', file=f_out)
+
+        
+    print('\hline \hline', file=f_out)
+    print('\end{tabular}', file=f_out)
+    print("\caption{Mc-Nemar statistics test. Scores of current classifier}", file=f_out)
     print("\label{tab:tukey}", file=f_out)
