@@ -13,6 +13,7 @@ from collections import Counter
 from tqdm import tqdm
 from functools import lru_cache
 import datetime
+import math
 
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
@@ -53,11 +54,15 @@ class genetic_selection:
             #print(np.unique(next_generation_y))
             scores, popx, popy                   = self.fitness_score(next_generation_x, next_generation_y)
             scores, popx, popy                   = self.set_population_size(scores, popx, popy, generation, self.population_size)
-            # termination_criterion()
-            pa_x, pa_y, pb_x, pb_y               = self.selection(popx, popy, self.coef)
-            new_population_x , new_population_y  = self.crossover(pa_x, pa_y, pb_x, pb_y, self.population_size)
-            new_offspring_x, new_offspring_y     = self.mutation(new_population_x, new_population_y, self.mutation_rate)
-            next_generation_x, next_generation_y = self.append_offspring(popx, popy, new_offspring_x, new_offspring_y)
+            if termination_criterion(generation, 10, best_score) is True:
+                print('BREAK')
+                break
+                return None
+            else:
+                pa_x, pa_y, pb_x, pb_y               = self.selection(popx, popy, self.coef)
+                new_population_x , new_population_y  = self.crossover(pa_x, pa_y, pb_x, pb_y, self.population_size)
+                new_offspring_x, new_offspring_y     = self.mutation(new_population_x, new_population_y, self.mutation_rate)
+                next_generation_x, next_generation_y = self.append_offspring(popx, popy, new_offspring_x, new_offspring_y)
 
             print(f"Best score achieved in generation {generation} is {scores[-1::]}")
         return None
@@ -218,11 +223,17 @@ class genetic_selection:
         return  next_generation_x, next_generation_y
 
 
-    def termination_criterion(self):
-        if generation == 0:
-            pass
+    def termination_criterion(generation, window, best_score):
+        if generation <= window - 1:
+            return False
         else:
-            pass
+            std = pd.Series(best_score).rolling(window).std()
+            print('STD: ', std.iloc[len(std)-1])
+            if std.iloc[len(std)-1] < 0.001:
+                print('TRUE')
+                return True
+            else:
+                return None
 
     def area_roc(self, model, X_test, Y_test):
         y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
