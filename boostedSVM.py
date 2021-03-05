@@ -74,7 +74,7 @@ class AdaBoostSVM:
             error_pass = errorOut < 0.49 and errorOut > 0.0
             # Diverse_AdaBoost, if Diversity=False, diversity plays no role in classifier selection
             div_pass,tres = self.pass_diversity(flag_div, value_div, count, error_pass)
-            if(error_pass and not div_pass): value_div = self.diversity(x_train, y_pred, count)                    
+            if(error_pass and not div_pass): value_div = self.diversity(x_train, y_pred, count)
             if self.debug: print('error_flag: %5s | div_flag: %5s | div_value: %5s | Threshold: %5s | no. data: %5s | count: %5s | error: %5.2f | gamma: %5.2f | diversities  %3s '
                   %(error_pass, div_pass, value_div, tres, len(y_pred), count, errorOut, myGamma, len(self.diversities)))
             
