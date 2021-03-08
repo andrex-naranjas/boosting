@@ -14,6 +14,7 @@ from tqdm import tqdm
 from functools import lru_cache
 import datetime
 import math
+import pandas as pd
 
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
@@ -54,7 +55,7 @@ class genetic_selection:
             #print(np.unique(next_generation_y))
             scores, popx, popy                   = self.fitness_score(next_generation_x, next_generation_y)
             scores, popx, popy                   = self.set_population_size(scores, popx, popy, generation, self.population_size)
-            if termination_criterion(generation, 10, best_score) is True:
+            if self.termination_criterion(generation, best_score=scores, window=10):
                 print('BREAK')
                 break
                 return None
@@ -212,7 +213,7 @@ class genetic_selection:
             pop_nextgen_x.append(chromosome_x)
             pop_nextgen_y.append(chromosome_y)
 
-        return np.array(pop_nextgen_x), np.array(pop_nextgen_y) # Asegurarnos que hayan genes -1 y 1 en Y, sino sklearn bastardea
+        return np.array(pop_nextgen_x), np.array(pop_nextgen_y) # check existence of genes -1 and 1 in Y, to avoid sklearn crashes
 
 
     def append_offspring(self, next_generation_x, next_generation_y, new_offspring_x, new_offspring_y):
@@ -223,17 +224,18 @@ class genetic_selection:
         return  next_generation_x, next_generation_y
 
 
-    def termination_criterion(generation, window, best_score):
+    def termination_criterion(self, generation, best_score, window=10):
         if generation <= window - 1:
             return False
         else:
-            std = pd.Series(best_score).rolling(window).std()
+            std = pd.Series(best_score).rolling(window).std() # equivalent to np.std(best_score, ddof=1)
+            print(std, type(std), len(std), np.std(best_score,ddof=1), best_score)
             print('STD: ', std.iloc[len(std)-1])
             if std.iloc[len(std)-1] < 0.001:
                 print('TRUE')
                 return True
             else:
-                return None
+                return False
 
     def area_roc(self, model, X_test, Y_test):
         y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
@@ -245,6 +247,7 @@ class genetic_selection:
 sample_list = ['titanic', 'cancer', 'german', 'heart', 'solar','car','contra','tac_toe', 'belle2_i', 'belle2_ii','belle_iii']
 data = data_preparation(GA_selection = True)
 X_train, Y_train, X_test, Y_test = data.dataset('belle2_iii','',sampling=False,split_sample=0.4, train_test=True)
+X_train, Y_train, X_test, Y_test = data.dataset('titanic','',sampling=False,split_sample=0.4, train_test=False)
 
 model_test = AdaBoostSVM(C=50, gammaIni=5, myKernel='rbf', Diversity=True, debug=False)
 #model_test = SVC()
@@ -253,7 +256,7 @@ model_test = AdaBoostSVM(C=50, gammaIni=5, myKernel='rbf', Diversity=True, debug
 start = datetime.datetime.now()
 #model_test.fit(X_train,Y_train)
 test_gen = genetic_selection(model_test, True, X_train, Y_train, X_test, Y_test,
-                             pop_size=10, chrom_len=100, n_gen=3, coef=0.5, mut_rate=0.3)
+                             pop_size=10, chrom_len=100, n_gen=1000, coef=0.5, mut_rate=0.3)
 test_gen.execute()
 
 end = datetime.datetime.now()
