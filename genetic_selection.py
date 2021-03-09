@@ -48,31 +48,47 @@ class genetic_selection:
         best_chromo = np.array([])
         best_score  = np.array([])
 
-        next_generation_x, next_generation_y = self.initialize_population(self.X_train, self.Y_train,
-                                                                          self.population_size, self.chrom_len)
-
+        next_generation_x, next_generation_y, next_generation_indexes = self.initialize_population(self.X_train, self.Y_train,
+                                                                                                   self.population_size, self.chrom_len)
+        
         for generation in tqdm(range(self.n_generations)):
             #print(np.unique(next_generation_y))
-            scores, popx, popy                   = self.fitness_score(next_generation_x, next_generation_y)
-            scores, popx, popy                   = self.set_population_size(scores, popx, popy, generation, self.population_size)
+            scores, popx, popy, index = self.fitness_score(next_generation_x, next_generation_y, next_generation_indexes)
+            scores, popx, popy, index = self.set_population_size(scores, popx, popy, index, generation, self.population_size)
             if self.termination_criterion(generation, best_score=scores, window=10):
                 print('End of genetic algorithm')
-                self.best_popx = popx
-                self.best_popy = popy
+                self.best_pop = next_generation_indexes
                 break
             else:
-                pa_x, pa_y, pb_x, pb_y               = self.selection(popx, popy, self.coef)
-                new_population_x , new_population_y  = self.crossover(pa_x, pa_y, pb_x, pb_y, self.population_size)
-                new_offspring_x, new_offspring_y     = self.mutation(new_population_x, new_population_y, self.mutation_rate)
-                next_generation_x, next_generation_y = self.append_offspring(popx, popy, new_offspring_x, new_offspring_y)
+                pa_x, pa_y, pb_x, pb_y, ind_a, ind_b = self.selection(popx, popy, index, self.coef)
+                new_population_x , new_population_y, new_index = self.crossover(pa_x, pa_y, pb_x, pb_y, ind_a, ind_b, self.population_size)
+                new_offspring_x, new_offspring_y, new_offs_index = self.mutation(new_population_x, new_population_y, new_index, self.mutation_rate)
+                next_generation_x, next_generation_y, next_generation_indexes = self.append_offspring(popx, popy, new_offspring_x, new_offspring_y,
+                                                                                                        index, new_offs_index)
 
-            print(f"Best score achieved in generation {generation} is {scores[-1::]}")
+            print(f"Best score achieved in generation {generation} is {scores[0]}")
 
-        self.best_popx = popx
-        self.best_popy = popy        
-
+        self.best_pop = next_generation_indexes
+        
+        
     def best_population(self):
-        return self.best_popx,self.best_popy
+        ''' fetches the best trained indexes, removing repetitions'''
+        best_train_indexes = self.best_pop.flatten()
+        return np.unique(best_train_indexes)
+
+    
+    def initialize_population(self, X, y, size, chromosome_length): # size==pop_size
+        population_x, population_y, index_pop = [], [], []
+
+        for i in range(size):
+            chromosome_x, chromosome_y = self.get_subset(X, y, size=chromosome_length)
+            population_x.append(chromosome_x.values)
+            population_y.append(chromosome_y.values)
+            # keep track of the indexes and propagate them during the GA selection
+            index_pop.append(chromosome_x.index)
+
+        return np.array(population_x),np.array(population_y),np.array(index_pop)
+
             
     def get_subset(self, X, y, size): #size==chrom_size
         # separate indices by class
@@ -96,19 +112,8 @@ class genetic_selection:
 
         # return shuffled dataframes
         rand_st  = randint(0, 10)
-
+        
         return X_balanced.sample(frac=1, random_state=rand_st), y_balanced.sample(frac=1, random_state=rand_st) # checar random_state
-
-
-    def initialize_population(self, X, y, size, chromosome_length): # size==pop_size
-        population_x, population_y = [], []
-
-        for i in range(size):
-            chromosome_x, chromosome_y = self.get_subset(X, y, size=chromosome_length)
-            population_x.append(chromosome_x.values)
-            population_y.append(chromosome_y.values)
-
-        return np.array(population_x), np.array(population_y)
 
 
     @lru_cache(maxsize = 1000)
@@ -120,9 +125,9 @@ class genetic_selection:
         return acc_score
 
 
-    def fitness_score(self, population_x, population_y):
+    def fitness_score(self, pop_x, pop_y, indexes_pop):
         scores = np.array([])
-        for chromosome_x, chromosome_y in zip(population_x, population_y):
+        for chromosome_x, chromosome_y in zip(pop_x, pop_y):
             array_tuple_x = map(tuple, chromosome_x)
             array_tuple_y = map(tuple, chromosome_y.reshape((1, len(chromosome_y))))
             tuple_tuple_x = tuple(array_tuple_x)
@@ -132,12 +137,12 @@ class genetic_selection:
             #print('Final test prediction:   ', accuracy_score(self.Y_test, predictions), len(self.Y_test), len(predictions))
             #area = self.area_roc(self.model, self.X_test, self.Y_test)
             if self.AB_SVM:  self.model.clean() # needed for AdaBoostSVM
-
+            
         sorted_indexes  = np.argsort(-1*scores) # indexes sorted by score, see the cross check!
-        return scores[sorted_indexes], population_x[sorted_indexes], population_y[sorted_indexes]
+        return scores[sorted_indexes], pop_x[sorted_indexes], pop_y[sorted_indexes], indexes_pop[sorted_indexes]
 
 
-    def set_population_size(self, scores, popx, popy, generation, size):
+    def set_population_size(self, scores, popx, popy, index, generation, size):
         '''Gets rid of lower part of population, restoring original size'''
         if generation == 0:
             pass
@@ -145,10 +150,11 @@ class genetic_selection:
             scores = scores[:size]
             popx   = popx[:size]
             popy   = popy[:size]
-        return scores, popx, popy
+            index   = index[:size]
+        return scores, popx, popy, index
 
 
-    def selection(self, pop_x, pop_y, coef):
+    def selection(self, pop_x, pop_y, data_index, coef):
         '''High-Low-fit selection'''
 
         # high fit and low fit parts of population
@@ -162,19 +168,26 @@ class genetic_selection:
         pa_x = pop_x[hf]
         pa_y = pop_y[hf]
 
+        in_a = data_index[hf]
+
         pb_x = pop_x[lf]
         pb_y = pop_y[lf]
 
-        return pa_x, pa_y, pb_x, pb_y
+        in_b = data_index[lf]
+
+        return pa_x, pa_y, pb_x, pb_y, in_a, in_b
 
 
-    def crossover(self, parent_a_x, parent_a_y, parent_b_x, parent_b_y, num_children):
+    def crossover(self, parent_a_x, parent_a_y, parent_b_x, parent_b_y, index_a, index_b, num_children):
         offspring_x = []
-        offspring_y = []
+        offspring_y = []        
+        offspring_index = []
 
         for i in range(0, num_children):
             p_ab_x = np.array([])
             p_ab_y = np.array([])
+
+            i_ab = np.array([])
 
             # generate random indices
             rand_indx = np.random.choice(range(0,2*len(parent_a_x[0])), len(parent_a_x[0]), replace=False)
@@ -182,23 +195,33 @@ class genetic_selection:
             p_ab_x = np.concatenate((parent_a_x[0], parent_b_x[0]), axis=0)
             p_ab_y = np.concatenate((parent_a_y[0], parent_b_y[0]), axis=0)
 
+            i_ab = np.concatenate((index_a[0], index_b[0]), axis=0)
+
             new_x = p_ab_x[rand_indx]
             new_y = p_ab_y[rand_indx]
 
+            new_i = i_ab[rand_indx]
+
             offspring_x.append(new_x)
             offspring_y.append(new_y)
+            
+            offspring_index.append(new_i)
 
-        return np.array(offspring_x), np.array(offspring_y)
+        return np.array(offspring_x), np.array(offspring_y), np.array(offspring_index)
         #return new_x, new_y
 
 
-    def mutation(self, offspring_x, offspring_y, mutation_rate):
+    def mutation(self, offspring_x, offspring_y, index, mutation_rate):
         pop_nextgen_x = []
         pop_nextgen_y = []
+        
+        ind_nextgen = []
 
         for i in range(0, len(offspring_x)):
             chromosome_x = offspring_x[i]
             chromosome_y = offspring_y[i]
+
+            index_chromosome = index[i]
 
             for j in range(len(chromosome_x)):
                 if random.random() < mutation_rate:
@@ -207,25 +230,29 @@ class genetic_selection:
                         rand_st  = randint(0, 10)
                         random_x = X_train.sample(random_state=rand_st)
                         random_y = Y_train.sample(random_state=rand_st)
+                        random_index = random_x.index
 
                         # Check if new random chromosome is already in the population. If not, it is added
                         if (chromosome_x == random_x.to_numpy()).all(1).any() is not True:
                             chromosome_x[j] = random_x.to_numpy()
                             chromosome_y[j] = random_y.to_numpy()
+                            index_chromosome[j] = random_index.to_numpy()
                             break
 
             pop_nextgen_x.append(chromosome_x)
             pop_nextgen_y.append(chromosome_y)
+            ind_nextgen.append(index_chromosome)
 
-        return np.array(pop_nextgen_x), np.array(pop_nextgen_y) # check existence of genes -1 and 1 in Y, to avoid sklearn crashes
+        return np.array(pop_nextgen_x), np.array(pop_nextgen_y), np.array(ind_nextgen) # check existence of genes -1 and 1 in Y, to avoid sklearn crashes
 
 
-    def append_offspring(self, next_generation_x, next_generation_y, new_offspring_x, new_offspring_y):
+    def append_offspring(self, next_generation_x, next_generation_y, new_offspring_x, new_offspring_y, next_generation_indexes, new_off_index):
         '''Append offspring to population'''
         next_generation_x = np.append(next_generation_x, new_offspring_x, axis=0)
         next_generation_y = np.append(next_generation_y, new_offspring_y, axis=0)
+        next_generation_indexes = np.append(next_generation_indexes, new_off_index, axis=0)
 
-        return  next_generation_x, next_generation_y
+        return  next_generation_x, next_generation_y, next_generation_indexes
 
 
     def termination_criterion(self, generation, best_score, window=10):
@@ -251,8 +278,7 @@ class genetic_selection:
 sample_list = ['titanic', 'cancer', 'german', 'heart', 'solar','car','contra','tac_toe', 'belle2_i', 'belle2_ii','belle_iii']
 data = data_preparation(GA_selection = True)
 X_train, Y_train, X_test, Y_test = data.dataset('belle2_iii','',sampling=False,split_sample=0.4, train_test=True)
-#X_train, Y_train, X_test, Y_test = data.dataset('titanic','',sampling=False,split_sample=0.4, train_test=False)
-print(X_train.shape, Y_train.shape, X_test.shape, Y_test.shape)
+# X_train, Y_train, X_test, Y_test = data.dataset('titanic','',sampling=False,split_sample=0.4, train_test=False)
 model_test = AdaBoostSVM(C=50, gammaIni=5, myKernel='rbf', Diversity=True, debug=False)
 #model_test = SVC()
 
@@ -262,13 +288,11 @@ start = datetime.datetime.now()
 test_gen = genetic_selection(model_test, True, X_train, Y_train, X_test, Y_test,
                              pop_size=10, chrom_len=100, n_gen=1000, coef=0.5, mut_rate=0.3)
 test_gen.execute()
+
+best_train_indexes = test_gen.best_population()
+print(best_train_indexes)
+print(best_train_indexes.shape,  type(best_train_indexes))
+
 end = datetime.datetime.now()
 elapsed_time = end - start
-
-best_x_train, best_y_train = test_gen.best_population()
-
-print(best_x_train.shape, best_y_train.shape, type(best_x_train), type(best_y_train))#, best_y_train.flatten(), best_x_train.flatten())
-print(best_x_train[0], best_y_train[0])
-
-
 print("Elapsed training time = " + str(elapsed_time))

@@ -70,7 +70,7 @@ class data_preparation:
         return data_set
 
     # call data
-    def dataset(self, sample_name='', data_set=None, data_train=None, data_test=None,
+    def dataset(self, sample_name, data_set=None, data_train=None, data_test=None,
                 sampling=False, split_sample=0, train_test=False):
         
         # if sampling = True, sampling is done outside data_preparation,
