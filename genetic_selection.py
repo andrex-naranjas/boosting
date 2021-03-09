@@ -56,9 +56,10 @@ class genetic_selection:
             scores, popx, popy                   = self.fitness_score(next_generation_x, next_generation_y)
             scores, popx, popy                   = self.set_population_size(scores, popx, popy, generation, self.population_size)
             if self.termination_criterion(generation, best_score=scores, window=10):
-                print('BREAK')
+                print('End of genetic algorithm')
+                self.best_popx = popx
+                self.best_popy = popy
                 break
-                return None
             else:
                 pa_x, pa_y, pb_x, pb_y               = self.selection(popx, popy, self.coef)
                 new_population_x , new_population_y  = self.crossover(pa_x, pa_y, pb_x, pb_y, self.population_size)
@@ -66,9 +67,13 @@ class genetic_selection:
                 next_generation_x, next_generation_y = self.append_offspring(popx, popy, new_offspring_x, new_offspring_y)
 
             print(f"Best score achieved in generation {generation} is {scores[-1::]}")
-        return None
 
+        self.best_popx = popx
+        self.best_popy = popy        
 
+    def best_population(self):
+        return self.best_popx,self.best_popy
+            
     def get_subset(self, X, y, size): #size==chrom_size
         # separate indices by class
         y0_index = y[y == -1].index
@@ -140,7 +145,6 @@ class genetic_selection:
             scores = scores[:size]
             popx   = popx[:size]
             popy   = popy[:size]
-
         return scores, popx, popy
 
 
@@ -231,7 +235,7 @@ class genetic_selection:
             std = pd.Series(best_score).rolling(window).std() # equivalent to np.std(best_score, ddof=1)
             print(std, type(std), len(std), np.std(best_score,ddof=1), best_score)
             print('STD: ', std.iloc[len(std)-1])
-            if std.iloc[len(std)-1] < 0.001:
+            if std.iloc[len(std)-1] < 0.01:
                 print('TRUE')
                 return True
             else:
@@ -247,8 +251,8 @@ class genetic_selection:
 sample_list = ['titanic', 'cancer', 'german', 'heart', 'solar','car','contra','tac_toe', 'belle2_i', 'belle2_ii','belle_iii']
 data = data_preparation(GA_selection = True)
 X_train, Y_train, X_test, Y_test = data.dataset('belle2_iii','',sampling=False,split_sample=0.4, train_test=True)
-X_train, Y_train, X_test, Y_test = data.dataset('titanic','',sampling=False,split_sample=0.4, train_test=False)
-
+#X_train, Y_train, X_test, Y_test = data.dataset('titanic','',sampling=False,split_sample=0.4, train_test=False)
+print(X_train.shape, Y_train.shape, X_test.shape, Y_test.shape)
 model_test = AdaBoostSVM(C=50, gammaIni=5, myKernel='rbf', Diversity=True, debug=False)
 #model_test = SVC()
 
@@ -258,7 +262,13 @@ start = datetime.datetime.now()
 test_gen = genetic_selection(model_test, True, X_train, Y_train, X_test, Y_test,
                              pop_size=10, chrom_len=100, n_gen=1000, coef=0.5, mut_rate=0.3)
 test_gen.execute()
-
 end = datetime.datetime.now()
 elapsed_time = end - start
+
+best_x_train, best_y_train = test_gen.best_population()
+
+print(best_x_train.shape, best_y_train.shape, type(best_x_train), type(best_y_train))#, best_y_train.flatten(), best_x_train.flatten())
+print(best_x_train[0], best_y_train[0])
+
+
 print("Elapsed training time = " + str(elapsed_time))
