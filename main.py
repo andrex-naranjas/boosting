@@ -23,7 +23,10 @@ import model_comparison as mc
 import data_visualization as dv
 from model_performance import model_performance
 import stats_summary as ss
+from genetic_selection import genetic_selection
 
+
+from boostedSVM import AdaBoostSVM
 
 if len(sys.argv) != 2:
     sys.exit('Provide data sample name. Try again!')
@@ -52,8 +55,9 @@ for name in sample_list:
     if name=='belle2_iii': split_flag = True
 
     X_train, Y_train, X_test, Y_test = \
-    data.dataset(sample_name=name,
-                 sampling=False,split_sample=0.4,train_test=split_flag)
+        data.dataset(sample_name=name,
+                     sampling=False,split_sample=0.4,train_test=split_flag)
+
 
     # # run AdaBoost support vector machine
     # print('AdaBoost-support vector machines')
@@ -72,7 +76,6 @@ for name in sample_list:
     # TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
 
     # nWeaks = len(model.alphas) # print on plot no. classifiers
-    # # dv.plot_roc_curve(TPR,FPR,sample,'real',   glob_local=True, name='nom')
     # dv.plot_roc_curve(TPR,FPR,name,'sorted', glob_local=True, name='nom', kernel=myKernel, nClass=nWeaks)        
     # print('End adaboost')
 
@@ -89,25 +92,51 @@ for name in sample_list:
     # area = auc(FPR_a,TPR_a)
     # print('Final test prediction:   ', accuracy_score(Y_test, y_preda_a), 'AUC: ', area)
 
-    # # dv.plot_roc_curve(TPR_a,FPR_a,sample,'real',   glob_local=True, name='div')
     # dv.plot_roc_curve(TPR_a,FPR_a,name,'sorted', glob_local=True, name='div', kernel=myKernel, nClass=nWeaks)
     # print('End adaboost')
 
-    
-    # comparison with other ml models (fit, predict and metrics)
-    # mc.comparison(name, X_train, Y_train, Y_test, X_test)
-    # metrics (via cross-validation)
-    # du.cv_metrics(model, X_train, Y_train)
-
     start = datetime.datetime.now()
-    ss.mcnemar_test(name, model='diverse', train_test=False)
-    ss.mcnemar_test(name, model='no_div',  train_test=False)
-    # do the statistical analysis of the performance across different models
-    # bootstrap
-    #ss.stats_results(name, n_cycles=5, kfolds=3, n_reps=2, boot_kfold ="bootstrap")
-    ss.stats_results(name, n_cycles=100, kfolds=10, n_reps=10, boot_kfold ="bootstrap")
-    # kfold cross-validation
-    ss.stats_results(name, n_cycles=10, kfolds=20, n_reps=10, boot_kfold ="kfold")    
+    model_test = AdaBoostSVM(C=50, gammaIni=5, myKernel='rbf', Diversity=True, debug=False)
+
+    GA_selection = genetic_selection(model_test, True, X_train, Y_train, X_test, Y_test,
+                                     pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3)
+    GA_selection.execute()    
+    GA_train_indexes = GA_selection.best_population()
+
+    X_train_GA, Y_train_GA, X_test_GA, Y_test_GA = \
+        data.dataset(sample_name=name, train_test=split_flag, indexes=GA_train_indexes)
+
+    # compare between data imputs
+    # traditional imput
+    model_test.fit(X_train, Y_train)
+    y_preda = model_test.predict(X_test)
+    y_thresholds = model_test.decision_thresholds(X_test, glob_dec=True)
+    TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
+    nWeaks = len(model_test.alphas) # print on plot no. classifiers
+    dv.plot_roc_curve(TPR,FPR,name,'normal',   glob_local=True, name='nom',kernel=myKernel, nClass=nWeaks)
+    model_test.clean()
+
+    # genetic selection input
+    model_test.fit(X_train_GA, Y_train_GA)
+    y_preda = model_test.predict(X_test_GA)
+    y_thresholds = model_test.decision_thresholds(X_test_GA, glob_dec=True)
+    TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test_GA)
+    nWeaks = len(model_test.alphas) # print on plot no. classifiers
+    dv.plot_roc_curve(TPR,FPR,name,'normal',   glob_local=True, name='GA',kernel=myKernel, nClass=nWeaks)
+    model_test.clean()
+
+
+    
+    
+    # ss.mcnemar_test(name, model='diverse', train_test=False)
+    # ss.mcnemar_test(name, model='no_div',  train_test=False)
+
+    # # do the statistical analysis of the performance across different models
+    # # bootstrap
+    # #ss.stats_results(name, n_cycles=5, kfolds=3, n_reps=2, boot_kfold ="bootstrap")
+    # ss.stats_results(name, n_cycles=100, kfolds=10, n_reps=10, boot_kfold ="bootstrap")
+    # # kfold cross-validation
+    # ss.stats_results(name, n_cycles=10, kfolds=20, n_reps=10, boot_kfold ="kfold")    
     end = datetime.datetime.now()
     elapsed_time = end - start
     print("Elapsed total time = " + str(elapsed_time))
@@ -116,3 +145,7 @@ for name in sample_list:
 #performance = model_performance(model, X_train, Y_train, X_test, Y_test)
 
 
+# comparison with other ml models (fit, predict and metrics)
+# mc.comparison(name, X_train, Y_train, Y_test, X_test)
+# metrics (via cross-validation)
+# du.cv_metrics(model, X_train, Y_train)

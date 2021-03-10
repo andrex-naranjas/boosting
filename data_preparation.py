@@ -14,6 +14,7 @@ import sys
 
 # data analysis and wrangling
 import pandas as pd
+import numpy as np
 
 # uproot to import ROOT format data
 import uproot
@@ -71,7 +72,7 @@ class data_preparation:
 
     # call data
     def dataset(self, sample_name, data_set=None, data_train=None, data_test=None,
-                sampling=False, split_sample=0, train_test=False):
+                sampling=False, split_sample=0, train_test=False, indexes = None):
         
         # if sampling = True, sampling is done outside data_preparation,
         # sample is fetched externally
@@ -119,9 +120,28 @@ class data_preparation:
                                   
         # divide sample into train and test sample
         if not train_test:
-            X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=split_sample)
-        
+            if indexes is None:
+                X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=split_sample)
+            else:
+                X_train, X_test, Y_train, Y_test = self.indexes_split(X, Y, split_indexes=indexes)
+                
         return X_train, Y_train, X_test, Y_test
+
+    
+    def indexes_split(self, X, Y, split_indexes):
+        ''' Function to split train and test data given train indexes'''
+        
+        total_indexes = np.array(X.index).tolist()        
+        train_indexes = split_indexes.tolist()
+        test_indexes  = list(set(total_indexes) - set(train_indexes))
+
+        X_train = X.loc[train_indexes]
+        Y_train = Y.loc[train_indexes]
+        X_test  = X.loc[test_indexes]
+        Y_test  = Y.loc[test_indexes]
+
+        return X_train, X_test, Y_train, Y_test
+
 
     # belle2 data preparation
     def belle2(self, data_set, sampling, sample_name):
