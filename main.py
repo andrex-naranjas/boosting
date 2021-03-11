@@ -78,7 +78,6 @@ for name in sample_list:
     # nWeaks = len(model.alphas) # print on plot no. classifiers
     # dv.plot_roc_curve(TPR,FPR,name,'sorted', glob_local=True, name='nom', kernel=myKernel, nClass=nWeaks)        
     # print('End adaboost')
-
     
     # # run Diverse-AdaBoost Diversity support vector machine
     # print('Diverse-AdaBoost-support vector machines')
@@ -95,11 +94,10 @@ for name in sample_list:
     # dv.plot_roc_curve(TPR_a,FPR_a,name,'sorted', glob_local=True, name='div', kernel=myKernel, nClass=nWeaks)
     # print('End adaboost')
 
-    start = datetime.datetime.now()
     model_test = AdaBoostSVM(C=50, gammaIni=5, myKernel='rbf', Diversity=True, debug=False)
 
     GA_selection = genetic_selection(model_test, True, X_train, Y_train, X_test, Y_test,
-                                     pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3)
+                                     pop_size=10, chrom_len=500, n_gen=50, coef=0.5, mut_rate=0.3)
     GA_selection.execute()    
     GA_train_indexes = GA_selection.best_population()
 
@@ -108,6 +106,7 @@ for name in sample_list:
 
     # compare between data imputs
     # traditional imput
+    start = datetime.datetime.now()
     model_test.fit(X_train, Y_train)
     y_preda = model_test.predict(X_test)
     y_thresholds = model_test.decision_thresholds(X_test, glob_dec=True)
@@ -115,8 +114,14 @@ for name in sample_list:
     nWeaks = len(model_test.alphas) # print on plot no. classifiers
     dv.plot_roc_curve(TPR,FPR,name,'normal',   glob_local=True, name='nom',kernel=myKernel, nClass=nWeaks)
     model_test.clean()
+    end = datetime.datetime.now()
+    elapsed_time = end - start
+    print(len(X_train), len(X_test))
+    print("Elapsed total time TRADITIONAL = " + str(elapsed_time))
+
 
     # genetic selection input
+    start = datetime.datetime.now()
     model_test.fit(X_train_GA, Y_train_GA)
     y_preda = model_test.predict(X_test_GA)
     y_thresholds = model_test.decision_thresholds(X_test_GA, glob_dec=True)
@@ -124,10 +129,11 @@ for name in sample_list:
     nWeaks = len(model_test.alphas) # print on plot no. classifiers
     dv.plot_roc_curve(TPR,FPR,name,'normal',   glob_local=True, name='GA',kernel=myKernel, nClass=nWeaks)
     model_test.clean()
+    end = datetime.datetime.now()
+    elapsed_time = end - start
+    print(len(X_train_GA), len(X_test_GA))
+    print("Elapsed total time GENETIC = " + str(elapsed_time))
 
-
-    
-    
     # ss.mcnemar_test(name, model='diverse', train_test=False)
     # ss.mcnemar_test(name, model='no_div',  train_test=False)
 
@@ -137,13 +143,9 @@ for name in sample_list:
     # ss.stats_results(name, n_cycles=100, kfolds=10, n_reps=10, boot_kfold ="bootstrap")
     # # kfold cross-validation
     # ss.stats_results(name, n_cycles=10, kfolds=20, n_reps=10, boot_kfold ="kfold")    
-    end = datetime.datetime.now()
-    elapsed_time = end - start
-    print("Elapsed total time = " + str(elapsed_time))
 
         
 #performance = model_performance(model, X_train, Y_train, X_test, Y_test)
-
 
 # comparison with other ml models (fit, predict and metrics)
 # mc.comparison(name, X_train, Y_train, Y_test, X_test)

@@ -45,25 +45,26 @@ class genetic_selection:
 
     def execute(self):
         best_chromo = np.array([])
-        best_score  = np.array([])
+        best_score  = []
         next_generation_x, next_generation_y, next_generation_indexes = self.initialize_population(self.X_train, self.Y_train,
                                                                                                    self.population_size, self.chrom_len)
         for generation in tqdm(range(self.n_generations)):
             #print(np.unique(next_generation_y))
             scores, popx, popy, index = self.fitness_score(next_generation_x, next_generation_y, next_generation_indexes)
             scores, popx, popy, index = self.set_population_size(scores, popx, popy, index, generation, self.population_size)
-            if self.termination_criterion(generation, best_score=scores, window=10):
+            if self.termination_criterion(generation, best_score, window=10):
                 print('End of genetic algorithm')
                 break
             else:
                 pa_x, pa_y, pb_x, pb_y, ind_a, ind_b = self.selection(popx, popy, index, self.coef)
                 new_population_x , new_population_y, new_index = self.crossover(pa_x, pa_y, pb_x, pb_y, ind_a, ind_b, self.population_size)
                 new_offspring_x, new_offspring_y, new_offs_index = self.mutation(new_population_x, new_population_y, new_index, self.mutation_rate)
+                best_score.append(scores[0])                
                 next_generation_x, next_generation_y, next_generation_indexes = self.append_offspring(popx, popy, new_offspring_x, new_offspring_y,
                                                                                                         index, new_offs_index)
             print(f"Best score achieved in generation {generation} is {scores[0]}")
 
-        self.best_pop = next_generation_indexes
+        self.best_pop = index
         
         
     def best_population(self):
