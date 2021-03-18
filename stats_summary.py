@@ -24,6 +24,7 @@ from data_preparation import data_preparation
 import data_utils as du
 import model_maker as mm
 import data_visualization as dv
+from genetic_selection import genetic_selection
 
 
 def _check_A(A):
@@ -36,7 +37,7 @@ def _check_A(A):
         return A
 
 
-def bootstrap(model, sample_name, roc_area, n_cycles, train_test=False, split_frac=0.6):
+def bootstrap(model, sample_name, roc_area, selection, n_cycles, train_test=False, split_frac=0.6):
     
     # fetch data_frame without preparation
     data = data_preparation()    
@@ -51,16 +52,29 @@ def bootstrap(model, sample_name, roc_area, n_cycles, train_test=False, split_fr
     # bootstrap score calculations
     for _ in range(n_cycles): # arbitrary number of bootstrap samples to produce
         
-        if not train_test:            
+        if not train_test:
             sampled_data_train   = resample(sample_df, replace = True, n_samples = n_samples, random_state = None)
-            # test data are the complement of full input data that is not considered for training
-            sampled_train_no_dup = sampled_data_train.drop_duplicates(keep=False)
-            sampled_data_test    = pd.concat([sample_df,sampled_train_no_dup]).drop_duplicates(keep=False)
             
-            X_train, Y_train = data.dataset(sample_name=sample_name, data_set=sampled_data_train,
-                                            sampling=True, split_sample=0.0, train_test=train_test)
-            X_test, Y_test   = data.dataset(sample_name=sample_name, data_set=sampled_data_test,
-                                            sampling=True, split_sample=0.0, train_test=train_test)
+            if selection == 'trad':
+            # test data are the complement of full input data that is not considered for training
+                sampled_train_no_dup = sampled_data_train.drop_duplicates(keep=False)
+                sampled_data_test    = pd.concat([sample_df, sampled_train_no_dup]).drop_duplicates(keep=False)
+                
+                X_train, Y_train = data.dataset(sample_name=sample_name, data_set=sampled_data_train,
+                                                sampling=True, split_sample=0.0, train_test=train_test)
+                X_test, Y_test   = data.dataset(sample_name=sample_name, data_set=sampled_data_test,
+                                                sampling=True, split_sample=0.0, train_test=train_test)                        
+            elif selection == 'gene': # genetic selection
+                train_indexes = np.unique(sampled_data_train.index) # TODO: handle the repeated indexes
+                X,Y = data.dataset(sample_name=sample_name, data_set = sample_df, sampling = True)
+                X_train, X_test, Y_train, Y_test = data.indexes_split(X, Y, train_indexes)
+                print(len(X_train.index),  len(Y_train.index), 'X_train, Y_train sizes')
+
+                GA_selection = genetic_selection(model, roc_area, X_train, Y_train, X_test, Y_test,
+                                                 pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type='acc')
+                GA_selection.execute()
+                GA_train_indexes = GA_selection.best_population()
+                X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, train_test=False, indexes=GA_train_indexes)
             
         else:
             sampled_data_train = resample(sample_train_df, replace = True, n_samples = 5000,  random_state = 0)
@@ -87,8 +101,7 @@ def bootstrap(model, sample_name, roc_area, n_cycles, train_test=False, split_fr
         elif roc_area=="deci":
             Y_pred_dec = model.decision_function(X_test)
             area = roc_auc_score(Y_test, Y_pred_dec)
-            
-        
+                    
         area_scores   = np.append(area_scores, area)
         prec_scores   = np.append(prec_scores, prec)
         f1_scores     = np.append(f1_scores,   f1)
@@ -205,7 +218,7 @@ def mcnemar_test(sample_name, model='no_div', train_test=False):
                                                        area1, prec1, f1_1, recall1, acc1, gmean1, f_mcnemar)
 
                 
-def cross_validation(model, sample_name, roc_area, kfolds, n_reps, train_test=False):
+def cross_validation(model, sample_name, roc_area, selection, kfolds, n_reps, train_test=False):
     
     # fetch data
     data = data_preparation()
@@ -214,16 +227,21 @@ def cross_validation(model, sample_name, roc_area, kfolds, n_reps, train_test=Fa
     X,Y = data.dataset(sample_name=sample_name, data_set=sample_df,
                        sampling=True, split_sample=0.0, train_test=train_test)
     
-    X,Y = X.values, Y.values
-
     area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores = ([]),([]),([]),([]),([]),([])
     
     # n-k fold cross validation, n_cycles = n_splits * n_repeats
     rkf = RepeatedKFold(n_splits = kfolds, n_repeats = n_reps, random_state = None)
     for train_index, test_index in rkf.split(X):
-        X_train, X_test = X[train_index], X[test_index]
-        Y_train, Y_test = Y[train_index], Y[test_index]
-        
+        X_train, X_test = X.loc[train_index], X.loc[test_index]
+        Y_train, Y_test = Y.loc[train_index], Y.loc[test_index]
+
+        if selection == 'gene': # genetic selection
+            GA_selection = genetic_selection(model, roc_area, X_train, Y_train, X_test, Y_test,
+                                             pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type='acc')
+            GA_selection.execute()
+            GA_train_indexes = GA_selection.best_population()
+            X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, train_test=train_test, indexes=GA_train_indexes)
+                    
         model.fit(X_train, Y_train)                
         y_pred = model.predict(X_test)
         prec = precision_score(Y_test, y_pred)
@@ -333,10 +351,12 @@ def stats_results(name, n_cycles, kfolds, n_reps, boot_kfold ='', split_frac=0.6
     models_auc = mm.model_loader("boot", name)
     
     for i in range(len(models_auc)):
-        if boot_kfold == 'bootstrap':        
-            auc, prc, f1, rec, acc, gmn = bootstrap(model=models_auc[i][0],sample_name=name, roc_area=models_auc[i][1], n_cycles=n_cycles)
+        if boot_kfold == 'bootstrap':
+            auc, prc, f1, rec, acc, gmn = bootstrap(model=models_auc[i][0], sample_name=name, roc_area=models_auc[i][1],
+                                                    selection=models_auc[i][3], n_cycles=n_cycles)
         elif boot_kfold == 'kfold':
-            auc, prc, f1, rec, acc, gmn = cross_validation(model=models_auc[i][0],sample_name=name, roc_area=models_auc[i][1], kfolds=kfolds, n_reps=n_reps)
+            auc, prc, f1, rec, acc, gmn = cross_validation(model=models_auc[i][0], sample_name=name, roc_area=models_auc[i][1],
+                                                           selection=models_auc[i][3], kfolds=kfolds, n_reps=n_reps)
 
         auc_values.append(auc)
         prc_values.append(prc)
@@ -360,8 +380,7 @@ def stats_results(name, n_cycles, kfolds, n_reps, boot_kfold ='', split_frac=0.6
         std_gmn = np.append(std_gmn,  np.std(gmn))
         
         # store model names, for later use in latex tables
-        names.append(models_auc[i][2])
-        
+        names.append(models_auc[i][2])        
     
     # tukey tests
     tukey_auc  =  tukey_test(np.array(auc_values))

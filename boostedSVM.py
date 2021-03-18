@@ -103,6 +103,7 @@ class AdaBoostSVM:
 
         # AdaBoost loop
         while True:
+            if count > 200: break
             if count == 0:
                 norm = 1.0
                 new_weights = weights.copy()

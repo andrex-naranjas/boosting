@@ -18,10 +18,9 @@ import pandas as pd
 
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score,auc
+from sklearn.metrics import accuracy_score,auc,precision_score,roc_auc_score,f1_score,recall_score
 
 # framework includes
-from boostedSVM import AdaBoostSVM
 from data_preparation import data_preparation
 import data_utils as du
 
@@ -29,9 +28,9 @@ import data_utils as du
 # Genetic algorithm for training sub-dataset selection
 class genetic_selection:
 
-    def __init__(self, model, isAB_SVM, X_train, Y_train, X_test, Y_test, pop_size, chrom_len, n_gen, coef, mut_rate):
+    def __init__(self, model, model_type, X_train, Y_train, X_test, Y_test, pop_size, chrom_len, n_gen, coef, mut_rate, score_type='acc'):
         self.model = model
-        self.AB_SVM = isAB_SVM
+        self.model_type = model_type
         self.X_train = X_train
         self.Y_train = Y_train
         self.X_test  = X_test
@@ -41,7 +40,11 @@ class genetic_selection:
         self.n_generations = n_gen # maximum number of iterations
         self.coef = coef
         self.mutation_rate=mut_rate
-
+        self.score_type = score_type
+        if(model_type == 'absv'):
+            self.AB_SVM = True
+        else:
+            self.AB_SVM = False
 
     def execute(self):
         best_chromo = np.array([])
@@ -77,7 +80,7 @@ class genetic_selection:
         population_x, population_y, index_pop = [], [], []
 
         for i in range(size):
-            chromosome_x, chromosome_y = self.get_subset(X, y, size=chromosome_length)
+            chromosome_x, chromosome_y = self.get_subset(X, y, size=chromosome_length, count=i)
             population_x.append(chromosome_x.values)
             population_y.append(chromosome_y.values)
             # keep track of the indexes and propagate them during the GA selection
@@ -86,11 +89,12 @@ class genetic_selection:
         return np.array(population_x),np.array(population_y),np.array(index_pop)
 
             
-    def get_subset(self, X, y, size): #size==chrom_size
+    def get_subset(self, X, y, size, count): #size==chrom_size
+        '''construct chromosomes'''        
         # separate indices by class
         y0_index = y[y == -1].index
         y1_index = y[y ==  1].index
-
+        
         # select a random subset of indexes of length size/2
         random_y0 = np.random.choice(y0_index, int(size/2), replace = False)
         random_y1 = np.random.choice(y1_index, int(size/2), replace = False)
@@ -102,9 +106,9 @@ class genetic_selection:
         X_balanced = X.loc[indexes]
         y_balanced = y.loc[indexes]
 
-        # delete useless variables
-        del y0_index
-        del y1_index
+        print(len(indexes), len(np.unique(indexes)))
+        print(X.shape, y.shape, 'original shapes')
+        print(X_balanced.shape, y_balanced.shape)
 
         # return shuffled dataframes
         rand_st  = randint(0, 10)
@@ -116,9 +120,9 @@ class genetic_selection:
     def memoization_score(self, tuple_chrom_x , tuple_chrom_y):
         chromosome_x, chromosome_y = np.asarray(tuple_chrom_x), np.asarray(tuple_chrom_y)
         self.model.fit(chromosome_x, chromosome_y[0])
-        predictions = self.model.predict(self.X_test)
-        acc_score      = accuracy_score(self.Y_test, predictions)
-        return acc_score
+        predictions = self.model_predictions(self.X_test, self.model_type, self.score_type)
+        score       = self.score_value(self.Y_test, predictions, self.model_type, self.score_type)
+        return score
 
 
     def fitness_score(self, pop_x, pop_y, indexes_pop):
@@ -244,14 +248,39 @@ class genetic_selection:
             return False
         else:
             std = pd.Series(best_score).rolling(window).std() # equivalent to np.std(best_score, ddof=1)
-            # print(std, type(std), len(std), np.std(best_score,ddof=1), best_score)
-            print('STD: ', std.iloc[len(std)-1])
             if std.iloc[len(std)-1] < 0.01:
                 return True
             else:
                 return False
 
-    def score_type(self, model, X_test, Y_test):
-        y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
-        TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
-        return auc(FPR,TPR)
+            
+    def score_value(self, Y_test, y_pred, model_type, score_type):
+        '''Computes different scores given options'''
+        if(score_type == 'auc' and model_type == 'absv'):
+            TPR, FPR = du.roc_curve_adaboost(y_pred, Y_test)
+            score_value = auc(FPR,TPR)
+        elif(score_type == 'auc' and model_type != 'absv'):
+            score_value = roc_auc_score(Y_test, y_pred)    
+        elif(score_type == 'acc'):
+            score_value = accuracy_score(Y_test, y_pred)
+        elif(score_type == 'prec'):
+            score_value = precision_score(Y_test, y_pred)
+        elif(score_type == 'f1'):
+            score_value = f1_score(Y_test, y_pred)
+        elif(score_type == 'rec'):
+            score_value = recall_score(Y_test, y_pred)
+        elif(score_type == 'gmean'):
+            score_value  = np.sqrt(precision_score(Y_test, y_pred)*recallscore(Y_test, y_pred))
+        return score_value
+
+    def model_predictions(self, X_test, model_type, score_type):
+        ''' computes the prediction given the score type set '''
+        if(score_type == 'auc'):
+            if(model_type == 'absv'):
+                return self.model.decision_thresholds(X_test, glob_dec=True)
+            elif(model_type == 'prob'):
+                return self.model.predict_proba(X_test)[:,1]
+            elif(model_type == 'deci'):
+                return self.model.decision_function(X_test)
+        else:
+            return self.model.predict(X_test)

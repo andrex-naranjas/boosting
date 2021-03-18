@@ -122,37 +122,41 @@ def pass_agre():
     return PassiveAggressiveClassifier()
 
 def model_loader(option=None, sample_name=None):
-    # set the models,their method to calculate the ROC(AUC) and table name
-    # tuple = (model, auc, latex_name)
+    # set the models,their method to calculate the ROC(AUC), table name and selection
+    # tuple = (model, auc, latex_name, selection)
     models_auc = []
 
     if option == "boot" or option=="kfold":        
-        models_auc.append((adaboost_svm(False), "absv", "boost-svm"))
-        models_auc.append((adaboost_svm(True),  "absv", "boost-svm"))
+        models_auc.append((adaboost_svm(False), "absv", "b-svm-gen", "gene"))
+        models_auc.append((adaboost_svm(True),  "absv", "b-svm-gen", "gene"))
+        models_auc.append((adaboost_svm(False), "absv", "boost-svm", "trad"))
+        models_auc.append((adaboost_svm(True),  "absv", "boost-svm", "trad"))
     elif option == "no_div":
-        models_auc.append((adaboost_svm(True),  "absv", "boost-svm"))
+        models_auc.append((adaboost_svm(True),  "absv", "b-svm-gen", "gene"))
+        models_auc.append((adaboost_svm(True),  "absv", "boost-svm", "trad"))
     elif option == "diverse":
-        models_auc.append((adaboost_svm(False), "absv", "boost-svm"))
+        models_auc.append((adaboost_svm(False), "absv", "b-svm-gen", "gene"))
+        models_auc.append((adaboost_svm(False), "absv", "boost-svm", "trad"))
 
         
-    models_auc.append((single_svm(),  "prob", "single-svm"))
-    models_auc.append((linear_svm(),  "deci", "linear-svm"))
-    models_auc.append((bdt_svm(),     "prob", "bdt-svm"))
-    models_auc.append((bag_svm(),     "prob", "bag-svm"))
-    models_auc.append((rand_forest(), "prob", "rand-forest"))
-    models_auc.append((bdt_forest(),  "prob", "bdt-forest"))
-    models_auc.append((bag_forest(),  "prob", "bag-forest"))
-    models_auc.append((grad_forest(), "prob", "grad-forest"))
-    models_auc.append((neural_net(),  "prob", "neural-net"))
-    models_auc.append((k_neighbors(), "prob", "k-neigh"))
-    models_auc.append((gauss_nb(),    "prob", "gauss-nb"))
-    models_auc.append((gauss_pc(),    "prob", "gauss-pc"))
-    models_auc.append((log_reg(),     "prob", "log-reg"))
-    models_auc.append((ridge_class(), "deci", "ridge-cl"))
-    models_auc.append((sgdc_class(),  "deci", "sgdc-cl"))
-    models_auc.append((pass_agre(),   "deci", "pass-agre"))
+    models_auc.append((single_svm(),  "prob", "single-svm", "trad"))
+    models_auc.append((linear_svm(),  "deci", "linear-svm", "trad"))
+    models_auc.append((bdt_svm(),     "prob", "bdt-svm",    "trad"))
+    models_auc.append((bag_svm(),     "prob", "bag-svm",    "trad"))
+    models_auc.append((rand_forest(), "prob", "rand-forest","trad"))
+    models_auc.append((bdt_forest(),  "prob", "bdt-forest", "trad"))
+    models_auc.append((bag_forest(),  "prob", "bag-forest", "trad"))
+    models_auc.append((grad_forest(), "prob", "grad-forest","trad"))
+    models_auc.append((neural_net(),  "prob", "neural-net", "trad"))
+    models_auc.append((k_neighbors(), "prob", "k-neigh",    "trad"))
+    models_auc.append((gauss_nb(),    "prob", "gauss-nb",   "trad"))
+    models_auc.append((gauss_pc(),    "prob", "gauss-pc",   "trad"))
+    models_auc.append((log_reg(),     "prob", "log-reg",    "trad"))
+    models_auc.append((ridge_class(), "deci", "ridge-cl",   "trad"))
+    models_auc.append((sgdc_class(),  "deci", "sgdc-cl",    "trad"))
+    models_auc.append((pass_agre(),   "deci", "pass-agre",  "trad"))
     if sample_name != "belle2_ii" and sample_name != "solar": # ugly fix
-        models_auc.append((linear_dis(),  "prob", "linear-dis"))
-        models_auc.append((quad_dis(),    "prob", "quad-dis"))
+        models_auc.append((linear_dis(),  "prob", "linear-dis", "trad"))
+        models_auc.append((quad_dis(),    "prob", "quad-dis", "trad"))
 
     return models_auc

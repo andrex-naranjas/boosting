@@ -81,7 +81,7 @@ class data_preparation:
         if not sampling:
             if not train_test:
                 data_set = self.fetch_data(sample_name)
-            else: # there is separte data samples for training and testing
+            else: # there is separate data samples for training and testing
                 data_train,data_test = self.fetch_data(sample_name)
             
         # prepare data
@@ -129,8 +129,7 @@ class data_preparation:
 
     
     def indexes_split(self, X, Y, split_indexes):
-        ''' Function to split train and test data given train indexes'''
-        
+        ''' Function to split train and test data given train indexes'''        
         total_indexes = np.array(X.index).tolist()        
         train_indexes = split_indexes.tolist()
         test_indexes  = list(set(total_indexes) - set(train_indexes))
@@ -146,7 +145,6 @@ class data_preparation:
     # belle2 data preparation
     def belle2(self, data_set, sampling, sample_name):
         
-
         if(sampling or self.genetic): # sampling was already carried, don't sample again!
             Y = data_set["Class"]
             # Data scaling [0,1]
