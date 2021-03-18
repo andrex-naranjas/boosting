@@ -65,7 +65,7 @@ def bootstrap(model, sample_name, roc_area, selection, n_cycles, train_test=Fals
                 X_test, Y_test   = data.dataset(sample_name=sample_name, data_set=sampled_data_test,
                                                 sampling=True, split_sample=0.0, train_test=train_test)                        
             elif selection == 'gene': # genetic selection
-                train_indexes = np.unique(sampled_data_train.index) # TODO: handle the repeated indexes
+                train_indexes = sampled_data_train.index
                 X,Y = data.dataset(sample_name=sample_name, data_set = sample_df, sampling = True)
                 X_train, X_test, Y_train, Y_test = data.indexes_split(X, Y, train_indexes)
                 print(len(X_train.index),  len(Y_train.index), 'X_train, Y_train sizes')

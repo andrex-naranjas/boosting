@@ -140,18 +140,16 @@ for name in sample_list:
     # # do the statistical analysis of the performance across different models
 
     start = datetime.datetime.now()
-    # ss.stats_results(name, n_cycles=5, kfolds=3, n_reps=2, boot_kfold ="bootstrap")
-    ss.stats_results(name, n_cycles=5, kfolds=3, n_reps=2, boot_kfold ="kfold")
+    # bootstrap
+    ss.stats_results(name, n_cycles=50, kfolds=10, n_reps=10, boot_kfold ="bootstrap")
+    # kfold cross-validation
+    ss.stats_results(name, n_cycles=5, kfolds=10, n_reps=10, boot_kfold ="kfold")
+    #ss.stats_results(name, n_cycles=5, kfolds=3, n_reps=2, boot_kfold ="bootstrap")
+    #ss.stats_results(name, n_cycles=5, kfolds=3, n_reps=2, boot_kfold ="kfold")
     end = datetime.datetime.now()
     elapsed_time = end - start
     print("Elapsed total time GENETIC = " + str(elapsed_time))
 
-    
-
-    # # bootstrap
-    # ss.stats_results(name, n_cycles=100, kfolds=10, n_reps=10, boot_kfold ="bootstrap")
-    # # kfold cross-validation
-    # ss.stats_results(name, n_cycles=10, kfolds=20, n_reps=10, boot_kfold ="kfold")
         
 #performance = model_performance(model, X_train, Y_train, X_test, Y_test)
 

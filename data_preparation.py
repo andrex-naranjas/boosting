@@ -129,7 +129,7 @@ class data_preparation:
 
     
     def indexes_split(self, X, Y, split_indexes):
-        ''' Function to split train and test data given train indexes'''        
+        ''' Function to split train and test data given train indexes'''
         total_indexes = np.array(X.index).tolist()        
         train_indexes = split_indexes.tolist()
         test_indexes  = list(set(total_indexes) - set(train_indexes))

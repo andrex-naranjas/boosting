@@ -9,15 +9,12 @@
 import numpy as np
 import random
 from random import randint
-from collections import Counter
 from tqdm import tqdm
 from functools import lru_cache
 import datetime
-import math
 import pandas as pd
+from sklearn.utils import resample
 
-from sklearn.model_selection import train_test_split
-from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score,auc,precision_score,roc_auc_score,f1_score,recall_score
 
 # framework includes
@@ -106,15 +103,20 @@ class genetic_selection:
         X_balanced = X.loc[indexes]
         y_balanced = y.loc[indexes]
 
-        print(len(indexes), len(np.unique(indexes)))
-        print(X.shape, y.shape, 'original shapes')
-        print(X_balanced.shape, y_balanced.shape)
-
-        # return shuffled dataframes
-        rand_st  = randint(0, 10)
+        # shuffled dataframes
+        rand_st = randint(0, 10)
+        X_balanced = X_balanced.sample(frac=1, random_state=rand_st)
+        y_balanced = y_balanced.sample(frac=1, random_state=rand_st) # check random_state
         
-        return X_balanced.sample(frac=1, random_state=rand_st), y_balanced.sample(frac=1, random_state=rand_st) # checar random_state
-
+        # It may exist repeated indexes that change the chromosome size
+        # these lines fix the issue coming from bootstrap
+        # the GA selection cannot handle different chromosome sizes
+        if(len(X_balanced) != len(indexes)):
+            X_balanced = resample(X_balanced, replace=False, n_samples=len(indexes))
+            y_balanced = resample(y_balanced, replace=False, n_samples=len(indexes))
+            
+        return X_balanced, y_balanced
+    
 
     @lru_cache(maxsize = 1000)
     def memoization_score(self, tuple_chrom_x , tuple_chrom_y):
