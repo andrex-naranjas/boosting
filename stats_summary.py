@@ -138,7 +138,7 @@ def mcnemar_table(y_pred1, y_pred2, y_test):
     return matrix,corrected
 
 
-def mcnemar_test(sample_name, model='no_div', train_test=False):
+def mcnemar_test(sample_name, selection='gene', model='no_div', train_test=False):
 
     if   model =='diverse': model1 = mm.adaboost_svm(True)
     elif model =='no_div' : model1 = mm.adaboost_svm(False)
@@ -148,6 +148,12 @@ def mcnemar_test(sample_name, model='no_div', train_test=False):
     X_train, Y_train, X_test, Y_test = \
     data.dataset(sample_name=sample_name,
                  sampling=False,split_sample=0.4,train_test=train_test)
+    if selection == 'gene':
+        GA_selection = genetic_selection(model1, "absv", X_train, Y_train, X_test, Y_test,
+                                         pop_size=20, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type='acc')
+        GA_selection.execute()
+        GA_train_indexes = GA_selection.best_population()
+        X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, train_test=train_test, indexes=GA_train_indexes)
     
     # train the model we are analyzing
     model1.fit(X_train, Y_train)

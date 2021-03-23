@@ -94,56 +94,58 @@ for name in sample_list:
     # dv.plot_roc_curve(TPR_a,FPR_a,name,'sorted', glob_local=True, name='div', kernel=myKernel, nClass=nWeaks)
     # print('End adaboost')
 
-    # model_test = AdaBoostSVM(C=50, gammaIni=5, myKernel='rbf', Diversity=False, debug=False)
 
-    # GA_selection = genetic_selection(model_test, 'absv', X_train, Y_train, X_test, Y_test,
-    #                                  pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type='prec')
-    # GA_selection.execute()
-    # GA_train_indexes = GA_selection.best_population()
+    # test genetic selection
+    model_test = AdaBoostSVM(C=50, gammaIni=5, myKernel='rbf', Diversity=False, early_stop=True, debug=False)
 
-    # X_train_GA, Y_train_GA, X_test_GA, Y_test_GA = \
-    #     data.dataset(sample_name=name, train_test=split_flag, indexes=GA_train_indexes)
+    GA_selection = genetic_selection(model_test, 'absv', X_train, Y_train, X_test, Y_test,
+                                     pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type='prec')
+    GA_selection.execute()
+    GA_train_indexes = GA_selection.best_population()
 
-    # # compare between data imputs
-    # # traditional input
-    # start = datetime.datetime.now()
-    # model_test.fit(X_train, Y_train)
-    # y_preda = model_test.predict(X_test)
-    # y_thresholds = model_test.decision_thresholds(X_test, glob_dec=True)
-    # TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
-    # nWeaks = len(model_test.alphas) # print on plot no. classifiers
-    # dv.plot_roc_curve(TPR,FPR,name,'normal',   glob_local=True, name='nom',kernel=myKernel, nClass=nWeaks)
-    # model_test.clean()
-    # end = datetime.datetime.now()
-    # elapsed_time = end - start
-    # print(len(X_train), len(X_test))
-    # print("Elapsed total time TRADITIONAL = " + str(elapsed_time))
+    X_train_GA, Y_train_GA, X_test_GA, Y_test_GA = \
+        data.dataset(sample_name=name, train_test=split_flag, indexes=GA_train_indexes)
+
+    # compare between data imputs
+    # traditional input
+    start = datetime.datetime.now()
+    model_test.fit(X_train, Y_train)
+    y_preda = model_test.predict(X_test)
+    y_thresholds = model_test.decision_thresholds(X_test, glob_dec=True)
+    TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
+    nWeaks = len(model_test.alphas) # print on plot no. classifiers
+    dv.plot_roc_curve(TPR,FPR,name,'normal',   glob_local=True, name='nom',kernel=myKernel, nClass=nWeaks)
+    model_test.clean()
+    end = datetime.datetime.now()
+    elapsed_time = end - start
+    print(len(X_train), len(X_test))
+    print("Elapsed total time TRADITIONAL = " + str(elapsed_time))
 
 
-    # # genetic selection input
-    # start = datetime.datetime.now()
-    # model_test.fit(X_train_GA, Y_train_GA)
-    # y_preda = model_test.predict(X_test_GA)
-    # y_thresholds = model_test.decision_thresholds(X_test_GA, glob_dec=True)
-    # TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test_GA)
-    # nWeaks = len(model_test.alphas) # print on plot no. classifiers
-    # dv.plot_roc_curve(TPR,FPR,name,'normal',   glob_local=True, name='GA',kernel=myKernel, nClass=nWeaks)
-    # model_test.clean()
-    # end = datetime.datetime.now()
-    # elapsed_time = end - start
-    # print(len(X_train_GA), len(X_test_GA))
-    # print("Elapsed total time GENETIC = " + str(elapsed_time))
+    # genetic selection input
+    start = datetime.datetime.now()
+    model_test.fit(X_train_GA, Y_train_GA)
+    y_preda = model_test.predict(X_test_GA)
+    y_thresholds = model_test.decision_thresholds(X_test_GA, glob_dec=True)
+    TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test_GA)
+    nWeaks = len(model_test.alphas) # print on plot no. classifiers
+    dv.plot_roc_curve(TPR,FPR,name,'normal',   glob_local=True, name='GA',kernel=myKernel, nClass=nWeaks)
+    model_test.clean()
+    end = datetime.datetime.now()
+    elapsed_time = end - start
+    print(len(X_train_GA), len(X_test_GA))
+    print("Elapsed total time GENETIC = " + str(elapsed_time))
+
+    # # do the statistical analysis of the performance across different models
 
     # ss.mcnemar_test(name, model='diverse', train_test=False)
     # ss.mcnemar_test(name, model='no_div',  train_test=False)
 
-    # # do the statistical analysis of the performance across different models
-
     start = datetime.datetime.now()
     # bootstrap
-    ss.stats_results(name, n_cycles=50, kfolds=10, n_reps=10, boot_kfold ="bootstrap")
+    # ss.stats_results(name, n_cycles=50, kfolds=10, n_reps=10, boot_kfold ="bootstrap")
     # kfold cross-validation
-    ss.stats_results(name, n_cycles=5, kfolds=10, n_reps=10, boot_kfold ="kfold")
+    # ss.stats_results(name, n_cycles=5, kfolds=10, n_reps=10, boot_kfold ="kfold")
     #ss.stats_results(name, n_cycles=5, kfolds=3, n_reps=2, boot_kfold ="bootstrap")
     #ss.stats_results(name, n_cycles=5, kfolds=3, n_reps=2, boot_kfold ="kfold")
     end = datetime.datetime.now()

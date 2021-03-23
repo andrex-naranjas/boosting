@@ -16,11 +16,14 @@ import numpy as np
 # machine learning
 from sklearn.svm import SVC, LinearSVC
 from sklearn import svm
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+
 # AdaBoost class
 
 class AdaBoostSVM:
 
-    def __init__(self, C, gammaIni, myKernel, Diversity=False, debug=False):
+    def __init__(self, C, gammaIni, myKernel, Diversity=False, early_stop=False, debug=False):
 
         self.C = C
         self.gammaIni = gammaIni
@@ -30,6 +33,8 @@ class AdaBoostSVM:
         self.weights_list = []
         self.errors    = ([])
         self.precision = ([])
+        self.train_scores = ([])
+        self.test_scores = ([])
         # Diversity threshold-constant and empty list
         self.div_flag = Diversity
         self.eta = 0.5
@@ -37,6 +42,7 @@ class AdaBoostSVM:
         self.Div_total = ([])
         self.Div_partial = ([])
         self.debug = debug
+        self.early_flag = early_stop
         self.count_warning = 1
         
 
@@ -70,7 +76,6 @@ class AdaBoostSVM:
                 if (y_train[i] != y_pred[i]):
                     errorOut += myWeights[i]
 
-
             error_pass = errorOut < 0.49 and errorOut > 0.0
             # Diverse_AdaBoost, if Diversity=False, diversity plays no role in classifier selection
             div_pass,tres = self.pass_diversity(flag_div, value_div, count, error_pass)
@@ -90,7 +95,13 @@ class AdaBoostSVM:
 
     def fit(self, X, y):
 
-        X_train, Y_train = self._check_X_y(X, y)
+        if self.early_flag:
+            X_train, X_test, Y_train, Y_test = train_test_split(X, y, test_size=0.2)
+            X_train, Y_train = self._check_X_y(X_train, Y_train)
+            X_test, Y_test = self._check_X_y(X_test, Y_test)
+        else:
+            X_train, Y_train = self._check_X_y(X, y)
+                        
         n = X_train.shape[0]
         weights = np.ones(n)/n
 
@@ -103,6 +114,8 @@ class AdaBoostSVM:
 
         # AdaBoost loop
         while True:
+            if self.early_flag:
+                if self.early_stop(count, X_train, Y_train, X_test, Y_test): break  # early stop based on a score
             if count > 200: break
             if count == 0:
                 norm = 1.0
@@ -161,9 +174,7 @@ class AdaBoostSVM:
             # do loop as long gamma > gammaMin, if gamma < 0, SVM fails exit loop
             if gammaVar <= gammaMin:#) or (gammaVar < 0):
                 break
-
             # end of adaboot loop
-        
 
         print(count,'number of classifiers')
         self.count_warning == count
@@ -234,6 +245,24 @@ class AdaBoostSVM:
         else:
             return False, threshold_div
 
+        
+    def early_stop(self, count, x_train, y_train, x_test, y_test):
+        if count==0 or count%10 != 0:
+            return False
+        else:
+            train_score = accuracy_score(y_train, self.predict(x_train))
+            test_score = accuracy_score(y_test, self.predict(x_test))
+            self.train_scores = np.append(self.train_scores, train_score)
+            self.test_scores  = np.append(self.test_scores , test_score)
+                        
+            length = len(self.test_scores)            
+            previous_score = self.test_scores[length - 2]
+
+            if (previous_score < test_score):
+                return True
+            else:
+                return False        
+    
 
     def _check_X_y(self, X, y):
         # Validate assumptions about format of input data. Expecting response variable to be formatted as ±1
