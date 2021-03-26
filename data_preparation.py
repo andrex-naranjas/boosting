@@ -55,16 +55,16 @@ class data_preparation:
         elif sample == 'tac_toe':
             data_set = pd.read_csv('./data/tac_toe.csv')
         elif sample == 'belle2_i':
-            file = uproot.open('./data/belle2_kpipi0.root')
-            data_set = file['combined'].pandas.df()
+            file = uproot.open('./data/belle2_kpipi0.root')            
+            data_set = file['combined'].arrays(library="pd")
         elif sample == 'belle2_ii':
             file = uproot.open('./data/belle2_kpi.root')
-            data_set = file['combined'].pandas.df()
+            data_set = file['combined'].arrays(library="pd")
         elif sample == 'belle2_iii':
             file_train = uproot.open('./data/train_D02k3pi.root')
-            data_train = file_train['d0tree'].pandas.df()
+            data_train = file_train['d0tree'].arrays(library="pd")
             file_test  = uproot.open('./data/test_D02k3pi.root')
-            data_test  = file_train['d0tree'].pandas.df()
+            data_test  = file_train['d0tree'].arrays(library="pd")
             return data_train, data_test
         else:
             sys.exit('The sample name provided does not exist. Try again!')

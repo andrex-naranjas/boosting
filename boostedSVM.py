@@ -116,7 +116,6 @@ class AdaBoostSVM:
         while True:
             if self.early_flag:
                 if self.early_stop(count, X_train, Y_train, X_test, Y_test): break  # early stop based on a score
-            if count > 200: break
             if count == 0:
                 norm = 1.0
                 new_weights = weights.copy()
