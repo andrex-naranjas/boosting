@@ -817,7 +817,7 @@ Survived,Pclass,Name,Sex,Age,Siblings/Spouses Aboard,Parents/Children Aboard,Far
 0,3,"Master. Karl Thorsten Skoog",male,10,3,2,27.9
 1,1,"Mrs. Charles Melville (Clara Jennings Gregg) Hays",female,52,1,1,93.5
 1,3,"Mr. Nikola Lulic",male,27,0,0,8.6625
-0,1,Jonkheer. John George Reuchlin",male,38,0,0,0
+0,1,"Jonkheer. John George Reuchlin",male,38,0,0,0
 1,3,"Mrs. (Beila) Moor",female,27,0,1,12.475
 0,3,"Master. Urho Abraham Panula",male,2,4,1,39.6875
 0,3,"Mr. John Flynn",male,36,0,0,6.95
