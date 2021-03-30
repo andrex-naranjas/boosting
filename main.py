@@ -96,7 +96,7 @@ for name in sample_list:
 
 
     # test genetic selection
-    model_test = AdaBoostSVM(C=50, gammaIni=5, myKernel='rbf', Diversity=False, early_stop=True, debug=False)
+    model_test = AdaBoostSVM(C=50, gammaIni=10, myKernel='rbf', Diversity=False, early_stop=True, debug=False)
 
     GA_selection = genetic_selection(model_test, 'absv', X_train, Y_train, X_test, Y_test,
                                      pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type='prec')
@@ -114,7 +114,7 @@ for name in sample_list:
     y_thresholds = model_test.decision_thresholds(X_test, glob_dec=True)
     TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
     nWeaks = len(model_test.alphas) # print on plot no. classifiers
-    dv.plot_roc_curve(TPR,FPR,name,'normal',   glob_local=True, name='nom',kernel=myKernel, nClass=nWeaks)
+    dv.plot_roc_curve(TPR,FPR,name,'normal', glob_local=True, name='nom', kernel=myKernel, nClass=nWeaks)
     model_test.clean()
     end = datetime.datetime.now()
     elapsed_time = end - start

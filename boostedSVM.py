@@ -35,6 +35,7 @@ class AdaBoostSVM:
         self.precision = ([])
         self.train_scores = ([])
         self.test_scores = ([])
+        self.count_over_train = ([])
         # Diversity threshold-constant and empty list
         self.div_flag = Diversity
         self.eta = 0.5
@@ -115,7 +116,7 @@ class AdaBoostSVM:
         # AdaBoost loop
         while True:
             if self.early_flag:
-                if self.early_stop(count, X_train, Y_train, X_test, Y_test): break  # early stop based on a score
+                if self.early_stop(count, X_test, Y_test, gammaVar): break  # early stop based on a score
             if count == 0:
                 norm = 1.0
                 new_weights = weights.copy()
@@ -158,6 +159,10 @@ class AdaBoostSVM:
             alpha = 0.5 * np.log(x)
             self.alphas   = np.append(self.alphas, alpha)
             self.weak_svm = np.append(self.weak_svm, learner)
+
+            # get training errors used for early stop
+            train_score = 1 - accuracy_score(Y_train, self.predict(X_train))
+            self.train_scores = np.append(self.train_scores, train_score)
             
             # reset weight lists
             weights = new_weights.copy()
@@ -245,22 +250,63 @@ class AdaBoostSVM:
             return False, threshold_div
 
         
-    def early_stop(self, count, x_train, y_train, x_test, y_test):
-        if count==0 or count%10 != 0:
+    def early_stop(self, count, x_test, y_test, gammaVar):
+        strip_length = 5
+        if count == 0 or count%strip_length != 0:
             return False
-        else:
-            train_score = accuracy_score(y_train, self.predict(x_train))
-            test_score = accuracy_score(y_test, self.predict(x_test))
-            self.train_scores = np.append(self.train_scores, train_score)
-            self.test_scores  = np.append(self.test_scores , test_score)
-                        
-            length = len(self.test_scores)            
-            previous_score = self.test_scores[length - 2]
+        
+        test_score = 1 - accuracy_score(y_test, self.predict(x_test))
+        if len(self.test_scores) == 0:
+            self.test_scores = np.append(self.test_scores, test_score)
+            return False
 
-            if (previous_score < test_score):
-                return True
-            else:
-                return False        
+        min_test_score = np.amin(self.test_scores)
+        if(min_test_score==0):
+            print(min_test_score, 'min_test_score')
+            return True
+        
+        self.test_scores = np.append(self.test_scores, test_score)
+        
+        # calculate the training strip progress (see paper)
+        strip = self.train_scores[count - strip_length + 1 - 1:count]
+        progress = 1000 * ( np.sum(strip)/np.amin(strip) -1)
+        #calculate the generalization (see paper)        
+        gl = 100 * ( (test_score / min_test_score ) - 1)
+        print(progress, gl, 'perrito check')
+
+        # if(gl!=0 and not np.isinf(gl) and not np.isinf(progress) and not np.isnan(gl) and not np.isnan(progress)):
+        #     print(round(progress), round(gl), round(progress/gl), 'perrito check')
+
+        # first criteria
+        if(False):
+            return gl >= 0.
+
+        # second criteria 
+        if(False):
+            return progress / gl >= 0.            
+                        
+        length = len(self.test_scores)
+        previous_score = self.test_scores[length - 2]
+
+        # third criteria
+        if(False or True):
+            index_test = int(count/strip_length)
+            current_error = self.test_scores[index_test-1]
+            past_error = self.test_scores[index_test - int(strip_length/strip_length) - 1]
+            if(current_error > past_error):
+                self.count_over_train = np.append(self.count_over_train, 1)
+            #print(current_error/test_score, past_error/previous_score, count, strip_length, 'another check')
+            # if(len(self.count_over_train)!=0 and current < past):
+            #     self.count_over_train = ([])
+                
+            
+            print('current:', round(current_error,1), ' past:',round(past_error,1), ' count:', count, ' length: ',len(self.count_over_train), 'another check', gammaVar)
+        
+        counter_flag = count >= 100
+        if(counter_flag):
+            counter_flag = count >= 200        
+            
+        return len(self.count_over_train) >= 4 or counter_flag# previous_score <= test_score
     
 
     def _check_X_y(self, X, y):
@@ -342,6 +388,9 @@ class AdaBoostSVM:
         self.Div_total = ([])
         self.Div_partial = ([])
         self.count_warning = 1
+        self.train_scores = ([])
+        self.test_scores = ([])
+        self.count_over_train = ([])
 
 
 '''
