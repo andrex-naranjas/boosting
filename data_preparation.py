@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 '''
 ---------------------------------------------------------------
  Code to improve SVM
  Authors: A. Ramirez-Morales and J. Salmon-Gamboa
  ---------------------------------------------------------------
 '''
-
 # data preparation module
 # python basics
 import sys
