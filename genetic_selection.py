@@ -91,6 +91,10 @@ class genetic_selection:
         # separate indices by class
         y0_index = y[y == -1].index
         y1_index = y[y ==  1].index
+
+        # set the size, to prevent larger sizes than allowed
+        if(len(y0_index) < size/2 or len(y1_index) < size/2):
+            size = np.amin([len(y0_index), len(y1_index)])
         
         # select a random subset of indexes of length size/2
         random_y0 = np.random.choice(y0_index, int(size/2), replace = False)

@@ -123,34 +123,34 @@ for name in sample_list:
 
 
     # genetic selection input
-    start = datetime.datetime.now()
-    model_test.fit(X_train_GA, Y_train_GA)
-    y_preda = model_test.predict(X_test_GA)
-    y_thresholds = model_test.decision_thresholds(X_test_GA, glob_dec=True)
-    TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test_GA)
-    nWeaks = len(model_test.alphas) # print on plot no. classifiers
-    dv.plot_roc_curve(TPR,FPR,name,'normal',   glob_local=True, name='GA',kernel=myKernel, nClass=nWeaks)
-    model_test.clean()
-    end = datetime.datetime.now()
-    elapsed_time = end - start
-    print(len(X_train_GA), len(X_test_GA))
-    print("Elapsed total time GENETIC = " + str(elapsed_time))
+    # start = datetime.datetime.now()
+    # model_test.fit(X_train_GA, Y_train_GA)
+    # y_preda = model_test.predict(X_test_GA)
+    # y_thresholds = model_test.decision_thresholds(X_test_GA, glob_dec=True)
+    # TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test_GA)
+    # nWeaks = len(model_test.alphas) # print on plot no. classifiers
+    # dv.plot_roc_curve(TPR,FPR,name,'normal',   glob_local=True, name='GA',kernel=myKernel, nClass=nWeaks)
+    # model_test.clean()
+    # end = datetime.datetime.now()
+    # elapsed_time = end - start
+    # print(len(X_train_GA), len(X_test_GA))
+    # print("Elapsed total time GENETIC = " + str(elapsed_time))
 
     # # do the statistical analysis of the performance across different models
 
     # ss.mcnemar_test(name, model='diverse', train_test=False)
     # ss.mcnemar_test(name, model='no_div',  train_test=False)
 
-    start = datetime.datetime.now()
+    # start = datetime.datetime.now()
     # bootstrap
     # ss.stats_results(name, n_cycles=50, kfolds=10, n_reps=10, boot_kfold ="bootstrap")
     # kfold cross-validation
     # ss.stats_results(name, n_cycles=5, kfolds=10, n_reps=10, boot_kfold ="kfold")
     #ss.stats_results(name, n_cycles=5, kfolds=3, n_reps=2, boot_kfold ="bootstrap")
     #ss.stats_results(name, n_cycles=5, kfolds=3, n_reps=2, boot_kfold ="kfold")
-    end = datetime.datetime.now()
-    elapsed_time = end - start
-    print("Elapsed total time GENETIC = " + str(elapsed_time))
+    # end = datetime.datetime.now()
+    # elapsed_time = end - start
+    # print("Elapsed total time GENETIC = " + str(elapsed_time))
 
         
 #performance = model_performance(model, X_train, Y_train, X_test, Y_test)
