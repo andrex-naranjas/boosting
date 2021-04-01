@@ -268,22 +268,22 @@ class AdaBoostSVM:
         self.test_scores = np.append(self.test_scores, test_score)
         
         # calculate the training strip progress (see paper)
-        strip = self.train_scores[count - strip_length + 1 - 1:count]
-        progress = 1000 * ( np.sum(strip)/np.amin(strip) -1)
-        #calculate the generalization (see paper)        
-        gl = 100 * ( (test_score / min_test_score ) - 1)
-        print(progress, gl, 'perrito check')
+        # strip = self.train_scores[count - strip_length + 1 - 1:count]
+        # progress = 1000 * ( np.sum(strip)/np.amin(strip) -1)
+        # #calculate the generalization (see paper)        
+        # gl = 100 * ( (test_score / min_test_score ) - 1)
+        # #print(progress, gl, 'perrito check')
 
-        # if(gl!=0 and not np.isinf(gl) and not np.isinf(progress) and not np.isnan(gl) and not np.isnan(progress)):
-        #     print(round(progress), round(gl), round(progress/gl), 'perrito check')
+        # # if(gl!=0 and not np.isinf(gl) and not np.isinf(progress) and not np.isnan(gl) and not np.isnan(progress)):
+        # #     print(round(progress), round(gl), round(progress/gl), 'perrito check')
 
-        # first criteria
-        if(False):
-            return gl >= 0.
+        # # first criteria
+        # if(False):
+        #     return gl >= 0.
 
-        # second criteria 
-        if(False):
-            return progress / gl >= 0.            
+        # # second criteria 
+        # if(False):
+        #     return progress / gl >= 0.            
                         
         length = len(self.test_scores)
         previous_score = self.test_scores[length - 2]
@@ -300,11 +300,11 @@ class AdaBoostSVM:
             #     self.count_over_train = ([])
                 
             
-            print('current:', round(current_error,1), ' past:',round(past_error,1), ' count:', count, ' length: ',len(self.count_over_train), 'another check', gammaVar)
+            #print('current:', round(current_error,1), ' past:',round(past_error,1), ' count:', count, ' length: ',len(self.count_over_train), 'another check', gammaVar)
         
         counter_flag = count >= 100
         if(counter_flag):
-            counter_flag = count >= 200        
+            counter_flag = count >= 150
             
         return len(self.count_over_train) >= 4 or counter_flag# previous_score <= test_score
     

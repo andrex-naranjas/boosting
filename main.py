@@ -98,10 +98,13 @@ for name in sample_list:
     # test genetic selection
     model_test = AdaBoostSVM(C=50, gammaIni=10, myKernel='rbf', Diversity=False, early_stop=True, debug=False)
 
+    start_GA = datetime.datetime.now()
     GA_selection = genetic_selection(model_test, 'absv', X_train, Y_train, X_test, Y_test,
                                      pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type='prec')
     GA_selection.execute()
     GA_train_indexes = GA_selection.best_population()
+    end_GA = datetime.datetime.now()
+    elapsed_time_GA = end_GA - start_GA
 
     X_train_GA, Y_train_GA, X_test_GA, Y_test_GA = \
         data.dataset(sample_name=name, train_test=split_flag, indexes=GA_train_indexes)
@@ -121,20 +124,20 @@ for name in sample_list:
     print(len(X_train), len(X_test))
     print("Elapsed total time TRADITIONAL = " + str(elapsed_time))
 
-
     # genetic selection input
-    # start = datetime.datetime.now()
-    # model_test.fit(X_train_GA, Y_train_GA)
-    # y_preda = model_test.predict(X_test_GA)
-    # y_thresholds = model_test.decision_thresholds(X_test_GA, glob_dec=True)
-    # TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test_GA)
-    # nWeaks = len(model_test.alphas) # print on plot no. classifiers
-    # dv.plot_roc_curve(TPR,FPR,name,'normal',   glob_local=True, name='GA',kernel=myKernel, nClass=nWeaks)
-    # model_test.clean()
-    # end = datetime.datetime.now()
-    # elapsed_time = end - start
-    # print(len(X_train_GA), len(X_test_GA))
-    # print("Elapsed total time GENETIC = " + str(elapsed_time))
+    start = datetime.datetime.now()
+    model_test.fit(X_train_GA, Y_train_GA)
+    y_preda = model_test.predict(X_test_GA)
+    y_thresholds = model_test.decision_thresholds(X_test_GA, glob_dec=True)
+    TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test_GA)
+    nWeaks = len(model_test.alphas) # print on plot no. classifiers
+    dv.plot_roc_curve(TPR,FPR,name,'normal',   glob_local=True, name='GA',kernel=myKernel, nClass=nWeaks)
+    model_test.clean()
+    end = datetime.datetime.now()
+    elapsed_time = end - start
+    print(len(X_train_GA), len(X_test_GA))
+    print("Elapsed total time GENETIC = " + str(elapsed_time))
+    print("GENETIC selection = " + str(elapsed_time_GA))
 
     # # do the statistical analysis of the performance across different models
 
