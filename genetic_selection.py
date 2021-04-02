@@ -140,6 +140,7 @@ class genetic_selection:
             tuple_tuple_y = tuple(array_tuple_y)
             print(type(tuple_tuple_y), type(tuple_tuple_y))
             score         = self.memoization_score(tuple_tuple_x , tuple_tuple_y)
+            print(score)
             scores        = np.append(scores, score)
             if self.AB_SVM:  self.model.clean() # needed for AdaBoostSVM
             
