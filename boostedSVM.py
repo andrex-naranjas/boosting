@@ -311,7 +311,7 @@ class AdaBoostSVM:
 
     def _check_X_y(self, X, y):
         # Validate assumptions about format of input data. Expecting response variable to be formatted as ±1
-        assert set(y) == {-1, 1}
+        assert set(y) == {-1, 1} or set(y) == {-1} or set(y) == {1} # extra conditions for highly imbalance
         # If input data already is numpy array, do nothing
         if type(X) == type(np.array([])) and type(y) == type(np.array([])):
             return X, y
