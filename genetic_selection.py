@@ -262,22 +262,26 @@ class genetic_selection:
             
     def score_value(self, Y_test, y_pred, model_type, score_type):
         '''Computes different scores given options'''
-        print(Y_test.values[0], y_pred[0], len(Y_test), len(y_pred) )
+        Y_test = Y_test.astype(float).values        
+        #print(Y_test.values[0], y_pred[0], len(Y_test), len(y_pred) )
+        # for i in range(len(y_pred)):
+        #     print(Y_test[i], y_pred[i], type(Y_test[i]), type(y_pred[i]) )
+        # input()
         if(score_type == 'auc' and model_type == 'absv'):
-            TPR, FPR = du.roc_curve_adaboost(y_pred, Y_test.values)
+            TPR, FPR = du.roc_curve_adaboost(y_pred, Y_test)
             score_value = auc(FPR,TPR)
         elif(score_type == 'auc' and model_type != 'absv'):
-            score_value = roc_auc_score(Y_test.values, y_pred)    
+            score_value = roc_auc_score(Y_test, y_pred)    
         elif(score_type == 'acc'):
-            score_value = accuracy_score(Y_test.values, y_pred)
+            score_value = accuracy_score(Y_test, y_pred)
         elif(score_type == 'prec'):
-            score_value = precision_score(Y_test.values, y_pred)
+            score_value = precision_score(Y_test, y_pred)
         elif(score_type == 'f1'):
-            score_value = f1_score(Y_test.values, y_pred)
+            score_value = f1_score(Y_test, y_pred)
         elif(score_type == 'rec'):
-            score_value = recall_score(Y_test.values, y_pred)
+            score_value = recall_score(Y_test, y_pred)
         elif(score_type == 'gmean'):
-            score_value  = np.sqrt(precision_score(Y_test.values, y_pred)*recallscore(Y_test.values, y_pred))
+            score_value  = np.sqrt(precision_score(Y_test, y_pred)*recallscore(Y_test, y_pred))
         return score_value
 
     def model_predictions(self, X_test, model_type, score_type):
