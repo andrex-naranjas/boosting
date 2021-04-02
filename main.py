@@ -100,7 +100,7 @@ for name in sample_list:
 
     start_GA = datetime.datetime.now()
     GA_selection = genetic_selection(model_test, 'absv', X_train, Y_train, X_test, Y_test,
-                                     pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type='prec')
+                                     pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type='acc')
     GA_selection.execute()
     GA_train_indexes = GA_selection.best_population()
     end_GA = datetime.datetime.now()
@@ -137,7 +137,7 @@ for name in sample_list:
     elapsed_time = end - start
     print(len(X_train_GA), len(X_test_GA))
     print("Elapsed total time GENETIC = " + str(elapsed_time))
-    print("GENETIC selection = " + str(elapsed_time_GA))
+    print("GENETIC selection time = " + str(elapsed_time_GA))
 
     # # do the statistical analysis of the performance across different models
 
