@@ -262,6 +262,7 @@ class genetic_selection:
             
     def score_value(self, Y_test, y_pred, model_type, score_type):
         '''Computes different scores given options'''
+        print(type(Y_test), type(y_pred), len(Y_test), len(y_pred) )
         if(score_type == 'auc' and model_type == 'absv'):
             TPR, FPR = du.roc_curve_adaboost(y_pred, Y_test)
             score_value = auc(FPR,TPR)
