@@ -107,6 +107,8 @@ class genetic_selection:
         X_balanced = X.loc[indexes]
         y_balanced = y.loc[indexes]
 
+        print(len(y_balanced[y_balanced==1]), len(y_balanced[y_balanced==-1]), 'check balance')
+
         # shuffled dataframes
         rand_st = randint(0, 10)
         X_balanced = X_balanced.sample(frac=1, random_state=rand_st)
