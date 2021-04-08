@@ -122,7 +122,7 @@ for name in sample_list:
     end = datetime.datetime.now()
     elapsed_time = end - start
     print(len(X_train), len(X_test))
-    print("Elapsed total time TRADITIONAL = " + str(elapsed_time))
+    print("Elapsed time TRADITIONAL = " + str(elapsed_time))
 
     # genetic selection input
     start = datetime.datetime.now()
@@ -136,7 +136,7 @@ for name in sample_list:
     end = datetime.datetime.now()
     elapsed_time = end - start
     print(len(X_train_GA), len(X_test_GA))
-    print("Elapsed total time GENETIC = " + str(elapsed_time))
+    print("Elapsed time GENETIC = " + str(elapsed_time))
     print("GENETIC selection time = " + str(elapsed_time_GA))
 
     # # do the statistical analysis of the performance across different models

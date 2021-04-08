@@ -146,9 +146,8 @@ class AdaBoostSVM:
             h_list.append(h_temp)
 
             # print("Error: {} Precision: {} Gamma: {} ".format(round(error,4), round(tp / (tp + fp),4), round(gammaVar+gammaStep,2)))
-            # store errors
+            # store errors and precision
             self.errors = np.append(self.errors, [error])
-            # store precision
             self.precision = np.append(self.precision, [tp / (tp + fp)])
             
             # calculate diversity
@@ -161,8 +160,8 @@ class AdaBoostSVM:
             self.weak_svm = np.append(self.weak_svm, learner)
 
             # get training errors used for early stop
-            train_score = 1 - accuracy_score(Y_train, self.predict(X_train))
-            self.train_scores = np.append(self.train_scores, train_score)
+            # train_score = 1 - accuracy_score(Y_train, self.predict(X_train))
+            # self.train_scores = np.append(self.train_scores, train_score)
             
             # reset weight lists
             weights = new_weights.copy()
@@ -216,7 +215,7 @@ class AdaBoostSVM:
     def predict(self, X):
         # Make predictions using already fitted model
         # print(len(self.alphas), len(self.weak_svm), "how many alphas we have")
-        # print(type(X.shape[0]), 'check size ada-boost' )
+        # print(type(X.shape[0]), 'check size ada-boost')
         if self.count_warning == 0: return np.zeros(X.shape[0])
         svm_preds = np.array([learner.predict(X) for learner in self.weak_svm])
         return np.sign(np.dot(self.alphas, svm_preds))
@@ -266,48 +265,29 @@ class AdaBoostSVM:
             return True
         
         self.test_scores = np.append(self.test_scores, test_score)
-        
-        # calculate the training strip progress (see paper)
-        # strip = self.train_scores[count - strip_length + 1 - 1:count]
-        # progress = 1000 * ( np.sum(strip)/np.amin(strip) -1)
-        # #calculate the generalization (see paper)        
-        # gl = 100 * ( (test_score / min_test_score ) - 1)
-        # #print(progress, gl, 'perrito check')
 
-        # # if(gl!=0 and not np.isinf(gl) and not np.isinf(progress) and not np.isnan(gl) and not np.isnan(progress)):
-        # #     print(round(progress), round(gl), round(progress/gl), 'perrito check')
+        # early stop definition 3 (see the paper)
+        index_test = int(count/strip_length)
+        current_error = self.test_scores[index_test-1]
+        past_error = self.test_scores[index_test - int(strip_length/strip_length) - 1]
+        if(current_error > past_error):
+            self.count_over_train = np.append(self.count_over_train, 1)
 
-        # # first criteria
-        # if(False):
-        #     return gl >= 0.
-
-        # # second criteria 
-        # if(False):
-        #     return progress / gl >= 0.            
-                        
-        length = len(self.test_scores)
-        previous_score = self.test_scores[length - 2]
-
-        # third criteria
-        if(False or True):
-            index_test = int(count/strip_length)
-            current_error = self.test_scores[index_test-1]
-            past_error = self.test_scores[index_test - int(strip_length/strip_length) - 1]
-            if(current_error > past_error):
-                self.count_over_train = np.append(self.count_over_train, 1)
-            #print(current_error/test_score, past_error/previous_score, count, strip_length, 'another check')
-            # if(len(self.count_over_train)!=0 and current < past):
-            #     self.count_over_train = ([])
-                
-            
-            #print('current:', round(current_error,1), ' past:',round(past_error,1), ' count:', count, ' length: ',len(self.count_over_train), 'another check', gammaVar)
-        
         counter_flag = count >= 100
         if(counter_flag):
-            counter_flag = count >= 150
-            
+            counter_flag = count >= 250
+        #print('current:', round(current_error,1), ' past:',round(past_error,1), ' count:', count, ' length: ',len(self.count_over_train), 'another check', gammaVar)
         return len(self.count_over_train) >= 4 or counter_flag# previous_score <= test_score
-    
+
+            
+    def early_stop_alternative(self, count, x_test, y_test, gammaVar): # not usable right now
+        strip_length = 5
+        if count == 0 or count%strip_length != 0:  return False
+        # calculate the training strip progress and generalization (see paper)
+        strip = self.train_scores[count - strip_length + 1 - 1:count]
+        progress = 1000 * ( np.sum(strip)/(strip_length*np.amin(strip)) -1)
+        gl = 100 * ( (test_score / min_test_score ) - 1)
+        
 
     def _check_X_y(self, X, y):
         # Validate assumptions about format of input data. Expecting response variable to be formatted as ±1
