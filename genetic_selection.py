@@ -200,6 +200,7 @@ class genetic_selection:
         cumulative_probabilities = [sum(relative_fitness[:i+1]) for i in range(len(relative_fitness))]
 
         # select two local indexes
+        # If r < qi select the first chromosome else Select the individual xi such that qi-1 < r < qi
         for n in range(2):
             r = random.random()
             for i in local_indexes:
