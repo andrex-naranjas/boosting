@@ -57,22 +57,23 @@ class genetic_selection:
                 break
             else:
                 pa_x, pa_y, pb_x, pb_y, ind_a, ind_b = self.selection(popx, popy, index, self.coef)
+                #pa_x, pa_y, pb_x, pb_y, ind_a, ind_b = self.roulette_wheel(scores, popx, popy, index)
                 new_population_x , new_population_y, new_index = self.crossover(pa_x, pa_y, pb_x, pb_y, ind_a, ind_b, self.population_size)
                 new_offspring_x, new_offspring_y, new_offs_index = self.mutation(new_population_x, new_population_y, new_index, self.mutation_rate)
-                best_score.append(scores[0])                
+                best_score.append(scores[0])
                 next_generation_x, next_generation_y, next_generation_indexes = self.append_offspring(popx, popy, new_offspring_x, new_offspring_y,
                                                                                                         index, new_offs_index)
             print(f"Best score achieved in generation {generation} is {scores[0]}")
 
         self.best_pop = index
-        
-        
+
+
     def best_population(self):
         ''' fetches the best trained indexes, removing repetitions'''
         best_train_indexes = self.best_pop.flatten()
         return np.unique(best_train_indexes)
 
-    
+
     def initialize_population(self, X, y, size, chromosome_length): # size==pop_size
         population_x, population_y, index_pop = [], [], []
 
@@ -85,9 +86,9 @@ class genetic_selection:
 
         return np.array(population_x),np.array(population_y),np.array(index_pop)
 
-            
+
     def get_subset(self, X, y, size, count): #size==chrom_size
-        '''construct chromosomes'''        
+        '''construct chromosomes'''
         # separate indices by class
         y0_index = y[y == -1].index
         y1_index = y[y ==  1].index
@@ -95,7 +96,7 @@ class genetic_selection:
         # set the size, to prevent larger sizes than allowed
         if(len(y0_index) < size/2 or len(y1_index) < size/2):
             size = np.amin([len(y0_index), len(y1_index)])
-        
+
         # select a random subset of indexes of length size/2
         random_y0 = np.random.choice(y0_index, int(size/2), replace = False)
         random_y1 = np.random.choice(y1_index, int(size/2), replace = False)
@@ -113,16 +114,16 @@ class genetic_selection:
         rand_st = randint(0, 10)
         X_balanced = X_balanced.sample(frac=1, random_state=rand_st)
         y_balanced = y_balanced.sample(frac=1, random_state=rand_st) # check random_state
-        
+
         # It may exist repeated indexes that change the chromosome size
         # these lines fix the issue coming from bootstrap
         # the GA selection cannot handle different chromosome sizes
         if(len(X_balanced) != len(indexes)):
             X_balanced = resample(X_balanced, replace=False, n_samples=len(indexes))
             y_balanced = resample(y_balanced, replace=False, n_samples=len(indexes))
-            
+
         return X_balanced, y_balanced
-    
+
 
     @lru_cache(maxsize = 1000)
     def memoization_score(self, tuple_chrom_x , tuple_chrom_y):
@@ -143,7 +144,7 @@ class genetic_selection:
             score         = self.memoization_score(tuple_tuple_x , tuple_tuple_y)
             scores        = np.append(scores, score)
             if self.AB_SVM:  self.model.clean() # needed for AdaBoostSVM
-            
+
         sorted_indexes  = np.argsort(-1*scores) # indexes sorted by score, see the cross check!
         return scores[sorted_indexes], pop_x[sorted_indexes], pop_y[sorted_indexes], indexes_pop[sorted_indexes]
 
@@ -182,9 +183,44 @@ class genetic_selection:
         return pa_x, pa_y, pb_x, pb_y, in_a, in_b
 
 
+    def roulette_wheel(self, scores, popx, popy, data_index):
+        '''Roulette wheel selection'''
+
+        chosen = []
+
+        # making index-fitness dictionary
+        local_indexes = np.array([i for i in range(len(scores))])
+        zip_iterator = zip(local_indexes, scores)
+        index_fitness_dictionary = dict(zip_iterator)
+
+        # compute probabilities
+        fitness = index_fitness_dictionary.values()
+        total_fit = float(sum(fitness))
+        relative_fitness = [f/total_fit for f in fitness]
+        cumulative_probabilities = [sum(relative_fitness[:i+1]) for i in range(len(relative_fitness))]
+
+        # select two local indexes
+        for n in range(2):
+            r = random.random()
+            for i in local_indexes:
+                if r <= cumulative_probabilities[i]:
+                    chosen.append(i)
+                    break
+
+        # retrieve parents and global indexes with local indexes
+        pa_x = [popx[chosen[0]]]
+        pa_y = [popy[chosen[0]]]
+        in_a = [data_index[chosen[0]]]
+
+        pb_x = [popx[chosen[1]]]
+        pb_y = [popy[chosen[1]]]
+        in_b = [data_index[chosen[1]]]
+
+        return pa_x, pa_y, pb_x, pb_y, in_a, in_b
+
     def crossover(self, parent_a_x, parent_a_y, parent_b_x, parent_b_y, index_a, index_b, num_children):
         offspring_x = []
-        offspring_y = []        
+        offspring_y = []
         offspring_index = []
 
         for i in range(0, num_children):
@@ -204,14 +240,14 @@ class genetic_selection:
             new_i = i_ab[rand_indx]
 
             offspring_x.append(new_x)
-            offspring_y.append(new_y)            
+            offspring_y.append(new_y)
             offspring_index.append(new_i)
 
         return np.array(offspring_x), np.array(offspring_y), np.array(offspring_index)
 
     def mutation(self, offspring_x, offspring_y, index, mutation_rate):
         pop_nextgen_x = []
-        pop_nextgen_y = []        
+        pop_nextgen_y = []
         ind_nextgen = []
 
         for i in range(0, len(offspring_x)):
@@ -261,7 +297,7 @@ class genetic_selection:
             else:
                 return False
 
-            
+
     def score_value(self, Y_test, y_pred, model_type, score_type):
         '''Computes different scores given options'''
         Y_test = Y_test.astype(float).values # make Y_test and y_pred same type
@@ -269,7 +305,7 @@ class genetic_selection:
             TPR, FPR = du.roc_curve_adaboost(y_pred, Y_test)
             score_value = auc(FPR,TPR)
         elif(score_type == 'auc' and model_type != 'absv'):
-            score_value = roc_auc_score(Y_test, y_pred)    
+            score_value = roc_auc_score(Y_test, y_pred)
         elif(score_type == 'acc'):
             score_value = accuracy_score(Y_test, y_pred)
         elif(score_type == 'prec'):
