@@ -100,7 +100,7 @@ for name in sample_list:
 
     start_GA = datetime.datetime.now()
     GA_selection = genetic_selection(model_test, 'absv', X_train, Y_train, X_test, Y_test,
-                                     pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type='acc')
+                                     pop_size=10, chrom_len=10, n_gen=50, coef=0.5, mut_rate=0.3, score_type='acc')
     GA_selection.execute()
     GA_train_indexes = GA_selection.best_population()
     end_GA = datetime.datetime.now()
@@ -131,7 +131,7 @@ for name in sample_list:
     y_thresholds = model_test.decision_thresholds(X_test_GA, glob_dec=True)
     TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test_GA)
     nWeaks = len(model_test.alphas) # print on plot no. classifiers
-    dv.plot_roc_curve(TPR,FPR,name,'normal',   glob_local=True, name='GA',kernel=myKernel, nClass=nWeaks)
+    dv.plot_roc_curve(TPR,FPR,name,'normal', glob_local=True, name='GA', kernel=myKernel, nClass=nWeaks)
     model_test.clean()
     end = datetime.datetime.now()
     elapsed_time = end - start
@@ -139,8 +139,12 @@ for name in sample_list:
     print("Elapsed time GENETIC = " + str(elapsed_time))
     print("GENETIC selection time = " + str(elapsed_time_GA))
 
-    # # do the statistical analysis of the performance across different models
 
+    # test statistical results
+    # ss.stats_results(name, n_cycles=5, kfolds=3, n_reps=2, boot_kfold ="bootstrap")
+    # ss.stats_results(name, n_cycles=5, kfolds=3, n_reps=2, boot_kfold ="kfold")
+
+    # # do the statistical analysis of the performance across different models
     # ss.mcnemar_test(name, model='diverse', train_test=False)
     # ss.mcnemar_test(name, model='no_div',  train_test=False)
 
@@ -149,8 +153,6 @@ for name in sample_list:
     # ss.stats_results(name, n_cycles=50, kfolds=10, n_reps=10, boot_kfold ="bootstrap")
     # kfold cross-validation
     # ss.stats_results(name, n_cycles=5, kfolds=10, n_reps=10, boot_kfold ="kfold")
-    #ss.stats_results(name, n_cycles=5, kfolds=3, n_reps=2, boot_kfold ="bootstrap")
-    #ss.stats_results(name, n_cycles=5, kfolds=3, n_reps=2, boot_kfold ="kfold")
     # end = datetime.datetime.now()
     # elapsed_time = end - start
     # print("Elapsed total time GENETIC = " + str(elapsed_time))

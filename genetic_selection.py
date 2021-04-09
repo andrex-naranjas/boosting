@@ -49,7 +49,10 @@ class genetic_selection:
         next_generation_x, next_generation_y, next_generation_indexes = self.initialize_population(self.X_train, self.Y_train,
                                                                                                    self.population_size, self.chrom_len)
         for generation in tqdm(range(self.n_generations)):
-            #print(np.unique(next_generation_y))
+            n_p_y = len(next_generation_y[next_generation_y==1])
+            n_n_y = len(next_generation_y[next_generation_y==-1])        
+            print(n_p_y, n_n_y, n_p_y+n_n_y, 'balance check for every generation')
+
             scores, popx, popy, index = self.fitness_score(next_generation_x, next_generation_y, next_generation_indexes)
             scores, popx, popy, index = self.set_population_size(scores, popx, popy, index, generation, self.population_size)
             if self.termination_criterion(generation, best_score, window=10):
@@ -57,11 +60,11 @@ class genetic_selection:
                 break
             else:
                 pa_x, pa_y, pb_x, pb_y, ind_a, ind_b = self.selection(popx, popy, index, self.coef)
-                new_population_x , new_population_y, new_index = self.crossover(pa_x, pa_y, pb_x, pb_y, ind_a, ind_b, self.population_size)
+                new_population_x, new_population_y, new_index = self.crossover(pa_x, pa_y, pb_x, pb_y, ind_a, ind_b, self.population_size)
                 new_offspring_x, new_offspring_y, new_offs_index = self.mutation(new_population_x, new_population_y, new_index, self.mutation_rate)
                 best_score.append(scores[0])                
                 next_generation_x, next_generation_y, next_generation_indexes = self.append_offspring(popx, popy, new_offspring_x, new_offspring_y,
-                                                                                                        index, new_offs_index)
+                                                                                                      index, new_offs_index)
             print(f"Best score achieved in generation {generation} is {scores[0]}")
 
         self.best_pop = index
@@ -107,13 +110,11 @@ class genetic_selection:
         X_balanced = X.loc[indexes]
         y_balanced = y.loc[indexes]
 
-        print(len(y_balanced[y_balanced==1]), len(y_balanced[y_balanced==-1]), 'check balance')
-
         # shuffled dataframes
         rand_st = randint(0, 10)
         X_balanced = X_balanced.sample(frac=1, random_state=rand_st)
         y_balanced = y_balanced.sample(frac=1, random_state=rand_st) # check random_state
-        
+                
         # It may exist repeated indexes that change the chromosome size
         # these lines fix the issue coming from bootstrap
         # the GA selection cannot handle different chromosome sizes
@@ -160,7 +161,7 @@ class genetic_selection:
         return scores, popx, popy, index
 
 
-    def selection(self, pop_x, pop_y, data_index, coef):
+    def selection(self, pop_x, pop_y, data_index, coef=0.5):
         '''High-Low-fit selection'''
 
         # high fit and low fit parts of population
