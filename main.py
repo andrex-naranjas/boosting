@@ -100,7 +100,7 @@ for name in sample_list:
 
     start_GA = datetime.datetime.now()
     GA_selection = genetic_selection(model_test, 'absv', X_train, Y_train, X_test, Y_test,
-                                     pop_size=10, chrom_len=10, n_gen=50, coef=0.5, mut_rate=0.3, score_type='acc')
+                                     pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type='acc')
     GA_selection.execute()
     GA_train_indexes = GA_selection.best_population()
     end_GA = datetime.datetime.now()

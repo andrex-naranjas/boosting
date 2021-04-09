@@ -59,8 +59,8 @@ class genetic_selection:
                 print('End of genetic algorithm')
                 break
             else:
-                pa_x, pa_y, pb_x, pb_y, ind_a, ind_b = self.selection(popx, popy, index, self.coef)
-                #pa_x, pa_y, pb_x, pb_y, ind_a, ind_b = self.roulette_wheel(scores, popx, popy, index)
+                #pa_x, pa_y, pb_x, pb_y, ind_a, ind_b = self.selection(popx, popy, index, self.coef)
+                pa_x, pa_y, pb_x, pb_y, ind_a, ind_b = self.roulette_wheel(scores, popx, popy, index)
                 new_population_x , new_population_y, new_index = self.crossover(pa_x, pa_y, pb_x, pb_y, ind_a, ind_b, self.population_size)
                 new_offspring_x, new_offspring_y, new_offs_index = self.mutation(new_population_x, new_population_y, new_index, self.mutation_rate)
                 best_score.append(scores[0])
