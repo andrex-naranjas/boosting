@@ -32,6 +32,8 @@ class genetic_selection:
         self.Y_train = Y_train
         self.X_test  = X_test
         self.Y_test  = Y_test
+        self.y0_index = Y_train[Y_train == -1].index
+        self.y1_index = Y_train[Y_train ==  1].index
         self.population_size=pop_size
         self.chrom_len = chrom_len
         self.n_generations = n_gen # maximum number of iterations
@@ -46,11 +48,10 @@ class genetic_selection:
     def execute(self):
         best_chromo = np.array([])
         best_score  = []
-        next_generation_x, next_generation_y, next_generation_indexes = self.initialize_population(self.X_train, self.Y_train,
-                                                                                                   self.population_size, self.chrom_len)
+        next_generation_x, next_generation_y, next_generation_indexes = self.initialize_population(self.population_size, self.chrom_len)
         for generation in tqdm(range(self.n_generations)):
             n_p_y = len(next_generation_y[next_generation_y==1])
-            n_n_y = len(next_generation_y[next_generation_y==-1])        
+            n_n_y = len(next_generation_y[next_generation_y==-1])
             print(n_p_y, n_n_y, n_p_y+n_n_y, 'balance check for every generation')
 
             scores, popx, popy, index = self.fitness_score(next_generation_x, next_generation_y, next_generation_indexes)
@@ -77,11 +78,11 @@ class genetic_selection:
         return np.unique(best_train_indexes)
 
 
-    def initialize_population(self, X, y, size, chromosome_length): # size==pop_size
+    def initialize_population(self, size, chromosome_length): # size==pop_size
         population_x, population_y, index_pop = [], [], []
 
         for i in range(size):
-            chromosome_x, chromosome_y = self.get_subset(X, y, size=chromosome_length, count=i)
+            chromosome_x, chromosome_y = self.get_subset(size=chromosome_length, count=i)
             population_x.append(chromosome_x.values)
             population_y.append(chromosome_y.values)
             # keep track of the indexes and propagate them during the GA selection
@@ -90,26 +91,23 @@ class genetic_selection:
         return np.array(population_x),np.array(population_y),np.array(index_pop)
 
 
-    def get_subset(self, X, y, size, count): #size==chrom_size
+    def get_subset(self, size, count): #size==chrom_size
         '''construct chromosomes'''
-        # separate indices by class
-        y0_index = y[y == -1].index
-        y1_index = y[y ==  1].index
 
         # set the size, to prevent larger sizes than allowed
-        if(len(y0_index) < size/2 or len(y1_index) < size/2):
-            size = np.amin([len(y0_index), len(y1_index)])
+        if(len(self.y0_index) < size/2 or len(self.y1_index) < size/2):
+            size = np.amin([len(self.y0_index), len(self.y1_index)])
 
         # select a random subset of indexes of length size/2
-        random_y0 = np.random.choice(y0_index, int(size/2), replace = False)
-        random_y1 = np.random.choice(y1_index, int(size/2), replace = False)
+        random_y0 = np.random.choice(self.y0_index, int(size/2), replace = False)
+        random_y1 = np.random.choice(self.y1_index, int(size/2), replace = False)
 
         # concatenate indexes for balanced dataframes
         indexes = np.concatenate([random_y0, random_y1])
 
         # construct balanced datasets
-        X_balanced = X.loc[indexes]
-        y_balanced = y.loc[indexes]
+        X_balanced = self.X_train.loc[indexes]
+        y_balanced = self.Y_train.loc[indexes]
 
         # shuffled dataframes
         rand_st = randint(0, 10)
@@ -252,6 +250,15 @@ class genetic_selection:
         pop_nextgen_y = []
         ind_nextgen = []
 
+        # get random sample from X_train, Y_train function
+        def get_random_gene(class_type_index):
+            rand_st  = randint(0, 10)
+            random_x = self.X_train.loc[class_type_index].sample(random_state=rand_st)
+            random_y = self.Y_train.loc[class_type_index].sample(random_state=rand_st)
+            random_index = random_x.index
+
+            return random_x, random_y, random_index
+
         for i in range(0, len(offspring_x)):
             chromosome_x = offspring_x[i]
             chromosome_y = offspring_y[i]
@@ -260,13 +267,27 @@ class genetic_selection:
             for j in range(len(chromosome_x)):
                 if random.random() < mutation_rate:
                     while True:
-                        # get random sample from X_train, Y_train
-                        rand_st  = randint(0, 10)
-                        random_x = self.X_train.sample(random_state=rand_st)
-                        random_y = self.Y_train.sample(random_state=rand_st)
-                        random_index = random_x.index
+                        # check balance of chromosome
+                        n_p_y = len(chromosome_y[chromosome_y == 1])
 
-                        # Check if new random chromosome is already in the population. If not, it is added
+                        # if already balanced
+                        if n_p_y == len(chromosome_y)/2:
+                            if chromosome_y[j] == 1:
+                                # get random sample from X_train, Y_train=1
+                                random_x, random_y, random_index = get_random_gene(self.y1_index)
+                            else:
+                                # get random sample from X_train, Y_train=-1
+                                random_x, random_y, random_index = get_random_gene(self.y0_index)
+
+                        # if class 1 is outnumbered
+                        elif n_p_y < len(chromosome_y)/2:
+                            random_x, random_y, random_index = get_random_gene(self.y1_index)
+
+                        # if class -1 is outnumbered
+                        elif n_p_y > len(chromosome_y)/2:
+                            random_x, random_y, random_index = get_random_gene(self.y0_index)
+
+                        # Check if new random gene is already in the population. If not, it is added
                         if (chromosome_x == random_x.to_numpy()).all(1).any() is not True:
                             chromosome_x[j] = random_x.to_numpy()
                             chromosome_y[j] = random_y.to_numpy()
