@@ -115,7 +115,7 @@ for name in sample_list:
     X_train_GA, Y_train_GA, X_test_GA, Y_test_GA = \
         data.dataset(sample_name=name, train_test=split_flag, indexes=GA_train_indexes)
 
-    # compare between data imputs
+    # compare between data inputs
     # traditional input
     start = datetime.datetime.now()
     model_test.fit(X_train, Y_train)
