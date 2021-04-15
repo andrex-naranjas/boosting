@@ -250,15 +250,6 @@ class genetic_selection:
         pop_nextgen_y = []
         ind_nextgen = []
 
-        # get random sample from X_train, Y_train function
-        def get_random_gene(class_type_index):
-            rand_st  = randint(0, 10)
-            random_x = self.X_train.loc[class_type_index].sample(random_state=rand_st)
-            random_y = self.Y_train.loc[class_type_index].sample(random_state=rand_st)
-            random_index = random_x.index
-
-            return random_x, random_y, random_index
-
         for i in range(0, len(offspring_x)):
             chromosome_x = offspring_x[i]
             chromosome_y = offspring_y[i]
@@ -269,23 +260,20 @@ class genetic_selection:
                     while True:
                         # check balance of chromosome
                         n_p_y = len(chromosome_y[chromosome_y == 1])
-
                         # if already balanced
                         if n_p_y == len(chromosome_y)/2:
                             if chromosome_y[j] == 1:
                                 # get random sample from X_train, Y_train=1
-                                random_x, random_y, random_index = get_random_gene(self.y1_index)
+                                random_x, random_y, random_index = self.get_random_gene(self.y1_index)
                             else:
                                 # get random sample from X_train, Y_train=-1
-                                random_x, random_y, random_index = get_random_gene(self.y0_index)
-
+                                random_x, random_y, random_index = self.get_random_gene(self.y0_index)
                         # if class 1 is outnumbered
                         elif n_p_y < len(chromosome_y)/2:
-                            random_x, random_y, random_index = get_random_gene(self.y1_index)
-
+                            random_x, random_y, random_index = self.get_random_gene(self.y1_index)
                         # if class -1 is outnumbered
                         elif n_p_y > len(chromosome_y)/2:
-                            random_x, random_y, random_index = get_random_gene(self.y0_index)
+                            random_x, random_y, random_index = self.get_random_gene(self.y0_index)
 
                         # Check if new random gene is already in the population. If not, it is added
                         if (chromosome_x == random_x.to_numpy()).all(1).any() is not True:
@@ -299,6 +287,16 @@ class genetic_selection:
             ind_nextgen.append(index_chromosome)
 
         return np.array(pop_nextgen_x), np.array(pop_nextgen_y), np.array(ind_nextgen) # check existence of genes -1 and 1 in Y, to avoid sklearn crashes
+
+
+    # get random sample from X_train, Y_train function (used to balance data in mutation function)
+    def get_random_gene(self, class_type_index):
+        rand_st  = randint(0, 10)
+        random_x = self.X_train.loc[class_type_index].sample(random_state=rand_st)
+        random_y = self.Y_train.loc[class_type_index].sample(random_state=rand_st)
+        random_index = random_x.index
+    
+        return random_x, random_y, random_index
 
 
     def append_offspring(self, next_generation_x, next_generation_y, new_offspring_x, new_offspring_y, next_generation_indexes, new_off_index):
