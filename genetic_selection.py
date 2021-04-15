@@ -25,7 +25,7 @@ import data_utils as du
 # Genetic algorithm for training sub-dataset selection
 class genetic_selection:
 
-    def __init__(self, model, model_type, X_train, Y_train, X_test, Y_test, pop_size, chrom_len, n_gen, coef, mut_rate, score_type='acc'):
+    def __init__(self, model, model_type, X_train, Y_train, X_test, Y_test, pop_size, chrom_len, n_gen, coef, mut_rate, score_type='acc', selec_type='highlow'):
         self.model = model
         self.model_type = model_type
         self.X_train = X_train
@@ -38,6 +38,7 @@ class genetic_selection:
         self.coef = coef
         self.mutation_rate=mut_rate
         self.score_type = score_type
+        self.selec_type = selec_type
         if(model_type == 'absv'):
             self.AB_SVM = True
         else:
@@ -59,8 +60,10 @@ class genetic_selection:
                 print('End of genetic algorithm')
                 break
             else:
-                #pa_x, pa_y, pb_x, pb_y, ind_a, ind_b = self.selection(popx, popy, index, self.coef)
-                pa_x, pa_y, pb_x, pb_y, ind_a, ind_b = self.roulette_wheel(scores, popx, popy, index)
+                if(self.selec_type == 'roulette'):
+                    pa_x, pa_y, pb_x, pb_y, ind_a, ind_b = self.roulette_wheel(scores, popx, popy, index)
+                else:
+                    pa_x, pa_y, pb_x, pb_y, ind_a, ind_b = self.selection(popx, popy, index, self.coef)                    
                 new_population_x , new_population_y, new_index = self.crossover(pa_x, pa_y, pb_x, pb_y, ind_a, ind_b, self.population_size)
                 new_offspring_x, new_offspring_y, new_offs_index = self.mutation(new_population_x, new_population_y, new_index, self.mutation_rate)
                 best_score.append(scores[0])

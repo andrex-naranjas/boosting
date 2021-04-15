@@ -41,9 +41,9 @@ from sklearn.linear_model import PassiveAggressiveClassifier
 import numpy as np
 
 
-def adaboost_svm(div_flag=False, myKernel='rbf'):
-    return AdaBoostSVM(C=50, gammaIni=5, myKernel=myKernel, Diversity=div_flag)    
+def adaboost_svm(div_flag=False, myKernel='rbf', early_stop=True,  debug=False):
 
+    return AdaBoostSVM(C=150, gammaIni=5, myKernel=myKernel, Diversity=div_flag, early_stop=early_stop, debug=debug)
 def single_svm():
     # support vector machine (single case)
     return SVC(C=150.0, kernel='rbf', gamma=1/(2*(10**2)), shrinking = True, probability = True, tol = 0.001)

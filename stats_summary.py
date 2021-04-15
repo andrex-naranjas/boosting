@@ -37,7 +37,7 @@ def _check_A(A):
         return A
 
 
-def bootstrap(model, sample_name, roc_area, selection, n_cycles, train_test=False, split_frac=0.6):
+def bootstrap(model, sample_name, roc_area, selection, n_cycles, GA_score='', GA_selec='', train_test=False, split_frac=0.6):
     
     # fetch data_frame without preparation
     data = data_preparation()    
@@ -56,7 +56,7 @@ def bootstrap(model, sample_name, roc_area, selection, n_cycles, train_test=Fals
             sampled_data_train   = resample(sample_df, replace = True, n_samples = n_samples, random_state = None)
             
             if selection == 'trad':
-            # test data are the complement of full input data that is not considered for training
+                # test data are the complement of full input data that is not considered for training
                 sampled_train_no_dup = sampled_data_train.drop_duplicates(keep=False)
                 sampled_data_test    = pd.concat([sample_df, sampled_train_no_dup]).drop_duplicates(keep=False)
                 
@@ -71,7 +71,7 @@ def bootstrap(model, sample_name, roc_area, selection, n_cycles, train_test=Fals
                 print(len(X_train.index),  len(Y_train.index), 'X_train, Y_train sizes')
 
                 GA_selection = genetic_selection(model, roc_area, X_train, Y_train, X_test, Y_test,
-                                                 pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type='acc')
+                                                 pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type=GA_score, selec_type=GA_selec)
                 GA_selection.execute()
                 GA_train_indexes = GA_selection.best_population()
                 X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, train_test=False, indexes=GA_train_indexes)
@@ -138,7 +138,7 @@ def mcnemar_table(y_pred1, y_pred2, y_test):
     return matrix,corrected
 
 
-def mcnemar_test(sample_name, selection='gene', model='no_div', train_test=False):
+def mcnemar_test(sample_name, selection='gene', model='no_div', train_test=False, GA_score='', GA_selec=''):
 
     if   model =='diverse': model1 = mm.adaboost_svm(True)
     elif model =='no_div' : model1 = mm.adaboost_svm(False)
@@ -150,7 +150,7 @@ def mcnemar_test(sample_name, selection='gene', model='no_div', train_test=False
                  sampling=False,split_sample=0.4,train_test=train_test)
     if selection == 'gene':
         GA_selection = genetic_selection(model1, "absv", X_train, Y_train, X_test, Y_test,
-                                         pop_size=20, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type='acc')
+                                         pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type=GA_score, selec_type=GA_selec)
         GA_selection.execute()
         GA_train_indexes = GA_selection.best_population()
         X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, train_test=train_test, indexes=GA_train_indexes)
@@ -224,7 +224,7 @@ def mcnemar_test(sample_name, selection='gene', model='no_div', train_test=False
                                                        area1, prec1, f1_1, recall1, acc1, gmean1, f_mcnemar)
 
                 
-def cross_validation(model, sample_name, roc_area, selection, kfolds, n_reps, train_test=False):
+def cross_validation(model, sample_name, roc_area, selection, kfolds, n_reps, GA_score='', GA_selec='', train_test=False):
     
     # fetch data
     data = data_preparation()
@@ -243,7 +243,7 @@ def cross_validation(model, sample_name, roc_area, selection, kfolds, n_reps, tr
 
         if selection == 'gene': # genetic selection
             GA_selection = genetic_selection(model, roc_area, X_train, Y_train, X_test, Y_test,
-                                             pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type='acc')
+                                             pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type=GA_score, selec_type=GA_selec)
             GA_selection.execute()
             GA_train_indexes = GA_selection.best_population()
             X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, train_test=train_test, indexes=GA_train_indexes)
@@ -345,7 +345,7 @@ def normal_test(sample,alpha,verbose):
     return p,alpha
 
 
-def stats_results(name, n_cycles, kfolds, n_reps, boot_kfold ='', split_frac=0.6):
+def stats_results(name, n_cycles, kfolds, n_reps, boot_kfold ='', GA_score='acc', GA_selec='roulette', split_frac=0.6):
 
     # arrays to store the scores
     mean_auc,mean_prc,mean_f1,mean_rec,mean_acc,mean_gmn = ([]),([]),([]),([]),([]),([])
@@ -359,10 +359,10 @@ def stats_results(name, n_cycles, kfolds, n_reps, boot_kfold ='', split_frac=0.6
     for i in range(len(models_auc)):
         if boot_kfold == 'bootstrap':
             auc, prc, f1, rec, acc, gmn = bootstrap(model=models_auc[i][0], sample_name=name, roc_area=models_auc[i][1],
-                                                    selection=models_auc[i][3], n_cycles=n_cycles)
+                                                    selection=models_auc[i][3], n_cycles=n_cycles, GA_score=GA_score, GA_selec=GA_selec)
         elif boot_kfold == 'kfold':
             auc, prc, f1, rec, acc, gmn = cross_validation(model=models_auc[i][0], sample_name=name, roc_area=models_auc[i][1],
-                                                           selection=models_auc[i][3], kfolds=kfolds, n_reps=n_reps)
+                                                           selection=models_auc[i][3], kfolds=kfolds, n_reps=n_reps, GA_score=GA_score, GA_selec=GA_selec)
 
         auc_values.append(auc)
         prc_values.append(prc)
