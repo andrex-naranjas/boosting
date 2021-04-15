@@ -271,10 +271,10 @@ class genetic_selection:
                             else:
                                 # get random sample from X_train, Y_train=-1
                                 random_x, random_y, random_index = self.get_random_gene(self.y0_index)
-                        # if class 1 is outnumbered
+                        # if class 1 is outnumbered (balance dataset)
                         elif n_p_y < len(chromosome_y)/2:
                             random_x, random_y, random_index = self.get_random_gene(self.y1_index)
-                        # if class -1 is outnumbered
+                        # if class -1 is outnumbered (balance dataset)
                         elif n_p_y > len(chromosome_y)/2:
                             random_x, random_y, random_index = self.get_random_gene(self.y0_index)
 
