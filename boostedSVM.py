@@ -23,11 +23,13 @@ from sklearn.model_selection import train_test_split
 
 class AdaBoostSVM:
 
-    def __init__(self, C, gammaIni, myKernel, Diversity=False, early_stop=False, debug=False):
-
+    def __init__(self, C, gammaIni, myKernel, myDegree=1, myCoef0=1, Diversity=False, early_stop=False, debug=False):
+        
         self.C = C
         self.gammaIni = gammaIni
         self.myKernel = myKernel
+        self.myDegree = myDegree
+        self.myCoef0 = myCoef0
         self.weak_svm = ([])
         self.alphas = ([])
         self.weights_list = []
@@ -61,8 +63,8 @@ class AdaBoostSVM:
             
             svcB = SVC(C=self.C,
                     kernel=self.myKernel,
-                    degree=1,
-                    coef0=1,
+                    degree=self.myDegree,
+                    coef0=self.myCoef0,
                     gamma=1/(2*(myGamma**2)),
                     shrinking=True,
                     probability=True,

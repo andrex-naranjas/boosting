@@ -37,7 +37,7 @@ def _check_A(A):
         return A
 
 
-def bootstrap(model, sample_name, roc_area, selection, n_cycles, GA_score='', GA_selec='', train_test=False, split_frac=0.6):
+def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', GA_selec='', GA_coef=0.5, n_cycles=1, train_test=False, split_frac=0.6):
     
     # fetch data_frame without preparation
     data = data_preparation()    
@@ -71,7 +71,7 @@ def bootstrap(model, sample_name, roc_area, selection, n_cycles, GA_score='', GA
                 print(len(X_train.index),  len(Y_train.index), 'X_train, Y_train sizes')
 
                 GA_selection = genetic_selection(model, roc_area, X_train, Y_train, X_test, Y_test,
-                                                 pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type=GA_score, selec_type=GA_selec)
+                                                 pop_size=10, chrom_len=100, n_gen=50, coef=GA_coef, mut_rate=GA_mut, score_type=GA_score, selec_type=GA_selec)
                 GA_selection.execute()
                 GA_train_indexes = GA_selection.best_population()
                 X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, train_test=False, indexes=GA_train_indexes)
@@ -224,7 +224,7 @@ def mcnemar_test(sample_name, selection='gene', model='no_div', train_test=False
                                                        area1, prec1, f1_1, recall1, acc1, gmean1, f_mcnemar)
 
                 
-def cross_validation(model, sample_name, roc_area, selection, kfolds, n_reps, GA_score='', GA_selec='', train_test=False):
+def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', GA_selec='', GA_coef=0.5, kfolds=1, n_reps=1, train_test=False):
     
     # fetch data
     data = data_preparation()
@@ -345,7 +345,9 @@ def normal_test(sample,alpha,verbose):
     return p,alpha
 
 
-def stats_results(name, n_cycles, kfolds, n_reps, boot_kfold ='', GA_score='acc', GA_selec='roulette', split_frac=0.6):
+def stats_results(name, n_cycles, kfolds, n_reps, boot_kfold ='', split_frac=0.6):
+    GA_score='acc'
+    GA_selec='roulette'
 
     # arrays to store the scores
     mean_auc,mean_prc,mean_f1,mean_rec,mean_acc,mean_gmn = ([]),([]),([]),([]),([]),([])
@@ -358,12 +360,13 @@ def stats_results(name, n_cycles, kfolds, n_reps, boot_kfold ='', GA_score='acc'
     
     for i in range(len(models_auc)):
         if boot_kfold == 'bootstrap':
-            auc, prc, f1, rec, acc, gmn = bootstrap(model=models_auc[i][0], sample_name=name, roc_area=models_auc[i][1],
-                                                    selection=models_auc[i][3], n_cycles=n_cycles, GA_score=GA_score, GA_selec=GA_selec)
+            auc, prc, f1, rec, acc, gmn = bootstrap(sample_name=name, model=models_auc[i][1], roc_area=models_auc[i][2],
+                                                    selection=models_auc[i][3], GA_mut=models_auc[i][4], GA_score=models_auc[i][5],
+                                                    GA_selec=models_auc[i][6], GA_coef=models_auc[i][7], n_cycles=n_cycles)
         elif boot_kfold == 'kfold':
-            auc, prc, f1, rec, acc, gmn = cross_validation(model=models_auc[i][0], sample_name=name, roc_area=models_auc[i][1],
-                                                           selection=models_auc[i][3], kfolds=kfolds, n_reps=n_reps, GA_score=GA_score, GA_selec=GA_selec)
-
+            auc, prc, f1, rec, acc, gmn = cross_validation(sample_name=name, model=models_auc[i][1],  roc_area=models_auc[i][2],
+                                                           selection=models_auc[i][3], GA_mut=models_auc[i][4], GA_score=models_auc[i][5],
+                                                           GA_selec=models_auc[i][6], GA_coef=models_auc[i][7], kfolds=kfolds, n_reps=n_reps)
         auc_values.append(auc)
         prc_values.append(prc)
         f1_values.append(f1)
@@ -386,7 +389,7 @@ def stats_results(name, n_cycles, kfolds, n_reps, boot_kfold ='', GA_score='acc'
         std_gmn = np.append(std_gmn,  np.std(gmn))
         
         # store model names, for later use in latex tables
-        names.append(models_auc[i][2])        
+        names.append(models_auc[i][0])
     
     # tukey tests
     tukey_auc  =  tukey_test(np.array(auc_values))
