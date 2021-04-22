@@ -36,6 +36,7 @@ class AdaBoostSVM:
         self.train_scores = ([])
         self.test_scores = ([])
         self.count_over_train = ([])
+        self.count_over_train_equal = ([])
         # Diversity threshold-constant and empty list
         self.div_flag = Diversity
         self.eta = 0.5
@@ -270,14 +271,20 @@ class AdaBoostSVM:
         index_test = int(count/strip_length)
         current_error = self.test_scores[index_test-1]
         past_error = self.test_scores[index_test - int(strip_length/strip_length) - 1]
+        if(current_error == past_error):
+            self.count_over_train_equal = np.append(self.count_over_train_equal, 1)
         if(current_error > past_error):
             self.count_over_train = np.append(self.count_over_train, 1)
+            self.count_over_train_equal = ([])
+        if(current_error < past_error):
+            self.count_over_train_equal = ([])
 
         counter_flag = count >= 100
         if(counter_flag):
             counter_flag = count >= 250
-        #print('current:', round(current_error,1), ' past:',round(past_error,1), ' count:', count, ' length: ',len(self.count_over_train), 'another check', gammaVar)
-        return len(self.count_over_train) >= 4 or counter_flag# previous_score <= test_score
+        # print('current:', round(current_error,2), ' past:',round(past_error,2), ' count:', count, ' length: ',
+        #       len(self.count_over_train), 'another check', gammaVar, 'count equal:', len(self.count_over_train_equal))
+        return len(self.count_over_train) >= 4 or counter_flag or len(self.count_over_train_equal) >= 15# previous_score <= test_score
 
             
     def early_stop_alternative(self, count, x_test, y_test, gammaVar): # not usable right now
@@ -309,7 +316,7 @@ class AdaBoostSVM:
 
         thres_decision = []
 
-        steps = np.linspace(-100,100,num=101)
+        steps = np.linspace(-10,10,num=101)
         decision,decision_temp = ([]),([])
 
         if not glob_dec: # threshold each individual classifier
@@ -371,6 +378,7 @@ class AdaBoostSVM:
         self.train_scores = ([])
         self.test_scores = ([])
         self.count_over_train = ([])
+        self.count_over_train_equal = ([])
 
 
 '''

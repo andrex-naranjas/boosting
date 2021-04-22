@@ -146,7 +146,6 @@ for name in sample_list:
     print("GENETIC selection time = " + str(elapsed_time_GA))
 
 
-
     # # do the statistical analysis of the performance across different models
     # ss.mcnemar_test(name, model="diverse", train_test=False)
     # ss.mcnemar_test(name, model="no_div",  train_test=False)
