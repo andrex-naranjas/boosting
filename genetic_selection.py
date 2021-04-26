@@ -339,7 +339,7 @@ class genetic_selection:
         elif(score_type == 'rec'):
             score_value = recall_score(Y_test, y_pred)
         elif(score_type == 'gmean'):
-            score_value  = np.sqrt(precision_score(Y_test, y_pred)*recallscore(Y_test, y_pred))
+            score_value  = np.sqrt(precision_score(Y_test, y_pred)*recall_score(Y_test, y_pred))
         return score_value
 
     def model_predictions(self, X_test, model_type, score_type):

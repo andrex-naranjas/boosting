@@ -95,22 +95,23 @@ for name in sample_list:
     # print("End adaboost")
 
     # test statistical results
-    # ss.mcnemar_test(name, model="diverse", GA_score="acc", GA_selec="roulette", train_test=False)
-    # ss.mcnemar_test(name, model="no_div",  GA_score="acc", GA_selec="roulette", train_test=False)
     start = datetime.datetime.now()
     ss.stats_results(name, n_cycles=5, kfolds=3, n_reps=2, boot_kfold ="bootstrap")
-    ss.stats_results(name, n_cycles=5, kfolds=3, n_reps=2, boot_kfold ="kfold")
+    #ss.stats_results(name, n_cycles=5, kfolds=3, n_reps=2, boot_kfold ="kfold")
     end = datetime.datetime.now()
     elapsed_time = end - start
     print("Elapsed time TRADITIONAL = " + str(elapsed_time))
 
+    # ss.mcnemar_test(name, model="diverse", GA_score="acc", GA_selec="roulette", train_test=False)
+    # ss.mcnemar_test(name, model="no_div",  GA_score="acc", GA_selec="roulette", train_test=False)
 
-    # # test genetic selection
-    # model_test = AdaBoostSVM(C=150, gammaIni=10, myKernel="rbf", Diversity=False, early_stop=True, debug=False)
+
+    # test genetic selection
+    # model_test = AdaBoostSVM(C=150, gammaIni=10, myKernel="poly", myDegree=2, myCoef0=1, Diversity=True, early_stop=True, debug=True)
 
     # start_GA = datetime.datetime.now()
     # GA_selection = genetic_selection(model_test, "absv", X_train, Y_train, X_test, Y_test,
-    #                                  pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type="acc", selec_type="roulette")
+    #                                  pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type="gmean", selec_type="roulette")
     # GA_selection.execute()
     # GA_train_indexes = GA_selection.best_population()
     # end_GA = datetime.datetime.now()

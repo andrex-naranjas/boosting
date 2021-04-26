@@ -346,9 +346,6 @@ def normal_test(sample,alpha,verbose):
 
 
 def stats_results(name, n_cycles, kfolds, n_reps, boot_kfold ='', split_frac=0.6):
-    GA_score='acc'
-    GA_selec='roulette'
-
     # arrays to store the scores
     mean_auc,mean_prc,mean_f1,mean_rec,mean_acc,mean_gmn = ([]),([]),([]),([]),([]),([])
     std_auc,std_prc,std_f1,std_rec,std_acc,std_gmn = ([]),([]),([]),([]),([]),([])
