@@ -9,6 +9,7 @@
 # data preparation module
 # python basics
 import sys
+from os import system,getenv,getuid,getcwd
 
 # data analysis and wrangling
 import pandas as pd
@@ -28,6 +29,7 @@ from sklearn.utils import resample
 # data visualization module
 import data_visualization as dv
 
+workpath=getcwd()
 
 class data_preparation:
 
@@ -37,9 +39,9 @@ class data_preparation:
     # fetch data
     def fetch_data(self, sample):
         if sample == "titanic":
-            data_set = pd.read_csv("./data/titanic.csv")
+            data_set = pd.read_csv(workpath+"/data/titanic.csv")
         elif sample == "cancer":
-            data_set = pd.read_csv("./data/breast_cancer.csv")
+            data_set = pd.read_csv(workpath+"/data/breast_cancer.csv")
         elif sample == "german":
             data_set = pd.read_csv("./data/german.csv")
         elif sample == "heart":
