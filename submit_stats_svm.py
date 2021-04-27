@@ -10,6 +10,7 @@
 
 from sys import argv
 from os import system,getenv,getuid,getcwd
+import model_makes as mm
 
 workpath=getcwd()
 
@@ -20,6 +21,8 @@ elif(len(argv)==3):
   sample_name = argv[1]
   boot_kfold = argv[2]
 
+n_flavors = len(mm.model_flavors())
+
 classad='''
 universe = vanilla
 executable = /usr/bin/python3
@@ -29,9 +32,9 @@ when_to_transfer_output = ON_EXIT
 output = {0}/output_batch/{1}/$(Process).out
 error = {0}/output_batch/{1}/$(Process).err
 log = {0}/output_batch/{1}/$(Process).log
-Queue 1
+Queue {3}
 
-'''.format(workpath, sample_name, boot_kfold)
+'''.format(workpath, sample_name, boot_kfold, n_flavors)
 
 logpath = '.'
 
