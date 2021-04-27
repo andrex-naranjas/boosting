@@ -20,7 +20,7 @@ path = str(sys.argv[3])
 
 auc, prc, f1, rec, acc, gmn = ss.bootstrap(sample_name=name, model=model_auc[1], roc_area=model_auc[2],
                                            selection=model_auc[3], GA_mut=model_auc[4], GA_score=model_auc[5],
-                                           GA_selec=model_auc[6], GA_coef=model_auc[7], n_cycles=n_cycles, path)
+                                           GA_selec=model_auc[6], GA_coef=model_auc[7], n_cycles=n_cycles, path=path)
 print(model_auc[0], name)
 print(auc, prc, f1, rec, acc, gmn)
 
