@@ -38,6 +38,6 @@ logpath = '.'
 with open(logpath+'/condor.jdl','w') as jdlfile:
   jdlfile.write(classad)
 
-print("Batch jobs for: ", sample_name, " and stats: ", boot_kfold)
+print("************************ Batch jobs for: ", sample_name, "and stats:", boot_kfold, "************************")
 #print('condor_submit %s/condor.jdl'%logpath)
 system('condor_submit %s/condor.jdl'%logpath)
