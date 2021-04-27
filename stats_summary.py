@@ -37,10 +37,10 @@ def _check_A(A):
         return A
 
 
-def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', GA_selec='', GA_coef=0.5, n_cycles=1, train_test=False, split_frac=0.6):
+def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', GA_selec='', GA_coef=0.5, n_cycles=1, train_test=False, split_frac=0.6, path=''):
     
     # fetch data_frame without preparation
-    data = data_preparation()    
+    data = data_preparation(path)
     if not train_test: sample_df = data.fetch_data(sample_name)
     else: sample_train_df, sample_test_df = data.fetch_data(sample_name)
         
