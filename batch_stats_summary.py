@@ -36,11 +36,10 @@ col_f1  = pd.DataFrame(data=f1,  columns=["f1"])
 col_rec = pd.DataFrame(data=rec, columns=["rec"])
 col_acc = pd.DataFrame(data=acc, columns=["acc"])
 col_gmn = pd.DataFrame(data=gmn, columns=["gmn"])
-
 df = pd.concat([col_auc["auc"], col_prc["prc"], col_f1["f1"], col_rec["rec"], col_acc["acc"], col_gmn["gmn"]],
                axis=1, keys=["auc", "prc", "f1", "rec", "acc", "gmn"])
-print(df)
-name_csv = path+"/stats_results/"+name+"_"+model_auc[0]+"_"+boot_kfold+".csv" 
+name_csv = path+"/stats_results/"+name+"/"+model_auc[0]+"_"+boot_kfold+".csv" 
 df.to_csv(str(name_csv), index=False)
-#print(model_auc[0], name)
-#print(auc, prc, f1, rec, acc, gmn)
+
+print(model_auc[0], name)
+print(df)

@@ -26,9 +26,9 @@ executable = /usr/bin/python3
 arguments = {0}/batch_stats_summary.py $(Process) {1} {0} {2}
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-output = {0}/output_batch_{1}/$(Process).out
-error = {0}/output_batch_{1}/$(Process).err
-log = {0}/output_batch_{1}/$(Process).log
+output = {0}/output_batch/{1}/$(Process).out
+error = {0}/output_batch/{1}/$(Process).err
+log = {0}/output_batch/{1}/$(Process).log
 Queue 1
 
 '''.format(workpath, sample_name, boot_kfold)
