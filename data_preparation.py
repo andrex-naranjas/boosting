@@ -42,37 +42,37 @@ class data_preparation:
         elif sample == "cancer":
             data_set = pd.read_csv(self.workpath+"/data/breast_cancer.csv")
         elif sample == "german":
-            data_set = pd.read_csv("./data/german.csv")
+            data_set = pd.read_csv(self.workpath+"/data/german.csv")
         elif sample == "heart":
-            data_set = pd.read_csv("./data/heart.csv")
+            data_set = pd.read_csv(self.workpath+"/data/heart.csv")
         elif sample == "solar":
-            data_set = pd.read_csv("./data/solar.csv")
+            data_set = pd.read_csv(self.workpath+"/data/solar.csv")
         elif sample == "car":
-            data_set = pd.read_csv("./data/car.csv")
+            data_set = pd.read_csv(self.workpath+"/data/car.csv")
         elif sample == "ecoli":
-            data_set = pd.read_csv("./data/ecoli.csv")
+            data_set = pd.read_csv(self.workpath+"/data/ecoli.csv")
         elif sample == "wine":
-            data_set = pd.read_csv("./data/wine.csv")
+            data_set = pd.read_csv(self.workpath+"/data/wine.csv")
         elif sample == "abalone":
-            data_set = pd.read_csv("./data/abalone.csv")
+            data_set = pd.read_csv(self.workpath+"/data/abalone.csv")
         elif sample == "adult":
-            data_set = pd.read_csv("./data/adult.csv")
+            data_set = pd.read_csv(self.workpath+"/data/adult.csv")
         elif sample == "connect":
-            data_set = pd.read_csv("./data/connect.csv")            
+            data_set = pd.read_csv(self.workpath+"/data/connect.csv")            
         elif sample == "contra":
-            data_set = pd.read_csv("./data/contra.csv")
+            data_set = pd.read_csv(self.workpath+"/data/contra.csv")
         elif sample == "tac_toe":
-            data_set = pd.read_csv("./data/tac_toe.csv")
+            data_set = pd.read_csv(self.workpath+"/data/tac_toe.csv")
         elif sample == "belle2_i":
-            file = uproot.open("./data/belle2_kpipi0.root")            
+            file = uproot.open(self.workpath+"/data/belle2_kpipi0.root")            
             data_set = file["combined"].arrays(library="pd")
         elif sample == "belle2_ii":
-            file = uproot.open("./data/belle2_kpi.root")
+            file = uproot.open(self.workpath+"/data/belle2_kpi.root")
             data_set = file["combined"].arrays(library="pd")
         elif sample == "belle2_iii":
-            file_train = uproot.open("./data/train_D02k3pi.root")
+            file_train = uproot.open(self.workpath+"/data/train_D02k3pi.root")
             data_train = file_train["d0tree"].arrays(library="pd")
-            file_test  = uproot.open("./data/test_D02k3pi.root")
+            file_test  = uproot.open(self.workpath+"/data/test_D02k3pi.root")
             data_test  = file_train["d0tree"].arrays(library="pd")
             return data_train, data_test
         else:
