@@ -10,7 +10,7 @@
 
 from sys import argv
 from os import system,getenv,getuid,getcwd
-import model_makes as mm
+import model_maker as mm
 
 workpath=getcwd()
 
