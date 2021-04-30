@@ -7,22 +7,17 @@
  ---------------------------------------------------------------
 '''
 # data preparation module
-# python basics
-import sys
 
-# data analysis and wrangling
+import sys
 import pandas as pd
 import numpy as np
 
 # uproot to import ROOT format data
 import uproot
+# sklearn utils
 from sklearn.preprocessing import KBinsDiscretizer
 from sklearn.preprocessing import MinMaxScaler
-
-# machine learning
 from sklearn.model_selection import train_test_split
-
-# bootstrap
 from sklearn.utils import resample
 
 # data visualization module
@@ -70,28 +65,37 @@ class data_preparation:
             file = uproot.open(self.workpath+"/data/belle2_kpi.root")
             data_set = file["combined"].arrays(library="pd")
         elif sample == "belle2_iii":
-            file_train = uproot.open(self.workpath+"/data/train_D02k3pi.root")
+            file_train = uproot.open(self.workpath+"/data/train_D02k3pi.root")            
             data_train = file_train["d0tree"].arrays(library="pd")
             file_test  = uproot.open(self.workpath+"/data/test_D02k3pi.root")
-            data_test  = file_train["d0tree"].arrays(library="pd")
-            return data_train, data_test
+            data_test  = file_test["d0tree"].arrays(library="pd")
+            return (data_train, data_test)
+        elif sample == "belle2_iv":
+            file_train = uproot.open(self.workpath+"/data/train_D02kpipi0vxVc-cont0p5.root")
+            data_train = file_train["d0tree"].arrays(library="pd")
+            file_test  = uproot.open(self.workpath+"/data/test_D02kpipi0vxVc-cont0p5.root")
+            data_test  = file_test["d0tree"].arrays(library="pd")
+            return (data_train, data_test)
         else:
             sys.exit("The sample name provided does not exist. Try again!")
         return data_set
 
     # call data
     def dataset(self, sample_name, data_set=None, data_train=None, data_test=None,
-                sampling=False, split_sample=0, train_test=False, indexes = None):
-        
+                sampling=False, split_sample=0, indexes = None):
+
+        train_test = False # to check if data is divided
         # if sampling = True, sampling is done outside data_preparation,
         # sample is fetched externally
 
         # fetch data_set if NOT externally provided
         if not sampling:
+            data_temp = self.fetch_data(sample_name)
+            train_test = type(data_temp) is tuple
             if not train_test:
-                data_set = self.fetch_data(sample_name)
+                data_set = data_temp
             else: # there is separate data samples for training and testing
-                data_train,data_test = self.fetch_data(sample_name)
+                data_train,data_test = data_temp
             
         # prepare data
         if sample_name == "titanic":
@@ -123,19 +127,27 @@ class data_preparation:
         elif sample_name == "belle2_i" or sample_name == "belle2_ii":
             X,Y = self.belle2(data_set, sampling, sample_name=sample_name)
         elif sample_name == "belle2_iii":
+            train_test = True
             X_train, Y_train, X_test, Y_test = self.belle2_3pi(data_train, data_test, sampling, sample_name=sample_name)
+        elif sample_name == "belle2_iv":
+            train_test = True
+            X_train, Y_train, X_test, Y_test = self.belle2_iv(data_train, data_test, sampling, sample_name=sample_name)
 
         # print data after preparation
         if not sampling:
-            print("After preparation shapes X and Y")#, X.shape, Y.shape)
-            if(sample_name!="belle2_iii"): print(X.head())#, Y.head())
-            if(sample_name!="belle2_iii"): print(Y.head())#, Y.head())
-            if(sample_name=="belle2_iii"): print(X_train.head())#, Y.head())
-            if(sample_name=="belle2_iii"): print(Y_train.head())#, Y.head())
-
-        # return X,Y without any spliting (for bootstrap)
+            if train_test:
+                print(X_train.head())#, Y.head())
+                print(Y_train.head())#, Y.head())
+            else:
+                print(X.head())#, Y.head())
+                print(Y.head())#, Y.head())
+                
+        # return X,Y without any spliting (for bootstrap and kfold-CV)
         if sampling:
-            return X,Y
+            if not train_test:
+                return X,Y
+            else:
+                return X_train, Y_train, X_test, Y_test                
                                   
         # divide sample into train and test sample
         if not train_test:
@@ -189,6 +201,60 @@ class data_preparation:
         return X,Y
 
 
+        # belle2 data preparation
+    def belle2_iv(self, data_train, data_test, sampling, sample_name):
+
+        # change value labels
+        title_mapping = {0: -1, 1: 1}
+        data_train["isSignal"] = data_train["isSignal"].map(title_mapping)
+        data_train["isSignal"] = data_train["isSignal"].fillna(0)        
+        data_test["isSignal"]  = data_test["isSignal"].map(title_mapping)
+        data_test["isSignal"]  = data_test["isSignal"].fillna(0)
+
+        if(sampling or self.genetic): # sampling already done or not needed, don"t sample again!
+            Y_train = data_train["isSignal"]
+            Y_test  = data_test["isSignal"]
+            # Data scaling [0,1]
+            cols = list(data_train.columns)        
+            data_train = pd.DataFrame(MinMaxScaler().fit_transform(data_train),columns = cols)
+            data_train = data_train.drop("vM", axis=1)
+            data_train = data_train.drop("vpCMS", axis=1)
+
+            data_test  = pd.DataFrame(MinMaxScaler().fit_transform(data_test) ,columns = cols)
+            data_test  = data_test.drop("vM", axis=1)
+            data_test  = data_test.drop("vpCMS", axis=1)
+            
+            X_test  = data_test.drop("isSignal", axis=1)
+            X_train = data_train.drop("isSignal", axis=1)
+            return X_train, Y_train, X_test, Y_test
+        
+
+        sampled_data_train = resample(data_train, replace = False, n_samples = 1000, random_state=None)
+        sampled_data_test  = resample(data_test,  replace = False, n_samples = 10000, random_state=None)
+        
+        Y_train = sampled_data_train["isSignal"]
+        Y_test  = sampled_data_test["isSignal"]
+
+        sampled_data_train = sampled_data_train.drop("vM", axis=1)
+        sampled_data_test  = sampled_data_test.drop("vM", axis=1)
+
+        sampled_data_train = sampled_data_train.drop("vpCMS", axis=1)
+        sampled_data_test  = sampled_data_test.drop("vpCMS",  axis=1)
+
+        sampled_data_train = sampled_data_train.drop("__index__", axis=1)
+        sampled_data_test  = sampled_data_test.drop("__index__",  axis=1)
+        
+        # column names list
+        cols = list(sampled_data_train.columns)        
+        # data scaling [0,1]
+        sampled_data_train = pd.DataFrame(MinMaxScaler().fit_transform(sampled_data_train),columns = cols)
+        sampled_data_test  = pd.DataFrame(MinMaxScaler().fit_transform(sampled_data_test), columns = cols)
+        
+        X_train = sampled_data_train.drop("isSignal", axis=1)
+        X_test  = sampled_data_test.drop("isSignal", axis=1)
+        return X_train, Y_train, X_test, Y_test
+
+
     # belle2 data preparation
     def belle2_3pi(self, data_train, data_test, sampling, sample_name):
 
@@ -215,8 +281,8 @@ class data_preparation:
             return X_train, Y_train, X_test, Y_test
         
 
-        sampled_data_train = resample(data_train, replace = True, n_samples = 1000, random_state=0)
-        sampled_data_test  = resample(data_test,  replace = False, n_samples = 10000, random_state=0)
+        sampled_data_train = resample(data_train, replace = True, n_samples = 1000, random_state=None)
+        sampled_data_test  = resample(data_test,  replace = False, n_samples = 10000, random_state=None)
 
         Y_train = sampled_data_train["isSignal"]
         Y_test  = sampled_data_test["isSignal"]

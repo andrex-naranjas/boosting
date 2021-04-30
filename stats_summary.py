@@ -37,12 +37,14 @@ def _check_A(A):
         return A
 
 
-def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', GA_selec='', GA_coef=0.5, n_cycles=1, train_test=False, split_frac=0.6, path='.'):
+def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', GA_selec='', GA_coef=0.5, n_cycles=1, split_frac=0.6, path='.'):
     
     # fetch data_frame without preparation
     data = data_preparation(path)
-    if not train_test: sample_df = data.fetch_data(sample_name)
-    else: sample_train_df, sample_test_df = data.fetch_data(sample_name)
+    sample_df_temp = data.fetch_data(sample_name)
+    train_test = type(sample_df_temp) is tuple  # are the data already splitted?
+    if not train_test: sample_df = sample_df_temp
+    else: sample_train_df, sample_test_df = sample_df_temp
         
     area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores = ([]),([]),([]),([]),([]),([])
 
@@ -61,9 +63,9 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
                 sampled_data_test    = pd.concat([sample_df, sampled_train_no_dup]).drop_duplicates(keep=False)
                 
                 X_train, Y_train = data.dataset(sample_name=sample_name, data_set=sampled_data_train,
-                                                sampling=True, split_sample=0.0, train_test=train_test)
+                                                sampling=True, split_sample=0.0)
                 X_test, Y_test   = data.dataset(sample_name=sample_name, data_set=sampled_data_test,
-                                                sampling=True, split_sample=0.0, train_test=train_test)                        
+                                                sampling=True, split_sample=0.0)
             elif selection == 'gene': # genetic selection
                 train_indexes = sampled_data_train.index
                 X,Y = data.dataset(sample_name=sample_name, data_set = sample_df, sampling = True)
@@ -74,14 +76,14 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
                                                  pop_size=10, chrom_len=100, n_gen=50, coef=GA_coef, mut_rate=GA_mut, score_type=GA_score, selec_type=GA_selec)
                 GA_selection.execute()
                 GA_train_indexes = GA_selection.best_population()
-                X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, train_test=False, indexes=GA_train_indexes)
+                X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, indexes=GA_train_indexes)
             
         else:
-            sampled_data_train = resample(sample_train_df, replace = True, n_samples = 5000,  random_state = 0)
-            sampled_data_test  = resample(sample_test_df,  replace = True, n_samples = 10000, random_state = 0)
+            sampled_data_train = resample(sample_train_df, replace = True, n_samples = 5000,  random_state = None)
+            sampled_data_test  = resample(sample_test_df,  replace = True, n_samples = 10000, random_state = None)
             X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, data_set='',
                                                             data_train=sampled_data_train, data_test = sampled_data_test,
-                                                            sampling=True, split_sample=0.4, train_test=True)
+                                                            sampling=True, split_sample=0.4)
         model.fit(X_train, Y_train)
         y_pred = model.predict(X_test)
         prec = precision_score(Y_test, y_pred)
@@ -147,13 +149,13 @@ def mcnemar_test(sample_name, selection='gene', model='no_div', train_test=False
     data = data_preparation()
     X_train, Y_train, X_test, Y_test = \
     data.dataset(sample_name=sample_name,
-                 sampling=False,split_sample=0.4,train_test=train_test)
+                 sampling=False,split_sample=0.4)
     if selection == 'gene':
         GA_selection = genetic_selection(model1, "absv", X_train, Y_train, X_test, Y_test,
                                          pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type=GA_score, selec_type=GA_selec)
         GA_selection.execute()
         GA_train_indexes = GA_selection.best_population()
-        X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, train_test=train_test, indexes=GA_train_indexes)
+        X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, indexes=GA_train_indexes)
     
     # train the model we are analyzing
     model1.fit(X_train, Y_train)
@@ -224,14 +226,19 @@ def mcnemar_test(sample_name, selection='gene', model='no_div', train_test=False
                                                        area1, prec1, f1_1, recall1, acc1, gmean1, f_mcnemar)
 
                 
-def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', GA_selec='', GA_coef=0.5, kfolds=1, n_reps=1, train_test=False, path='.'):
+def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', GA_selec='', GA_coef=0.5, kfolds=1, n_reps=1, path='.'):
     
     # fetch data
+    # fetch data_frame without preparation
     data = data_preparation(path)
-    if not train_test: sample_df = data.fetch_data(sample_name)
-    else: sample_train_df, sample_test_df = data.fetch_data(sample_name)
+    sample_df_temp = data.fetch_data(sample_name)
+    train_test = type(sample_df_temp) is tuple  # are the data already splitted?
+    if not train_test: sample_df = sample_df_temp
+    else: sample_train_df, sample_test_df = sample_df_temp
+
+    
     X,Y = data.dataset(sample_name=sample_name, data_set=sample_df,
-                       sampling=True, split_sample=0.0, train_test=train_test)
+                       sampling=True, split_sample=0.0)
     
     area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores = ([]),([]),([]),([]),([]),([])
     
@@ -246,7 +253,7 @@ def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_sco
                                              pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type=GA_score, selec_type=GA_selec)
             GA_selection.execute()
             GA_train_indexes = GA_selection.best_population()
-            X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, train_test=train_test, indexes=GA_train_indexes)
+            X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name,  indexes=GA_train_indexes)
                     
         model.fit(X_train, Y_train)                
         y_pred = model.predict(X_test)
