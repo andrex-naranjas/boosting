@@ -17,10 +17,11 @@ path = str(sys.argv[3])       # path where code lives
 boot_kfold = str(sys.argv[4]) # use bootstrap or kfold
 
 model_auc = mm.model_loader_batch(process)
-n_cycles=4
-k_folds = 2
-n_reps = 2
+n_cycles = 50
+k_folds  = 2
+n_reps   = 2
 
+start = datetime.datetime.now()
 if(boot_kfold=="boot"):
     auc, prc, f1, rec, acc, gmn = ss.bootstrap(sample_name=name, model=model_auc[1], roc_area=model_auc[2],
                                                selection=model_auc[3], GA_mut=model_auc[4], GA_score=model_auc[5],
@@ -41,5 +42,8 @@ df = pd.concat([col_auc["auc"], col_prc["prc"], col_f1["f1"], col_rec["rec"], co
 name_csv = path+"/stats_results/"+name+"/"+model_auc[0]+"_"+boot_kfold+".csv" 
 df.to_csv(str(name_csv), index=False)
 
+end = datetime.datetime.now()
+elapsed_time = end - start
+print("Elapsed time = " + str(elapsed_time))
 print(model_auc[0], name)
 print(df)
