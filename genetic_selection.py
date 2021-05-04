@@ -11,14 +11,11 @@ import random
 from random import randint
 from tqdm import tqdm
 from functools import lru_cache
-import datetime
 import pandas as pd
+
 from sklearn.utils import resample
-
 from sklearn.metrics import accuracy_score,auc,precision_score,roc_auc_score,f1_score,recall_score
-
 # framework includes
-from data_preparation import data_preparation
 import data_utils as du
 
 
@@ -32,6 +29,9 @@ class genetic_selection:
         self.Y_train = Y_train
         self.X_test  = X_test
         self.Y_test  = Y_test
+        if len(self.Y_test) > len(self.Y_train):
+            self.X_test  = resample(X_test, replace=False, n_samples=10000)
+            self.Y_test  = resample(Y_test, replace=False, n_samples=10000)
         self.y0_index = Y_train[Y_train == -1].index
         self.y1_index = Y_train[Y_train ==  1].index
         self.population_size=pop_size

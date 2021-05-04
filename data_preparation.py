@@ -7,19 +7,14 @@
  ---------------------------------------------------------------
 '''
 # data preparation module
-
 import sys
 import pandas as pd
 import numpy as np
-
 # uproot to import ROOT format data
 import uproot
 # sklearn utils
-from sklearn.preprocessing import KBinsDiscretizer
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
-from sklearn.utils import resample
-
 # data visualization module
 import data_visualization as dv
 
@@ -72,13 +67,16 @@ class data_preparation:
             return (data_train, data_test)
         elif sample == "belle2_iv":
             file_train = uproot.open(self.workpath+"/data/train_D02kpipi0vxVc-cont0p5.root")
+            #file_train = uproot.open(self.workpath+"/data/test_belle2_iv.root")
             data_train = file_train["d0tree"].arrays(library="pd")
             file_test  = uproot.open(self.workpath+"/data/test_D02kpipi0vxVc-cont0p5.root")
             data_test  = file_test["d0tree"].arrays(library="pd")
+            #return data_train
             return (data_train, data_test)
         else:
             sys.exit("The sample name provided does not exist. Try again!")
         return data_set
+
 
     # call data
     def dataset(self, sample_name, data_set=None, data_train=None, data_test=None,
@@ -150,20 +148,28 @@ class data_preparation:
                 return X_train, Y_train, X_test, Y_test                
                                   
         # divide sample into train and test sample
-        if not train_test:
-            if indexes is None:
+        if indexes is None:
+            if not train_test:
                 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=split_sample)
+        else:
+            if not train_test:
+                X_train, X_test, Y_train, Y_test = self.indexes_split(X, Y, split_indexes=indexes, train_test=train_test)
             else:
-                X_train, X_test, Y_train, Y_test = self.indexes_split(X, Y, split_indexes=indexes)
+                X_train, X_test, Y_train, Y_test = self.indexes_split(X_train, Y_train, X_test, Y_test,
+                                                                      split_indexes=indexes, train_test=train_test)
                 
         return X_train, Y_train, X_test, Y_test
 
     
-    def indexes_split(self, X, Y, split_indexes):
+    def indexes_split(self, X, Y, x_test=None, y_test=None, split_indexes=None, train_test=False):
         """ Function to split train and test data given train indexes"""
-        total_indexes = np.array(X.index).tolist()        
-        train_indexes = split_indexes.tolist()
-        test_indexes  = list(set(total_indexes) - set(train_indexes))
+        if not train_test:
+            total_indexes = np.array(X.index).tolist()        
+            train_indexes = split_indexes.tolist()
+            test_indexes  = list(set(total_indexes) - set(train_indexes))
+        else:
+            train_indexes = split_indexes.tolist()
+            test_indexes  = split_indexes.tolist()
 
         X_train = X.loc[train_indexes]
         Y_train = Y.loc[train_indexes]
@@ -172,7 +178,7 @@ class data_preparation:
 
         return X_train, X_test, Y_train, Y_test
 
-
+    
     # belle2 data preparation
     def belle2(self, data_set, sampling, sample_name):
         
@@ -182,7 +188,7 @@ class data_preparation:
             # column names list            
             cols = list(data_set.columns)
             data_set = pd.DataFrame(MinMaxScaler().fit_transform(data_set),columns = cols)
-            X = data_set.drop("Class", axis=1)            
+            X = data_set.drop("Class", axis=1)
             return X,Y 
 
         sampled_data = resample(data_set, replace = False, n_samples = 5000, random_state = 0)
@@ -201,17 +207,16 @@ class data_preparation:
         return X,Y
 
 
-        # belle2 data preparation
+    # belle2 data preparation
     def belle2_iv(self, data_train, data_test, sampling, sample_name):
+        #def belle2_iv(self, data_train, sampling, sample_name):
+        
+        data_train = data_train.copy()
+        data_train.loc[data_train["isSignal"] == 0, "isSignal"] = -1
+        data_test = data_test.copy()
+        data_test.loc[data_test["isSignal"] == 0, "isSignal"] = -1
 
-        # change value labels
-        title_mapping = {0: -1, 1: 1}
-        data_train["isSignal"] = data_train["isSignal"].map(title_mapping)
-        data_train["isSignal"] = data_train["isSignal"].fillna(0)        
-        data_test["isSignal"]  = data_test["isSignal"].map(title_mapping)
-        data_test["isSignal"]  = data_test["isSignal"].fillna(0)
-
-        if(sampling or self.genetic): # sampling already done or not needed, don"t sample again!
+        if(sampling or self.genetic): # sampling already done or not needed
             Y_train = data_train["isSignal"]
             Y_test  = data_test["isSignal"]
             # Data scaling [0,1]
@@ -219,29 +224,29 @@ class data_preparation:
             data_train = pd.DataFrame(MinMaxScaler().fit_transform(data_train),columns = cols)
             data_train = data_train.drop("vM", axis=1)
             data_train = data_train.drop("vpCMS", axis=1)
+            data_train = data_train.drop("__index__", axis=1)
 
             data_test  = pd.DataFrame(MinMaxScaler().fit_transform(data_test) ,columns = cols)
             data_test  = data_test.drop("vM", axis=1)
             data_test  = data_test.drop("vpCMS", axis=1)
+            data_test  = data_test.drop("__index__", axis=1)
             
             X_test  = data_test.drop("isSignal", axis=1)
-            X_train = data_train.drop("isSignal", axis=1)
+            X_train = data_train.drop("isSignal", axis=1)            
             return X_train, Y_train, X_test, Y_test
         
-
         sampled_data_train = resample(data_train, replace = False, n_samples = 1000, random_state=None)
-        sampled_data_test  = resample(data_test,  replace = False, n_samples = 10000, random_state=None)
+        sampled_data_test  = resample(data_test,  replace = False, n_samples = 1000, random_state=None)
         
         Y_train = sampled_data_train["isSignal"]
         Y_test  = sampled_data_test["isSignal"]
 
         sampled_data_train = sampled_data_train.drop("vM", axis=1)
-        sampled_data_test  = sampled_data_test.drop("vM", axis=1)
-
         sampled_data_train = sampled_data_train.drop("vpCMS", axis=1)
-        sampled_data_test  = sampled_data_test.drop("vpCMS",  axis=1)
-
         sampled_data_train = sampled_data_train.drop("__index__", axis=1)
+
+        sampled_data_test  = sampled_data_test.drop("vM", axis=1)
+        sampled_data_test  = sampled_data_test.drop("vpCMS",  axis=1)
         sampled_data_test  = sampled_data_test.drop("__index__",  axis=1)
         
         # column names list
@@ -254,16 +259,14 @@ class data_preparation:
         X_test  = sampled_data_test.drop("isSignal", axis=1)
         return X_train, Y_train, X_test, Y_test
 
-
+    
     # belle2 data preparation
     def belle2_3pi(self, data_train, data_test, sampling, sample_name):
 
-        # change value labels
-        title_mapping = {0: -1, 1: 1}
-        data_train["isSignal"] = data_train["isSignal"].map(title_mapping)
-        data_train["isSignal"] = data_train["isSignal"].fillna(0)        
-        data_test["isSignal"]  = data_test["isSignal"].map(title_mapping)
-        data_test["isSignal"]  = data_test["isSignal"].fillna(0)
+        data_train = data_train.copy()
+        data_train.loc[data_train["isSignal"] == 0, "isSignal"] = -1
+        data_test = data_test.copy()
+        data_test.loc[data_test["isSignal"] == 0, "isSignal"] = -1
 
         if(sampling or self.genetic): # sampling already done or not needed, don"t sample again!
             Y_train = data_train["isSignal"]
@@ -271,10 +274,12 @@ class data_preparation:
             # Data scaling [0,1]
             cols = list(data_train.columns)        
             data_train = pd.DataFrame(MinMaxScaler().fit_transform(data_train),columns = cols)
-            data_train = data_train.drop("M", axis=1)            
+            data_train = data_train.drop("M", axis=1)
+            data_train = data_train.drop("__index__", axis=1)
 
             data_test  = pd.DataFrame(MinMaxScaler().fit_transform(data_test) ,columns = cols)
             data_test  = data_test.drop("M", axis=1)
+            data_test  = data_test.drop("__index__", axis=1)
             
             X_test  = data_test.drop("isSignal", axis=1)
             X_train = data_train.drop("isSignal", axis=1)
@@ -765,13 +770,13 @@ class data_preparation:
         data_set["Class"] = data_set["Class"].map(title_mapping)
         data_set["Class"] = data_set["Class"].fillna(0)
 
-
         X = data_set.drop("Class", axis=1)
         Y = data_set["Class"]
         return X,Y
 
 
     # bin data?!?
+    # from sklearn.preprocessing import KBinsDiscretizer
     # Xin = data_set.drop("Class", axis=1)
     # est = KBinsDiscretizer(n_bins=20, encode="ordinal", strategy="uniform")
     # est.fit(Xin)
