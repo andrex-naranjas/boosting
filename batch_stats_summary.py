@@ -30,7 +30,7 @@ if(boot_kfold=="boot"):
 elif(boot_kfold=="kfold"):
     auc, prc, f1, rec, acc, gmn = ss.cross_validation(sample_name=name, model=model_auc[1], roc_area=model_auc[2],
                                                       selection=model_auc[3], GA_mut=model_auc[4], GA_score=model_auc[5],
-                                                      GA_selec=model_auc[6], GA_coef=model_auc[7], kfolds=kfolds, n_reps=n_reps, path=path)
+                                                      GA_selec=model_auc[6], GA_coef=model_auc[7], kfolds=k_folds, n_reps=n_reps, path=path)
 
 col_auc = pd.DataFrame(data=auc, columns=["auc"])
 col_prc = pd.DataFrame(data=prc, columns=["prc"])
