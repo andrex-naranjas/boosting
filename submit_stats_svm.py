@@ -7,6 +7,7 @@
  ---------------------------------------------------------------
 '''
 # htcondor job submitter
+# python3 submit_stats_svm.py sample_name boot/kfold
 
 from sys import argv
 from os import system,getenv,getuid,getcwd
