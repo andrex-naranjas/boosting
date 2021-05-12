@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 # -*- coding: utf-8 -*-
 '''
 ---------------------------------------------------------------
@@ -417,7 +417,7 @@ def stats_results(name, n_cycles, kfolds, n_reps, boot_kfold ='', split_frac=0.6
     f_tukey_div.close()
 
 
-def tukey_call_batch(name='perrito'):
+def tukey_call_batch(sample_name='titanic', stats_type='tukey'):
     # arrays to store the scores
     mean_auc,mean_prc,mean_f1,mean_rec,mean_acc,mean_gmn = ([]),([]),([]),([]),([]),([])
     std_auc,std_prc,std_f1,std_rec,std_acc,std_gmn = ([]),([]),([]),([]),([]),([])
@@ -425,62 +425,69 @@ def tukey_call_batch(name='perrito'):
     names = []
 
     flavor_names = []
-    flavor_names.append('trad-lin-NOTdiv_boot.csv')
-    flavor_names.append('trad-lin-YESdiv_boot.csv')
     flavor_names.append('trad-rbf-NOTdiv_boot.csv')
     flavor_names.append('trad-rbf-YESdiv_boot.csv')
     flavor_names.append('trad-sig-NOTdiv_boot.csv')
     flavor_names.append('trad-sig-YESdiv_boot.csv')
     
-    # flavor_names.append('genHLACC-rbf-NOTdiv_boot.csv')
-    # flavor_names.append('genHLACC-rbf-YESdiv_boot.csv')
-    # flavor_names.append('genHLACC-sig-NOTdiv_boot.csv')
-    # flavor_names.append('genHLACC-sig-YESdiv_boot.csv')
-    # flavor_names.append('genHLAUC-rbf-NOTdiv_boot.csv')
-    # flavor_names.append('genHLAUC-rbf-YESdiv_boot.csv')
-    # flavor_names.append('genHLAUC-sig-NOTdiv_boot.csv')
-    # flavor_names.append('genHLAUC-sig-YESdiv_boot.csv')
-    # flavor_names.append('genHLF1-rbf-NOTdiv_boot.csv')
-    # flavor_names.append('genHLF1-rbf-YESdiv_boot.csv')
-    # flavor_names.append('genHLF1-sig-NOTdiv_boot.csv')
-    # flavor_names.append('genHLF1-sig-YESdiv_boot.csv')
-    # flavor_names.append('genHLGMN-rbf-NOTdiv_boot.csv')
-    # flavor_names.append('genHLGMN-rbf-YESdiv_boot.csv')
-    # flavor_names.append('genHLGMN-sig-NOTdiv_boot.csv')
-    # flavor_names.append('genHLGMN-sig-YESdiv_boot.csv')
-    # flavor_names.append('genHLPREC-rbf-NOTdiv_boot.csv')
-    # flavor_names.append('genHLPREC-rbf-YESdiv_boot.csv')
-    # flavor_names.append('genHLPREC-sig-NOTdiv_boot.csv')
-    # flavor_names.append('genHLPREC-sig-YESdiv_boot.csv')
-    # flavor_names.append('genHLREC-rbf-NOTdiv_boot.csv')
-    # flavor_names.append('genHLREC-rbf-YESdiv_boot.csv')
-    # flavor_names.append('genRLTACC-lin-NOTdiv_boot.csv')
-    # flavor_names.append('genRLTACC-lin-YESdiv_boot.csv')
-    # flavor_names.append('genRLTACC-rbf-NOTdiv_boot.csv')
-    # flavor_names.append('genRLTACC-rbf-YESdiv_boot.csv')
-    # flavor_names.append('genRLTACC-sig-NOTdiv_boot.csv')
-    # flavor_names.append('genRLTACC-sig-YESdiv_boot.csv')
-    # flavor_names.append('genRLTAUC-rbf-NOTdiv_boot.csv')
-    # flavor_names.append('genRLTAUC-rbf-YESdiv_boot.csv')
-    # flavor_names.append('genRLTAUC-sig-NOTdiv_boot.csv')
-    # flavor_names.append('genRLTAUC-sig-YESdiv_boot.csv')
-    # flavor_names.append('genRLTF1-rbf-NOTdiv_boot.csv')
-    # flavor_names.append('genRLTF1-rbf-YESdiv_boot.csv')
-    # flavor_names.append('genRLTF1-sig-NOTdiv_boot.csv')
-    # flavor_names.append('genRLTGMN-rbf-NOTdiv_boot.csv')
-    # flavor_names.append('genRLTGMN-rbf-YESdiv_boot.csv')
-    # flavor_names.append('genRLTGMN-sig-NOTdiv_boot.csv')
-    # flavor_names.append('genRLTGMN-sig-YESdiv_boot.csv')
-    # flavor_names.append('genRLTPREC-rbf-NOTdiv_boot.csv')
-    # flavor_names.append('genRLTPREC-rbf-YESdiv_boot.csv')
-    # flavor_names.append('genRLTPREC-sig-NOTdiv_boot.csv')
-    # flavor_names.append('genRLTREC-rbf-NOTdiv_boot.csv')
-    # flavor_names.append('genRLTREC-rbf-YESdiv_boot.csv')
-    # flavor_names.append('genRLTREC-sig-NOTdiv_boot.csv')
-    # flavor_names.append('genRLTREC-sig-YESdiv_boot.csv')
+    flavor_names.append('genHLACC-rbf-NOTdiv_boot.csv')
+    flavor_names.append('genHLACC-rbf-YESdiv_boot.csv')
+    flavor_names.append('genHLACC-sig-NOTdiv_boot.csv')
+    flavor_names.append('genHLACC-sig-YESdiv_boot.csv')
+
+    flavor_names.append('genHLAUC-rbf-NOTdiv_boot.csv')
+    flavor_names.append('genHLAUC-rbf-YESdiv_boot.csv')
+    flavor_names.append('genHLAUC-sig-NOTdiv_boot.csv')
+    flavor_names.append('genHLAUC-sig-YESdiv_boot.csv')
     
-    print(name, 'calling tukey test from batch results')
-    directory ='/home/andrex/PostDoc/PaperSVM/python/scripts/stats_results/wine'
+    flavor_names.append('genHLF1-rbf-NOTdiv_boot.csv')
+    flavor_names.append('genHLF1-rbf-YESdiv_boot.csv')
+    flavor_names.append('genHLF1-sig-NOTdiv_boot.csv')
+    flavor_names.append('genHLF1-sig-YESdiv_boot.csv')
+    
+    flavor_names.append('genHLGMN-rbf-NOTdiv_boot.csv')
+    flavor_names.append('genHLGMN-rbf-YESdiv_boot.csv')
+    flavor_names.append('genHLGMN-sig-NOTdiv_boot.csv')
+    flavor_names.append('genHLGMN-sig-YESdiv_boot.csv')
+    
+    flavor_names.append('genHLPREC-rbf-NOTdiv_boot.csv')
+    flavor_names.append('genHLPREC-rbf-YESdiv_boot.csv')
+    flavor_names.append('genHLPREC-sig-NOTdiv_boot.csv')
+    flavor_names.append('genHLPREC-sig-YESdiv_boot.csv')
+    
+    flavor_names.append('genHLREC-rbf-NOTdiv_boot.csv')
+    flavor_names.append('genHLREC-rbf-YESdiv_boot.csv')
+    
+    flavor_names.append('genRLTACC-rbf-NOTdiv_boot.csv')
+    flavor_names.append('genRLTACC-rbf-YESdiv_boot.csv')
+    flavor_names.append('genRLTACC-sig-NOTdiv_boot.csv')
+    
+    flavor_names.append('genRLTACC-sig-YESdiv_boot.csv')
+    flavor_names.append('genRLTAUC-rbf-NOTdiv_boot.csv')
+    flavor_names.append('genRLTAUC-rbf-YESdiv_boot.csv')
+    flavor_names.append('genRLTAUC-sig-NOTdiv_boot.csv')
+    flavor_names.append('genRLTAUC-sig-YESdiv_boot.csv')
+    
+    flavor_names.append('genRLTF1-rbf-NOTdiv_boot.csv')
+    flavor_names.append('genRLTF1-rbf-YESdiv_boot.csv')
+    flavor_names.append('genRLTF1-sig-NOTdiv_boot.csv')
+    
+    flavor_names.append('genRLTGMN-rbf-NOTdiv_boot.csv')
+    flavor_names.append('genRLTGMN-rbf-YESdiv_boot.csv')
+    flavor_names.append('genRLTGMN-sig-NOTdiv_boot.csv')
+    flavor_names.append('genRLTGMN-sig-YESdiv_boot.csv')
+    
+    flavor_names.append('genRLTPREC-rbf-NOTdiv_boot.csv')
+    flavor_names.append('genRLTPREC-rbf-YESdiv_boot.csv')
+    flavor_names.append('genRLTPREC-sig-NOTdiv_boot.csv')
+    
+    flavor_names.append('genRLTREC-rbf-NOTdiv_boot.csv')
+    flavor_names.append('genRLTREC-rbf-YESdiv_boot.csv')
+    flavor_names.append('genRLTREC-sig-NOTdiv_boot.csv')
+    flavor_names.append('genRLTREC-sig-YESdiv_boot.csv')
+    
+    print(sample_name, 'calling tukey test from batch results')
+    directory ='/home/andrex/PostDoc/PaperSVM/python/scripts/stats_results/'+sample_name
 
     for names in flavor_names:
         input_data = pd.read_csv(directory+'/'+names)
@@ -513,9 +520,7 @@ def tukey_call_batch(name='perrito'):
         std_acc = np.append(std_acc,  np.std(acc))
         std_gmn = np.append(std_gmn,  np.std(gmn))
         
-        # store model names, for later use in latex tables
-        # names.append(models_auc[i][0])
-    
+            
     # tukey tests
     tukey_auc  =  tukey_test(np.array(auc_values))
 
@@ -537,45 +542,48 @@ def tukey_call_batch(name='perrito'):
 
     #     matrix.append(column)
 
-    counter  = 0
-    counter2 = 0
-    flag = True
-    nClass = len(flavor_names)
-    column = ([])
-    for k in range(len(tukey_auc.reject)):
-        counter2+=1
-        # column = np.append(column, tukey_auc.pvalues[k])
-        if tukey_auc.reject[k]: value = 1
-        else: value = -1
-        column = np.append(column, value)
-        #print(k, counter2, 'test', len(flavor_names) - counter, counter2, counter)
-        if nClass - counter - 2 < counter2:
-            column = np.append(column, -1.)
-            zeros = np.zeros(nClass-len(column))
-            column = np.append(column, zeros)
-            matrix.append(column)
-            column = ([])
-            counter+=1
-            counter2 = 0
+    if stats_type == 'tukey':
+        counter  = 0
+        counter2 = 0
+        flag = True
+        nClass = len(flavor_names)
+        column = ([])
+        for k in range(len(tukey_auc.reject)):
+            counter2+=1
+            if counter2 == 1:
+                column = np.append(column, -1.)
+            # column = np.append(column, tukey_auc.pvalues[k])
+            if tukey_auc.reject[k]: value = 1
+            else: value = -1
+            column = np.append(column, value)
+            if nClass - counter - 2 < counter2:
+                column = np.flip(column)
+                zeros = np.zeros(nClass-len(column))
+                column = np.append(column, zeros)
+                column = np.flip(column)
+                matrix.append(column)
+                column = ([])
+                counter += 1
+                counter2 = 0
             
-    last_column = np.array([-1.])
-    zeros = np.zeros(nClass-len(last_column))
-    last_column = np.append(last_column, zeros)
-    matrix.append(last_column)
-    matrix = np.array(matrix)
-    matrix = matrix.transpose()
+        last_column = np.array([-1.])
+        zeros = np.zeros(nClass-len(last_column))
+        last_column = np.append(zeros, last_column)
+        matrix.append(last_column)
+        matrix = np.array(matrix)
+        #matrix = matrix.transpose()
 
-    for i in range(len(matrix)):
-        #print(matrix, len(matrix))
-        print(matrix[i], 'parrito test')
+        for i in range(len(matrix)):
+            #print(matrix, len(matrix))
+            print(matrix[i], 'parrito test')
             
         
-    sigmin = 0
-    sigmax = len(flavor_names)
-    cmin = 0
-    cmax = len(flavor_names)
-    sample_name = 'test'                
-    dv.plot_stats_2d(matrix, sample_name)
+        sigmin = 0
+        sigmax = len(flavor_names)
+        cmin = 0
+        cmax = len(flavor_names)
+        sample_name+='_'+stats_type
+        dv.plot_stats_2d(matrix, sample_name)
     
     #print(len(tukey_auc.reject), 'size')
     # tukey_prc  =  tukey_test(np.array(prc_values))

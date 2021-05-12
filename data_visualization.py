@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 # -*- coding: utf-8 -*-
 '''
 ---------------------------------------------------------------
@@ -82,6 +82,10 @@ def plot_stats_2d(matrix, sample_name):
     # ax.set_xticks([0,matrix.shape[1]/2, matrix.shape[1]-1]) # show some ticks
     # ax.set_yticks([0,matrix.shape[0]/2, matrix.shape[0]-1])
 
+    # Let the horizontal axes labeling appear on top.
+    ax.tick_params(top=True, bottom=False,
+                   labeltop=True, labelbottom=False)
+
     # loop over data dimensions and create text annotations.
     # for i in range(matrix.shape[1]):
     #     for j in range(matrix.shape[0]):
@@ -90,8 +94,8 @@ def plot_stats_2d(matrix, sample_name):
 
     ax.set_title('pvalue test - '+sample_name+' dataset', color=(0.1, 0, 0.5))
     fig.tight_layout()
-    plt.xlabel('Classifier')
-    plt.ylabel('Classifier')
+    # plt.xlabel('Classifier')
+    # plt.ylabel('Classifier')
     plt.savefig('./plots/2dplot_stats_'+sample_name+'.pdf')
     plt.close()
 
