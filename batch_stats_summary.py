@@ -18,7 +18,7 @@ path = str(sys.argv[3])       # path where code lives
 boot_kfold = str(sys.argv[4]) # use bootstrap or kfold
 
 model_auc = mm.model_loader_batch(process)
-n_cycles = 50
+n_cycles = 60
 k_folds  = 20
 n_reps   = 3
 

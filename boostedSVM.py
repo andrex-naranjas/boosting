@@ -23,7 +23,7 @@ from sklearn.model_selection import train_test_split
 
 class AdaBoostSVM:
 
-    def __init__(self, C, gammaIni, myKernel, myDegree=1, myCoef0=1, Diversity=False, early_stop=False, debug=False):
+    def __init__(self, C, gammaIni, myKernel, myDegree=1, myCoef0=1, Diversity=False, early_stop=False, debug=False, train_verbose=False):
         
         self.C = C
         self.gammaIni = gammaIni
@@ -46,6 +46,7 @@ class AdaBoostSVM:
         self.Div_total = ([])
         self.Div_partial = ([])
         self.debug = debug
+        self.verbose_train = train_verbose
         self.early_flag = early_stop
         self.count_warning = 1
         
@@ -180,38 +181,50 @@ class AdaBoostSVM:
             # do loop as long gamma > gammaMin, if gamma < 0, SVM fails exit loop
             if gammaVar <= gammaMin:#) or (gammaVar < 0):
                 break
-            # end of adaboot loop
+            # end of adaboost loop
 
         print(count,'number of classifiers')
-        self.count_warning == count
+        self.count_warning = count
         if(count==0):
-            print(' WARNING: No classifiers in the ensemble!')
+            print(' WARNING: No selected classifiers in the ensemble! Adding artifically the first one with no requirements!!!!!!')
             self.count_warning = 0
+            self.alphas   = np.append(self.alphas, 1.0)
+            # artificially added classifier, when no classifier has been
+            # selected, the first classifier
+            svcB = SVC(C=self.C,
+                    kernel=self.myKernel,
+                    degree=self.myDegree,
+                    coef0=self.myCoef0,
+                    gamma=1/(2*(self.gammaIni**2)),
+                    shrinking=True,
+                    probability=True,
+                    tol=0.001,
+                    cache_size=10000
+                )
+            self.weak_svm = np.append(self.weak_svm, learner)
             return self
 
-        h_list = np.array(h_list)
-        
-        # start to calculate the final classifier
-        h_alpha = np.array([h_list[i]*self.alphas[i] for i in range(count)])
-
-        # final classifier is an array (size of number of data points)
-        final = ([])
-        for j in range(len(h_alpha[0])):
-            suma = 0.0
-            for i in range(count):
-                suma+=h_alpha[i][j]
-            final = np.append(final, [np.sign(suma)])
-
-        # final precision calculation
-        final_fp, final_tp  = 0,0
-        for i in range(n):
-            if(Y_train[i]!=final[i]):  final_fp+=1
-            else:                      final_tp+=1
-
-        final_precision = final_tp / (final_fp + final_tp)
-        print("Final training precision: {} ".format( round(final_precision,4)) )
-        #du.metrics(sample,'svmBoosted', svcB, X_train, Y_train, Y_test, X_test, Y_predB)
-
+        # show the training the performance (optional)
+        if(self.verbose_train):
+            h_list = np.array(h_list)            
+            # calculate the final classifier
+            h_alpha = np.array([h_list[i]*self.alphas[i] for i in range(count)])            
+            # final classifier is an array (size of number of data points)
+            final = ([])
+            for j in range(len(h_alpha[0])):
+                suma = 0.0
+                for i in range(count):
+                    suma+=h_alpha[i][j]
+                    final = np.append(final, [np.sign(suma)])                    
+                    # final precision calculation
+                    final_fp, final_tp  = 0,0
+                    for i in range(n):
+                        if(Y_train[i]!=final[i]):  final_fp+=1
+                        else:                      final_tp+=1                        
+                        final_precision = final_tp / (final_fp + final_tp)
+                        print("Final training precision: {} ".format( round(final_precision,4)) )
+                        #du.metrics(sample,'svmBoosted', svcB, X_train, Y_train, Y_test, X_test, Y_predB)
+                        
         return self
 
 
