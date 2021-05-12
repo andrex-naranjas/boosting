@@ -9,8 +9,6 @@
 import numpy as np
 from sklearn.metrics import accuracy_score,auc,precision_score,roc_auc_score,f1_score,recall_score
 from sklearn.utils import resample # for bootstraping
-from scipy.stats import f_oneway
-from scipy.stats import norm, normaltest, shapiro, chisquare, kstest
 import pandas as pd
 from sklearn.model_selection import RepeatedKFold
 
@@ -18,6 +16,12 @@ from sklearn.model_selection import RepeatedKFold
 from statsmodels.stats.multicomp import pairwise_tukeyhsd,MultiComparison
 from statsmodels.stats.diagnostic import lilliefors
 from statsmodels.stats.contingency_tables import mcnemar
+
+# scypi includes
+from scipy.stats import ttest_ind
+from scipy.stats import wilcoxon
+from scipy.stats import f_oneway
+from scipy.stats import norm, normaltest, shapiro, chisquare, kstest
 
 # framework includes
 from data_preparation import data_preparation
@@ -69,7 +73,7 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
             elif selection == 'gene': # genetic selection
                 train_indexes = sampled_data_train.index
                 X,Y = data.dataset(sample_name=sample_name, data_set = sample_df, sampling = True)
-                X_train, X_test, Y_train, Y_test = data.indexes_split(X, Y, train_indexes)
+                X_train, X_test, Y_train, Y_test = data.indexes_split(X, Y, split_indexes=train_indexes, train_test=train_test)
                 print(len(X_train.index),  len(Y_train.index), 'X_train, Y_train sizes')
 
                 GA_selection = genetic_selection(model, roc_area, X_train, Y_train, X_test, Y_test,
@@ -104,6 +108,65 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
             Y_pred_dec = model.decision_function(X_test)
             area = roc_auc_score(Y_test, Y_pred_dec)
                     
+        area_scores   = np.append(area_scores, area)
+        prec_scores   = np.append(prec_scores, prec)
+        f1_scores     = np.append(f1_scores,   f1)
+        recall_scores = np.append(recall_scores, recall)
+        acc_scores    = np.append(acc_scores, acc)
+        gmean_scores  = np.append(gmean_scores, gmean)
+
+    return area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores
+
+
+def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', GA_selec='', GA_coef=0.5, kfolds=1, n_reps=1, path='.'):
+    
+    # fetch data_frame without preparation
+    data = data_preparation(path)
+    sample_df_temp = data.fetch_data(sample_name)
+    train_test = type(sample_df_temp) is tuple  # are the data already splitted?
+    if not train_test: sample_df = sample_df_temp
+    else: sample_train_df, sample_test_df = sample_df_temp
+
+    area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores = ([]),([]),([]),([]),([]),([])
+        
+    X,Y = data.dataset(sample_name=sample_name, data_set=sample_df,
+                       sampling=True, split_sample=0.0)
+    
+    # n-k fold cross validation, n_cycles = n_splits * n_repeats
+    rkf = RepeatedKFold(n_splits = kfolds, n_repeats = n_reps, random_state = None)
+    for train_index, test_index in rkf.split(X):
+        X_train, X_test = X.loc[train_index], X.loc[test_index]
+        Y_train, Y_test = Y.loc[train_index], Y.loc[test_index]
+
+        if selection == 'gene': # genetic selection
+            GA_selection = genetic_selection(model, roc_area, X_train, Y_train, X_test, Y_test,
+                                             pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type=GA_score, selec_type=GA_selec)
+            GA_selection.execute()
+            GA_train_indexes = GA_selection.best_population()
+            X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name,  indexes=GA_train_indexes)
+                    
+        model.fit(X_train, Y_train)                
+        y_pred = model.predict(X_test)
+        prec = precision_score(Y_test, y_pred)
+        f1 = f1_score(Y_test, y_pred)
+        recall = recall_score(Y_test, y_pred)
+        acc = accuracy_score(Y_test, y_pred)
+        gmean = np.sqrt(prec*recall)
+        
+        # calcualate roc-auc depending on the classifier
+        if roc_area=="absv":
+            y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
+            TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
+            area = auc(FPR,TPR)
+            model.clean()
+        elif roc_area=="prob":
+            Y_pred_prob = model.predict_proba(X_test)[:,1]            
+            area = roc_auc_score(Y_test, Y_pred_prob)
+        elif roc_area=="deci":
+            Y_pred_dec = model.decision_function(X_test)
+            area = roc_auc_score(Y_test, Y_pred_dec)
+
+        # store scores
         area_scores   = np.append(area_scores, area)
         prec_scores   = np.append(prec_scores, prec)
         f1_scores     = np.append(f1_scores,   f1)
@@ -224,68 +287,7 @@ def mcnemar_test(sample_name, selection='gene', model='no_div', train_test=False
     
     dv.latex_table_mcnemar(names,p_values,stats,rejects, areas2,precs2,f1_s2,recalls2,accs2,gmeans2,
                                                        area1, prec1, f1_1, recall1, acc1, gmean1, f_mcnemar)
-
                 
-def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', GA_selec='', GA_coef=0.5, kfolds=1, n_reps=1, path='.'):
-    
-    # fetch data
-    # fetch data_frame without preparation
-    data = data_preparation(path)
-    sample_df_temp = data.fetch_data(sample_name)
-    train_test = type(sample_df_temp) is tuple  # are the data already splitted?
-    if not train_test: sample_df = sample_df_temp
-    else: sample_train_df, sample_test_df = sample_df_temp
-
-    
-    X,Y = data.dataset(sample_name=sample_name, data_set=sample_df,
-                       sampling=True, split_sample=0.0)
-    
-    area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores = ([]),([]),([]),([]),([]),([])
-    
-    # n-k fold cross validation, n_cycles = n_splits * n_repeats
-    rkf = RepeatedKFold(n_splits = kfolds, n_repeats = n_reps, random_state = None)
-    for train_index, test_index in rkf.split(X):
-        X_train, X_test = X.loc[train_index], X.loc[test_index]
-        Y_train, Y_test = Y.loc[train_index], Y.loc[test_index]
-
-        if selection == 'gene': # genetic selection
-            GA_selection = genetic_selection(model, roc_area, X_train, Y_train, X_test, Y_test,
-                                             pop_size=10, chrom_len=100, n_gen=50, coef=0.5, mut_rate=0.3, score_type=GA_score, selec_type=GA_selec)
-            GA_selection.execute()
-            GA_train_indexes = GA_selection.best_population()
-            X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name,  indexes=GA_train_indexes)
-                    
-        model.fit(X_train, Y_train)                
-        y_pred = model.predict(X_test)
-        prec = precision_score(Y_test, y_pred)
-        f1 = f1_score(Y_test, y_pred)
-        recall = recall_score(Y_test, y_pred)
-        acc = accuracy_score(Y_test, y_pred)
-        gmean = np.sqrt(prec*recall)
-        
-        # calcualate roc-auc depending on the classifier
-        if roc_area=="absv":
-            y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
-            TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
-            area = auc(FPR,TPR)
-            model.clean()
-        elif roc_area=="prob":
-            Y_pred_prob = model.predict_proba(X_test)[:,1]            
-            area = roc_auc_score(Y_test, Y_pred_prob)
-        elif roc_area=="deci":
-            Y_pred_dec = model.decision_function(X_test)
-            area = roc_auc_score(Y_test, Y_pred_dec)
-
-        # store scores
-        area_scores   = np.append(area_scores, area)
-        prec_scores   = np.append(prec_scores, prec)
-        f1_scores     = np.append(f1_scores,   f1)
-        recall_scores = np.append(recall_scores, recall)
-        acc_scores    = np.append(acc_scores, acc)
-        gmean_scores  = np.append(gmean_scores, gmean)
-
-    return area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores
-
 
 def anova_test(a,b,c,d,e,f,g):
     print('ANOVA TEEEST!')
@@ -414,6 +416,197 @@ def stats_results(name, n_cycles, kfolds, n_reps, boot_kfold ='', split_frac=0.6
                          mean_rec, std_rec,  tukey_rec, mean_acc, std_acc, tukey_acc, mean_gmn, std_gmn, tukey_gmn, f_tukey_div)
     f_tukey_div.close()
 
+
+def tukey_call_batch(name='perrito'):
+    # arrays to store the scores
+    mean_auc,mean_prc,mean_f1,mean_rec,mean_acc,mean_gmn = ([]),([]),([]),([]),([]),([])
+    std_auc,std_prc,std_f1,std_rec,std_acc,std_gmn = ([]),([]),([]),([]),([]),([])
+    auc_values,prc_values,f1_values,rec_values,acc_values,gmn_values = [],[],[],[],[],[]
+    names = []
+
+    flavor_names = []
+    flavor_names.append('trad-lin-NOTdiv_boot.csv')
+    flavor_names.append('trad-lin-YESdiv_boot.csv')
+    flavor_names.append('trad-rbf-NOTdiv_boot.csv')
+    flavor_names.append('trad-rbf-YESdiv_boot.csv')
+    flavor_names.append('trad-sig-NOTdiv_boot.csv')
+    flavor_names.append('trad-sig-YESdiv_boot.csv')
+    
+    # flavor_names.append('genHLACC-rbf-NOTdiv_boot.csv')
+    # flavor_names.append('genHLACC-rbf-YESdiv_boot.csv')
+    # flavor_names.append('genHLACC-sig-NOTdiv_boot.csv')
+    # flavor_names.append('genHLACC-sig-YESdiv_boot.csv')
+    # flavor_names.append('genHLAUC-rbf-NOTdiv_boot.csv')
+    # flavor_names.append('genHLAUC-rbf-YESdiv_boot.csv')
+    # flavor_names.append('genHLAUC-sig-NOTdiv_boot.csv')
+    # flavor_names.append('genHLAUC-sig-YESdiv_boot.csv')
+    # flavor_names.append('genHLF1-rbf-NOTdiv_boot.csv')
+    # flavor_names.append('genHLF1-rbf-YESdiv_boot.csv')
+    # flavor_names.append('genHLF1-sig-NOTdiv_boot.csv')
+    # flavor_names.append('genHLF1-sig-YESdiv_boot.csv')
+    # flavor_names.append('genHLGMN-rbf-NOTdiv_boot.csv')
+    # flavor_names.append('genHLGMN-rbf-YESdiv_boot.csv')
+    # flavor_names.append('genHLGMN-sig-NOTdiv_boot.csv')
+    # flavor_names.append('genHLGMN-sig-YESdiv_boot.csv')
+    # flavor_names.append('genHLPREC-rbf-NOTdiv_boot.csv')
+    # flavor_names.append('genHLPREC-rbf-YESdiv_boot.csv')
+    # flavor_names.append('genHLPREC-sig-NOTdiv_boot.csv')
+    # flavor_names.append('genHLPREC-sig-YESdiv_boot.csv')
+    # flavor_names.append('genHLREC-rbf-NOTdiv_boot.csv')
+    # flavor_names.append('genHLREC-rbf-YESdiv_boot.csv')
+    # flavor_names.append('genRLTACC-lin-NOTdiv_boot.csv')
+    # flavor_names.append('genRLTACC-lin-YESdiv_boot.csv')
+    # flavor_names.append('genRLTACC-rbf-NOTdiv_boot.csv')
+    # flavor_names.append('genRLTACC-rbf-YESdiv_boot.csv')
+    # flavor_names.append('genRLTACC-sig-NOTdiv_boot.csv')
+    # flavor_names.append('genRLTACC-sig-YESdiv_boot.csv')
+    # flavor_names.append('genRLTAUC-rbf-NOTdiv_boot.csv')
+    # flavor_names.append('genRLTAUC-rbf-YESdiv_boot.csv')
+    # flavor_names.append('genRLTAUC-sig-NOTdiv_boot.csv')
+    # flavor_names.append('genRLTAUC-sig-YESdiv_boot.csv')
+    # flavor_names.append('genRLTF1-rbf-NOTdiv_boot.csv')
+    # flavor_names.append('genRLTF1-rbf-YESdiv_boot.csv')
+    # flavor_names.append('genRLTF1-sig-NOTdiv_boot.csv')
+    # flavor_names.append('genRLTGMN-rbf-NOTdiv_boot.csv')
+    # flavor_names.append('genRLTGMN-rbf-YESdiv_boot.csv')
+    # flavor_names.append('genRLTGMN-sig-NOTdiv_boot.csv')
+    # flavor_names.append('genRLTGMN-sig-YESdiv_boot.csv')
+    # flavor_names.append('genRLTPREC-rbf-NOTdiv_boot.csv')
+    # flavor_names.append('genRLTPREC-rbf-YESdiv_boot.csv')
+    # flavor_names.append('genRLTPREC-sig-NOTdiv_boot.csv')
+    # flavor_names.append('genRLTREC-rbf-NOTdiv_boot.csv')
+    # flavor_names.append('genRLTREC-rbf-YESdiv_boot.csv')
+    # flavor_names.append('genRLTREC-sig-NOTdiv_boot.csv')
+    # flavor_names.append('genRLTREC-sig-YESdiv_boot.csv')
+    
+    print(name, 'calling tukey test from batch results')
+    directory ='/home/andrex/PostDoc/PaperSVM/python/scripts/stats_results/wine'
+
+    for names in flavor_names:
+        input_data = pd.read_csv(directory+'/'+names)
+        #input_data = pd.read_csv("./test_results_condor.csv")
+        auc =  np.array(input_data['auc'])
+        prc =  np.array(input_data['prc'])
+        f1  =  np.array(input_data['f1' ])
+        rec =  np.array(input_data['rec'])
+        acc =  np.array(input_data['acc'])
+        gmn =  np.array(input_data['gmn'])
+
+        auc_values.append(auc)
+        prc_values.append(prc)
+        f1_values.append(f1)
+        rec_values.append(rec)
+        acc_values.append(acc)
+        gmn_values.append(gmn)
+        
+        mean_auc = np.append(mean_auc,  np.mean(auc))
+        mean_prc = np.append(mean_prc,  np.mean(prc))
+        mean_f1  = np.append(mean_f1,   np.mean(f1))
+        mean_rec = np.append(mean_rec,  np.mean(rec))
+        mean_acc = np.append(mean_acc,  np.mean(acc))
+        mean_gmn = np.append(mean_gmn,  np.mean(gmn))
+        
+        std_auc = np.append(std_auc,  np.std(auc))
+        std_prc = np.append(std_prc,  np.std(prc))
+        std_f1  = np.append(std_f1,   np.std(f1))
+        std_rec = np.append(std_rec,  np.std(rec))
+        std_acc = np.append(std_acc,  np.std(acc))
+        std_gmn = np.append(std_gmn,  np.std(gmn))
+        
+        # store model names, for later use in latex tables
+        # names.append(models_auc[i][0])
+    
+    # tukey tests
+    tukey_auc  =  tukey_test(np.array(auc_values))
+
+    # result_matix = np.matrix()
+
+    matrix = []
+
+    # for i in range(len(flavor_names)):
+    #     column = ([])
+    #     #print(tukey_auc.reject[i])
+    #     for j in range(len(flavor_names)):
+    #         # print(ttest_ind(auc_values[i], auc_values[j]).pvalue)
+    #         pval = ttest_ind(auc_values[i], auc_values[j]).pvalue
+    #         if pval < 0.05:
+    #             column = np.append(column, 1)
+    #         else:
+    #             column = np.append(column, 0)
+    #             # matrix.append(tukey_auc.group1[i])
+
+    #     matrix.append(column)
+
+    counter  = 0
+    counter2 = 0
+    flag = True
+    nClass = len(flavor_names)
+    column = ([])
+    for k in range(len(tukey_auc.reject)):
+        counter2+=1
+        # column = np.append(column, tukey_auc.pvalues[k])
+        if tukey_auc.reject[k]: value = 1
+        else: value = -1
+        column = np.append(column, value)
+        #print(k, counter2, 'test', len(flavor_names) - counter, counter2, counter)
+        if nClass - counter - 2 < counter2:
+            column = np.append(column, -1.)
+            zeros = np.zeros(nClass-len(column))
+            column = np.append(column, zeros)
+            matrix.append(column)
+            column = ([])
+            counter+=1
+            counter2 = 0
+            
+    last_column = np.array([-1.])
+    zeros = np.zeros(nClass-len(last_column))
+    last_column = np.append(last_column, zeros)
+    matrix.append(last_column)
+    matrix = np.array(matrix)
+    matrix = matrix.transpose()
+
+    for i in range(len(matrix)):
+        #print(matrix, len(matrix))
+        print(matrix[i], 'parrito test')
+            
+        
+    sigmin = 0
+    sigmax = len(flavor_names)
+    cmin = 0
+    cmax = len(flavor_names)
+    sample_name = 'test'                
+    dv.plot_stats_2d(matrix, sample_name)
+    
+    #print(len(tukey_auc.reject), 'size')
+    # tukey_prc  =  tukey_test(np.array(prc_values))
+    # tukey_f1   =  tukey_test(np.array(f1_values))  
+    # tukey_rec  =  tukey_test(np.array(rec_values)) 
+    # tukey_acc  =  tukey_test(np.array(acc_values))
+    # tukey_gmn  =  tukey_test(np.array(gmn_values))
+
+                                 
+    # # latex tables
+    # f_tukey_noDiv = open('./tables/tukey_'+name+'_'+boot_kfold+'_noDiv.tex', "w")
+    # dv.latex_table_tukey(names, False, mean_auc, std_auc, tukey_auc, mean_prc, std_prc,  tukey_prc, mean_f1, std_f1,  tukey_f1,
+    #                      mean_rec, std_rec,  tukey_rec, mean_acc, std_acc,  tukey_acc, mean_gmn, std_gmn,  tukey_gmn,  f_tukey_noDiv)
+    # f_tukey_noDiv.close()
+
+    # f_tukey_div = open('./tables/tukey_'+name+'_'+boot_kfold+'_div.tex', "w")
+    # dv.latex_table_tukey(names, True, mean_auc, std_auc, tukey_auc, mean_prc, std_prc,  tukey_prc, mean_f1, std_f1, tukey_f1,
+    #                      mean_rec, std_rec,  tukey_rec, mean_acc, std_acc, tukey_acc, mean_gmn, std_gmn, tukey_gmn, f_tukey_div)
+    # f_tukey_div.close()
+
+
+
+    
+
+    
+
+    
+
+
+    
+
     # p_gaus, alpha = ss.normal_test(sample=auc_svm_boost,     alpha=0.05, verbose=True)
     
     # ss.anova_test(auc_svm_boost,     
@@ -423,3 +616,5 @@ def stats_results(name, n_cycles, kfolds, n_reps, boot_kfold ='', split_frac=0.6
     #               auc_bdt_forest,    
     #               auc_net_neural,    
     #               auc_knn_neighb
+
+
