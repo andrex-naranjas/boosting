@@ -127,7 +127,7 @@ def pass_agre():
 def model_loader_batch(process):
     # return a single model to be used in a batch job
     batch_models = model_flavors()
-    return batch_models[process]
+    return (batch_models, batch_models[process])
 
 def model_flavors():
     # set the models,their method to calculate the ROC(AUC), table name and selection

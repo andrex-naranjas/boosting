@@ -17,7 +17,7 @@ name = str(sys.argv[2])       # sample name
 path = str(sys.argv[3])       # path where code lives
 boot_kfold = str(sys.argv[4]) # use bootstrap or kfold
 
-model_auc = mm.model_loader_batch(process)
+model_auc = mm.model_loader_batch(process)[1]
 n_cycles = 60
 k_folds  = 20
 n_reps   = 3
@@ -48,3 +48,7 @@ elapsed_time = end - start
 print("Elapsed time = " + str(elapsed_time))
 print(model_auc[0], name)
 print(df)
+print('All names')
+model_auc_names = mm.model_loader_batch(process)[0]
+for i in range(len(model_auc_names)):
+    print(model_auc_names[i][0])
