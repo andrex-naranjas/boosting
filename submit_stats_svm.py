@@ -27,6 +27,7 @@ n_flavors = len(mm.model_flavors())
 classad='''
 universe = vanilla
 executable = /u/user/andres/.conda/envs/flavour/bin/python3
+getenv = True
 arguments = {0}/batch_stats_summary.py $(Process) {1} {0} {2}
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
