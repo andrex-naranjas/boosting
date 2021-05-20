@@ -281,7 +281,7 @@ class genetic_selection:
                         # Check if new random gene is already in the population. If not, it is added
                         if (chromosome_x == random_x.to_numpy()).all(1).any() is not True:
                             chromosome_x[j] = random_x.to_numpy()
-                            chromosome_y[j] = random_y.to_numpy()
+                            chromosome_y[j] = int(random_y.to_numpy()) # partially fix a bug for ecoli,car,cancer(updated pip packs)
                             index_chromosome[j] = random_index.to_numpy()
                             break
 
