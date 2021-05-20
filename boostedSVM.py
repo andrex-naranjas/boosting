@@ -1,26 +1,18 @@
-
-# -*- coding: utf-8 -*-
 '''
 ---------------------------------------------------------------
  Code to improve SVM
  Authors: A. Ramirez-Morales and J. Salmon-Gamboa
  ---------------------------------------------------------------
 '''
-
-# python basics
-import sys
-
-# data analysis and wrangling
 import numpy as np
 
 # machine learning
-from sklearn.svm import SVC, LinearSVC
-from sklearn import svm
+from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 
-# AdaBoost class
 
+# AdaBoost class
 class AdaBoostSVM:
 
     def __init__(self, C, gammaIni, myKernel, myDegree=1, myCoef0=1, Diversity=False, early_stop=False, debug=False, train_verbose=False):
@@ -55,24 +47,20 @@ class AdaBoostSVM:
 
         if count == 0: myGamma = self.gammaIni
 
-        if myGamma <= 0:  return 0, 0, None, None
-
         while True:
             if myGamma <= 0: return 0, 0, None, None
 
-            errorOut = 0.0
-            
+            errorOut = 0.0            
             svcB = SVC(C=self.C,
-                    kernel=self.myKernel,
-                    degree=self.myDegree,
-                    coef0=self.myCoef0,
-                    gamma=1/(2*(myGamma**2)),
-                    shrinking=True,
-                    probability=True,
-                    tol=0.001,
-                    cache_size=10000
-                )
-
+                       kernel=self.myKernel,
+                       degree=self.myDegree,
+                       coef0=self.myCoef0,
+                       gamma=1/(2*(myGamma**2)),
+                       shrinking=True,
+                       probability=True,
+                       tol=0.001,
+                       cache_size=1000 )
+            
             svcB.fit(x_train, y_train, sample_weight=myWeights)
             y_pred = svcB.predict(x_train)
                                         
@@ -110,8 +98,7 @@ class AdaBoostSVM:
         n = X_train.shape[0]
         weights = np.ones(n)/n
 
-        div_flag = self.div_flag
-        div_value = 0
+        div_flag, div_value = self.div_flag, 0
         
         gammaMin, gammaStep, gammaVar = 0.1, 0.1, 0.0
         cost, count, norm = 1, 0, 0.0
@@ -149,7 +136,6 @@ class AdaBoostSVM:
             h_temp = h.tolist()
             h_list.append(h_temp)
 
-            # print("Error: {} Precision: {} Gamma: {} ".format(round(error,4), round(tp / (tp + fp),4), round(gammaVar+gammaStep,2)))
             # store errors and precision
             self.errors = np.append(self.errors, [error])
             self.precision = np.append(self.precision, [tp / (tp + fp)])
@@ -186,22 +172,22 @@ class AdaBoostSVM:
         print(count,'number of classifiers')
         self.count_warning = count
         if(count==0):
-            print(' WARNING: No selected classifiers in the ensemble! Adding artifically the first one with no requirements!!!!!!')
+            print(' WARNING: No selected classifiers in the ensemble! Adding artifically the first one with NO requirements!!!!!!')
             self.count_warning = 0
             self.alphas   = np.append(self.alphas, 1.0)
             # artificially added classifier, when no classifier has been
             # selected, the first classifier
-            svcB = SVC(C=self.C,
-                    kernel=self.myKernel,
-                    degree=self.myDegree,
-                    coef0=self.myCoef0,
-                    gamma=1/(2*(self.gammaIni**2)),
-                    shrinking=True,
-                    probability=True,
-                    tol=0.001,
-                    cache_size=10000
-                )
-            self.weak_svm = np.append(self.weak_svm, learner)
+            single = SVC(C=self.C,
+                         kernel=self.myKernel,
+                         degree=self.myDegree,
+                         coef0=self.myCoef0,
+                         gamma=1/(2*(self.gammaIni**2)),
+                         shrinking=True,
+                         probability=True,
+                         tol=0.001,
+                         cache_size=10000 )
+            single.fit(X_train, Y_train)
+            self.weak_svm = np.append(self.weak_svm, single)
             return self
 
         # show the training the performance (optional)
@@ -222,8 +208,8 @@ class AdaBoostSVM:
                         if(Y_train[i]!=final[i]):  final_fp+=1
                         else:                      final_tp+=1                        
                         final_precision = final_tp / (final_fp + final_tp)
-                        print("Final training precision: {} ".format( round(final_precision,4)) )
-                        #du.metrics(sample,'svmBoosted', svcB, X_train, Y_train, Y_test, X_test, Y_predB)
+            print("Final training precision: {} ".format( round(final_precision,4)) )
+            #du.metrics(sample,'svmBoosted', svcB, X_train, Y_train, Y_test, X_test, Y_predB)
                         
         return self
 
@@ -353,7 +339,7 @@ class AdaBoostSVM:
             decision = np.dot(self.alphas,decision)
 
             for i in range(len(steps)):
-                # print('daaaaaaaaaaaaaaaaaaaaaliiiii: ', len(steps), len(decision))
+                # print('check point: ', len(steps), len(decision))
                 decision_temp = np.array([np.sign(decision[j] + steps[i] ) for j in range(len(decision))]) #*svm_biases[j]
                 thres_decision.append(decision_temp)
                         
@@ -402,7 +388,6 @@ check = 0.
 for i in range(len(myWeights,)):
     check+=myWeights[i] #weights must add one, i.e. check=1.
 '''
-
 
     # def pass_diversity(self, flag_div, val_div, y_pred, count):
 
