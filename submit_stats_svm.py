@@ -10,7 +10,7 @@
 # python3 submit_stats_svm.py sample_name boot/kfold
 
 from sys import argv
-from os import system,getenv,getuid,getcwd
+from os import system,getenv,getuid,getcwd,popen
 import model_maker as mm
 
 workpath=getcwd()
@@ -23,20 +23,21 @@ elif(len(argv)==3):
   boot_kfold = argv[2]
 
 n_flavors = len(mm.model_flavors())
+py3_path = popen('which python3').read().strip()
 
 classad='''
 universe = vanilla
-executable = /u/user/andres/.conda/envs/flavour/bin/python3
+executable = {0}
 getenv = True
-arguments = {0}/batch_stats_summary.py $(Process) {1} {0} {2}
+arguments = {1}/batch_stats_summary.py $(Process) {2} {1} {3}
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-output = {0}/output_batch/{1}/$(Process).out
-error = {0}/output_batch/{1}/$(Process).err
-log = {0}/output_batch/{1}/$(Process).log
-Queue {3}
+output = {1}/output_batch/{2}/$(Process).out
+error = {1}/output_batch/{2}/$(Process).err
+log = {1}/output_batch/{2}/$(Process).log
+Queue {4}
 
-'''.format(workpath, sample_name, boot_kfold, n_flavors)
+'''.format(py3_path, workpath, sample_name, boot_kfold, n_flavors)
 
 logpath = '.'
 
