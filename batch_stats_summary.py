@@ -16,10 +16,12 @@ path = str(sys.argv[3])       # path where code lives
 boot_kfold = str(sys.argv[4]) # use bootstrap or kfold
 
 model_auc = mm.model_loader_batch(process)[1]
+model_auc_names = mm.model_loader_batch(process)[0]
 n_cycles = 5
 k_folds  = 20
 n_reps   = 3
 
+print('sample:', name, 'model name:', model_auc[0])
 start = datetime.datetime.now()
 if(boot_kfold=="boot"):
     auc, prc, f1, rec, acc, gmn = ss.bootstrap(sample_name=name, model=model_auc[1], roc_area=model_auc[2],
@@ -47,6 +49,5 @@ print("Elapsed time = " + str(elapsed_time))
 print(model_auc[0], name)
 print(df)
 print('All names')
-model_auc_names = mm.model_loader_batch(process)[0]
 for i in range(len(model_auc_names)):
     print(model_auc_names[i][0])

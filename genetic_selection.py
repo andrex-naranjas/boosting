@@ -1,5 +1,3 @@
-
-# -*- coding: utf-8 -*-
 '''
 ---------------------------------------------------------------
  Code to improve SVM
@@ -17,7 +15,6 @@ from sklearn.utils import resample
 from sklearn.metrics import accuracy_score,auc,precision_score,roc_auc_score,f1_score,recall_score
 # framework includes
 import data_utils as du
-
 
 # Genetic algorithm for training sub-dataset selection
 class genetic_selection:
@@ -325,6 +322,11 @@ class genetic_selection:
     def score_value(self, Y_test, y_pred, model_type, score_type):
         '''Computes different scores given options'''
         Y_test = Y_test.astype(float).values # make Y_test and y_pred same type
+        # check this later carefully!!!
+        score_value = 0
+        if not set(Y_test) == {-1, 1}: return score_value
+        if not set(y_pred) == {-1, 1}: return score_value
+        
         if(score_type == 'auc' and model_type == 'absv'):
             TPR, FPR = du.roc_curve_adaboost(y_pred, Y_test)
             score_value = auc(FPR,TPR)
