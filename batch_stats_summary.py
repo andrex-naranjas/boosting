@@ -20,7 +20,7 @@ boot_kfold = str(sys.argv[4]) # use bootstrap or kfold
 print(process, 'HELLO COLD WORLD!')
 
 model_auc = mm.model_loader_batch(process)[1]
-n_cycles = 60
+n_cycles = 5
 k_folds  = 20
 n_reps   = 3
 
