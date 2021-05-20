@@ -1,5 +1,3 @@
-
-# -*- coding: utf-8 -*-
 '''
 ---------------------------------------------------------------
  Code to improve SVM
@@ -16,8 +14,6 @@ process = int(sys.argv[1])    # batch process
 name = str(sys.argv[2])       # sample name
 path = str(sys.argv[3])       # path where code lives
 boot_kfold = str(sys.argv[4]) # use bootstrap or kfold
-
-print(process, 'HELLO COLD WORLD!')
 
 model_auc = mm.model_loader_batch(process)[1]
 n_cycles = 5
