@@ -5,18 +5,14 @@
  ---------------------------------------------------------------
 '''
 import numpy as np
-
-# machine learning
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 
-
 # AdaBoost class
 class AdaBoostSVM:
 
-    def __init__(self, C, gammaIni, myKernel, myDegree=1, myCoef0=1, Diversity=False, early_stop=False, debug=False, train_verbose=False):
-        
+    def __init__(self, C, gammaIni, myKernel, myDegree=1, myCoef0=1, Diversity=False, early_stop=False, debug=False, train_verbose=False):        
         self.C = C
         self.gammaIni = gammaIni
         self.myKernel = myKernel
@@ -40,7 +36,7 @@ class AdaBoostSVM:
         self.debug = debug
         self.verbose_train = train_verbose
         self.early_flag = early_stop
-        self.count_warning = 1
+        self.n_classifiers=0
         
 
     def svc_train(self, myGamma, stepGamma, x_train, y_train, myWeights, count, flag_div, value_div):
@@ -59,7 +55,7 @@ class AdaBoostSVM:
                        shrinking=True,
                        probability=True,
                        tol=0.001,
-                       cache_size=1000 )
+                       cache_size=1000)
             
             svcB.fit(x_train, y_train, sample_weight=myWeights)
             y_pred = svcB.predict(x_train)
@@ -170,10 +166,10 @@ class AdaBoostSVM:
             # end of adaboost loop
 
         print(count,'number of classifiers')
-        self.count_warning = count
+        self.n_classifiers = count
         if(count==0):
             print(' WARNING: No selected classifiers in the ensemble! Adding artifically the first one with NO requirements!!!!!!')
-            self.count_warning = 0
+            self.n_classifiers = 0
             self.alphas   = np.append(self.alphas, 1.0)
             # artificially added classifier, when no classifier has been
             # selected, the first classifier
@@ -209,7 +205,6 @@ class AdaBoostSVM:
                         else:                      final_tp+=1                        
                         final_precision = final_tp / (final_fp + final_tp)
             print("Final training precision: {} ".format( round(final_precision,4)) )
-            #du.metrics(sample,'svmBoosted', svcB, X_train, Y_train, Y_test, X_test, Y_predB)
                         
         return self
 
@@ -218,7 +213,7 @@ class AdaBoostSVM:
         # Make predictions using already fitted model
         # print(len(self.alphas), len(self.weak_svm), "how many alphas we have")
         # print(type(X.shape[0]), 'check size ada-boost')
-        if self.count_warning == 0: return np.zeros(X.shape[0])
+        if self.n_classifiers == 0: return np.zeros(X.shape[0])
         svm_preds = np.array([learner.predict(X) for learner in self.weak_svm])
         return np.sign(np.dot(self.alphas, svm_preds))
     
@@ -375,11 +370,11 @@ class AdaBoostSVM:
         self.diversities = ([])
         self.Div_total = ([])
         self.Div_partial = ([])
-        self.count_warning = 1
         self.train_scores = ([])
         self.test_scores = ([])
         self.count_over_train = ([])
         self.count_over_train_equal = ([])
+        self.n_classifiers=0
 
 
 '''

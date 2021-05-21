@@ -128,6 +128,7 @@ class genetic_selection:
     def memoization_score(self, tuple_chrom_x , tuple_chrom_y):
         chromosome_x, chromosome_y = np.asarray(tuple_chrom_x), np.asarray(tuple_chrom_y)
         self.model.fit(chromosome_x, chromosome_y[0])
+        if(self.AB_SVM and self.model.n_classifiers==0): return 0.
         predictions = self.model_predictions(self.X_test, self.model_type, self.score_type)
         score       = self.score_value(self.Y_test, predictions, self.model_type, self.score_type)
         return score
@@ -322,11 +323,6 @@ class genetic_selection:
     def score_value(self, Y_test, y_pred, model_type, score_type):
         '''Computes different scores given options'''
         Y_test = Y_test.astype(float).values # make Y_test and y_pred same type
-        # check this later carefully!!!
-        score_value = 0
-        if not set(Y_test) == {-1, 1}: return score_value
-        if not set(y_pred) == {-1, 1}: return score_value
-        
         if(score_type == 'auc' and model_type == 'absv'):
             TPR, FPR = du.roc_curve_adaboost(y_pred, Y_test)
             score_value = auc(FPR,TPR)
