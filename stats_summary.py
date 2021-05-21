@@ -89,32 +89,40 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
                                                             data_train=sampled_data_train, data_test = sampled_data_test,
                                                             sampling=True, split_sample=0.4)
         model.fit(X_train, Y_train)
-        y_pred = model.predict(X_test)
-        prec = precision_score(Y_test, y_pred)
-        f1 = f1_score(Y_test, y_pred)
-        recall = recall_score(Y_test, y_pred)
-        acc = accuracy_score(Y_test, y_pred)
-        gmean = np.sqrt(prec*recall)
+        if(model.n_classifiers!=0):
+            y_pred = model.predict(X_test)
+            prec = precision_score(Y_test, y_pred)
+            f1 = f1_score(Y_test, y_pred)
+            recall = recall_score(Y_test, y_pred)
+            acc = accuracy_score(Y_test, y_pred)
+            gmean = np.sqrt(prec*recall)
 
-        if roc_area=="absv":
-            y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
-            TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
-            area = auc(FPR,TPR)
-            model.clean()
-        elif roc_area=="prob":
-            Y_pred_prob = model.predict_proba(X_test)[:,1]            
-            area = roc_auc_score(Y_test, Y_pred_prob)
-        elif roc_area=="deci":
-            Y_pred_dec = model.decision_function(X_test)
-            area = roc_auc_score(Y_test, Y_pred_dec)
+            if roc_area=="absv":
+                y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
+                TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
+                area = auc(FPR,TPR)
+                model.clean()
+            elif roc_area=="prob":
+                Y_pred_prob = model.predict_proba(X_test)[:,1]            
+                area = roc_auc_score(Y_test, Y_pred_prob)
+            elif roc_area=="deci":
+                Y_pred_dec = model.decision_function(X_test)
+                area = roc_auc_score(Y_test, Y_pred_dec)
                     
-        area_scores   = np.append(area_scores, area)
-        prec_scores   = np.append(prec_scores, prec)
-        f1_scores     = np.append(f1_scores,   f1)
-        recall_scores = np.append(recall_scores, recall)
-        acc_scores    = np.append(acc_scores, acc)
-        gmean_scores  = np.append(gmean_scores, gmean)
-
+            area_scores   = np.append(area_scores, area)
+            prec_scores   = np.append(prec_scores, prec)
+            f1_scores     = np.append(f1_scores,   f1)
+            recall_scores = np.append(recall_scores, recall)
+            acc_scores    = np.append(acc_scores, acc)
+            gmean_scores  = np.append(gmean_scores, gmean)
+        else: # this needs to be re-checked carefully
+            area_scores   = np.append(area_scores, 0)
+            prec_scores   = np.append(prec_scores, 0)
+            f1_scores     = np.append(f1_scores,   0)
+            recall_scores = np.append(recall_scores, 0)
+            acc_scores    = np.append(acc_scores, 0)
+            gmean_scores  = np.append(gmean_scores, 0)
+            
     return area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores
 
 
