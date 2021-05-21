@@ -57,7 +57,7 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
     for _ in range(n_cycles): # arbitrary number of bootstrap samples to produce
         
         if not train_test:
-            sampled_data_train   = resample(sample_df, replace = True, n_samples = n_samples, random_state = None)
+            sampled_data_train = resample(sample_df, replace = True, n_samples = n_samples, random_state = None)
             
             if selection == 'trad':
                 # test data are the complement of full input data that is not considered for training
@@ -78,8 +78,7 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
                                                  pop_size=10, chrom_len=100, n_gen=50, coef=GA_coef, mut_rate=GA_mut, score_type=GA_score, selec_type=GA_selec)
                 GA_selection.execute()
                 GA_train_indexes = GA_selection.best_population()
-                X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, indexes=GA_train_indexes)
-            
+                X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, indexes=GA_train_indexes)            
         else:
             sampled_data_train = resample(sample_train_df, replace = True, n_samples = 5000,  random_state = None)
             sampled_data_test  = resample(sample_test_df,  replace = True, n_samples = 10000, random_state = None)
@@ -94,14 +93,14 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
             recall = recall_score(Y_test, y_pred)
             acc = accuracy_score(Y_test, y_pred)
             gmean = np.sqrt(prec*recall)
-
+            # calcualate roc-auc depending on the classifier
             if roc_area=="absv":
                 y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
                 TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
                 area = auc(FPR,TPR)
                 model.clean()
             elif roc_area=="prob":
-                Y_pred_prob = model.predict_proba(X_test)[:,1]            
+                Y_pred_prob = model.predict_proba(X_test)[:,1]
                 area = roc_auc_score(Y_test, Y_pred_prob)
             elif roc_area=="deci":
                 Y_pred_dec = model.decision_function(X_test)
@@ -150,35 +149,41 @@ def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_sco
             GA_selection.execute()
             GA_train_indexes = GA_selection.best_population()
             X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name,  indexes=GA_train_indexes)
+            
+        model.fit(X_train, Y_train)
+        if(model.n_classifiers!=0):
+            y_pred = model.predict(X_test)
+            prec = precision_score(Y_test, y_pred)
+            f1 = f1_score(Y_test, y_pred)
+            recall = recall_score(Y_test, y_pred)
+            acc = accuracy_score(Y_test, y_pred)
+            gmean = np.sqrt(prec*recall)
+            # calcualate roc-auc depending on the classifier
+            if roc_area=="absv":
+                y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
+                TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
+                area = auc(FPR,TPR)
+                model.clean()
+            elif roc_area=="prob":
+                Y_pred_prob = model.predict_proba(X_test)[:,1]
+                area = roc_auc_score(Y_test, Y_pred_prob)
+            elif roc_area=="deci":
+                Y_pred_dec = model.decision_function(X_test)
+                area = roc_auc_score(Y_test, Y_pred_dec)
                     
-        model.fit(X_train, Y_train)                
-        y_pred = model.predict(X_test)
-        prec = precision_score(Y_test, y_pred)
-        f1 = f1_score(Y_test, y_pred)
-        recall = recall_score(Y_test, y_pred)
-        acc = accuracy_score(Y_test, y_pred)
-        gmean = np.sqrt(prec*recall)
-        
-        # calcualate roc-auc depending on the classifier
-        if roc_area=="absv":
-            y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
-            TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
-            area = auc(FPR,TPR)
-            model.clean()
-        elif roc_area=="prob":
-            Y_pred_prob = model.predict_proba(X_test)[:,1]            
-            area = roc_auc_score(Y_test, Y_pred_prob)
-        elif roc_area=="deci":
-            Y_pred_dec = model.decision_function(X_test)
-            area = roc_auc_score(Y_test, Y_pred_dec)
-
-        # store scores
-        area_scores   = np.append(area_scores, area)
-        prec_scores   = np.append(prec_scores, prec)
-        f1_scores     = np.append(f1_scores,   f1)
-        recall_scores = np.append(recall_scores, recall)
-        acc_scores    = np.append(acc_scores, acc)
-        gmean_scores  = np.append(gmean_scores, gmean)
+            area_scores   = np.append(area_scores, area)
+            prec_scores   = np.append(prec_scores, prec)
+            f1_scores     = np.append(f1_scores,   f1)
+            recall_scores = np.append(recall_scores, recall)
+            acc_scores    = np.append(acc_scores, acc)
+            gmean_scores  = np.append(gmean_scores, gmean)
+        else: # this needs to be re-checked carefully
+            area_scores   = np.append(area_scores, 0)
+            prec_scores   = np.append(prec_scores, 0)
+            f1_scores     = np.append(f1_scores,   0)
+            recall_scores = np.append(recall_scores, 0)
+            acc_scores    = np.append(acc_scores, 0)
+            gmean_scores  = np.append(gmean_scores, 0)
 
     return area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores
 
