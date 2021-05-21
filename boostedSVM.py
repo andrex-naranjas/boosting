@@ -168,22 +168,23 @@ class AdaBoostSVM:
         print(count,'number of classifiers')
         self.n_classifiers = count
         if(count==0):
-            print(' WARNING: No selected classifiers in the ensemble! Adding artifically the first one with NO requirements!!!!!!')
+            print(' WARNING: No selected classifiers in the ensemble!!!!')
+            # print('Adding artifically the first one with NO requirements!!!!!!')
             self.n_classifiers = 0
-            self.alphas   = np.append(self.alphas, 1.0)
-            # artificially added classifier, when no classifier has been
-            # selected, the first classifier
-            single = SVC(C=self.C,
-                         kernel=self.myKernel,
-                         degree=self.myDegree,
-                         coef0=self.myCoef0,
-                         gamma=1/(2*(self.gammaIni**2)),
-                         shrinking=True,
-                         probability=True,
-                         tol=0.001,
-                         cache_size=10000 )
-            single.fit(X_train, Y_train)
-            self.weak_svm = np.append(self.weak_svm, single)
+            # self.alphas   = np.append(self.alphas, 1.0)
+            # # artificially added classifier, when no classifier has been
+            # # selected, the first classifier
+            # single = SVC(C=self.C,
+            #              kernel=self.myKernel,
+            #              degree=self.myDegree,
+            #              coef0=self.myCoef0,
+            #              gamma=1/(2*(self.gammaIni**2)),
+            #              shrinking=True,
+            #              probability=True,
+            #              tol=0.001,
+            #              cache_size=10000 )
+            # single.fit(X_train, Y_train)
+            # self.weak_svm = np.append(self.weak_svm, single)
             return self
 
         # show the training the performance (optional)

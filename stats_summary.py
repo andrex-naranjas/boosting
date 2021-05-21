@@ -1,5 +1,3 @@
-
-# -*- coding: utf-8 -*-
 '''
 ---------------------------------------------------------------
  Code to improve SVM
@@ -7,9 +5,9 @@
  ---------------------------------------------------------------
 '''
 import numpy as np
-from sklearn.metrics import accuracy_score,auc,precision_score,roc_auc_score,f1_score,recall_score
-from sklearn.utils import resample # for bootstraping
 import pandas as pd
+from sklearn.metrics import accuracy_score,auc,precision_score,roc_auc_score,f1_score,recall_score
+from sklearn.utils import resample
 from sklearn.model_selection import RepeatedKFold
 
 # statsmodel includes
@@ -21,7 +19,7 @@ from statsmodels.stats.contingency_tables import mcnemar
 from scipy.stats import ttest_ind
 from scipy.stats import wilcoxon
 from scipy.stats import f_oneway
-from scipy.stats import norm, normaltest, shapiro, chisquare, kstest
+from scipy.stats import norm,normaltest,shapiro,chisquare,kstest
 
 # framework includes
 from data_preparation import data_preparation
