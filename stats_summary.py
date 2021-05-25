@@ -4,6 +4,7 @@
  Authors: A. Ramirez-Morales and J. Salmon-Gamboa
  ---------------------------------------------------------------
 '''
+from os import popen
 import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score,auc,precision_score,roc_auc_score,f1_score,recall_score
@@ -428,81 +429,21 @@ def stats_results(name, n_cycles, kfolds, n_reps, boot_kfold ='', split_frac=0.6
     f_tukey_div.close()
 
 
-def tukey_call_batch(sample_name='titanic', stats_type='tukey'):
+def tukey_call_batch(sample_name='titanic', stats_type='tukey', boot_kfold='boot'):
     # arrays to store the scores
     mean_auc,mean_prc,mean_f1,mean_rec,mean_acc,mean_gmn = ([]),([]),([]),([]),([]),([])
     std_auc,std_prc,std_f1,std_rec,std_acc,std_gmn = ([]),([]),([]),([]),([]),([])
     auc_values,prc_values,f1_values,rec_values,acc_values,gmn_values = [],[],[],[],[],[]
-    names = []
+    
+    current_path = popen('pwd').read().strip()    
+    flavor_names = mm.model_loader_batch(0)[0]
+    directory = current_path+'/stats_results/'+sample_name+'/'+boot_kfold
+    nClass = 0    
 
-    flavor_names = []
-    flavor_names.append('trad-rbf-NOTdiv_boot.csv')
-    flavor_names.append('trad-rbf-YESdiv_boot.csv')
-    flavor_names.append('trad-sig-NOTdiv_boot.csv')
-    flavor_names.append('trad-sig-YESdiv_boot.csv')
-    
-    flavor_names.append('genHLACC-rbf-NOTdiv_boot.csv')
-    flavor_names.append('genHLACC-rbf-YESdiv_boot.csv')
-    flavor_names.append('genHLACC-sig-NOTdiv_boot.csv')
-    flavor_names.append('genHLACC-sig-YESdiv_boot.csv')
-
-    flavor_names.append('genHLAUC-rbf-NOTdiv_boot.csv')
-    flavor_names.append('genHLAUC-rbf-YESdiv_boot.csv')
-    flavor_names.append('genHLAUC-sig-NOTdiv_boot.csv')
-    flavor_names.append('genHLAUC-sig-YESdiv_boot.csv')
-    
-    flavor_names.append('genHLF1-rbf-NOTdiv_boot.csv')
-    flavor_names.append('genHLF1-rbf-YESdiv_boot.csv')
-    flavor_names.append('genHLF1-sig-NOTdiv_boot.csv')
-    flavor_names.append('genHLF1-sig-YESdiv_boot.csv')
-    
-    flavor_names.append('genHLGMN-rbf-NOTdiv_boot.csv')
-    flavor_names.append('genHLGMN-rbf-YESdiv_boot.csv')
-    flavor_names.append('genHLGMN-sig-NOTdiv_boot.csv')
-    flavor_names.append('genHLGMN-sig-YESdiv_boot.csv')
-    
-    flavor_names.append('genHLPREC-rbf-NOTdiv_boot.csv')
-    flavor_names.append('genHLPREC-rbf-YESdiv_boot.csv')
-    flavor_names.append('genHLPREC-sig-NOTdiv_boot.csv')
-    flavor_names.append('genHLPREC-sig-YESdiv_boot.csv')
-    
-    flavor_names.append('genHLREC-rbf-NOTdiv_boot.csv')
-    flavor_names.append('genHLREC-rbf-YESdiv_boot.csv')
-    
-    flavor_names.append('genRLTACC-rbf-NOTdiv_boot.csv')
-    flavor_names.append('genRLTACC-rbf-YESdiv_boot.csv')
-    flavor_names.append('genRLTACC-sig-NOTdiv_boot.csv')
-    
-    flavor_names.append('genRLTACC-sig-YESdiv_boot.csv')
-    flavor_names.append('genRLTAUC-rbf-NOTdiv_boot.csv')
-    flavor_names.append('genRLTAUC-rbf-YESdiv_boot.csv')
-    flavor_names.append('genRLTAUC-sig-NOTdiv_boot.csv')
-    flavor_names.append('genRLTAUC-sig-YESdiv_boot.csv')
-    
-    flavor_names.append('genRLTF1-rbf-NOTdiv_boot.csv')
-    flavor_names.append('genRLTF1-rbf-YESdiv_boot.csv')
-    flavor_names.append('genRLTF1-sig-NOTdiv_boot.csv')
-    
-    flavor_names.append('genRLTGMN-rbf-NOTdiv_boot.csv')
-    flavor_names.append('genRLTGMN-rbf-YESdiv_boot.csv')
-    flavor_names.append('genRLTGMN-sig-NOTdiv_boot.csv')
-    flavor_names.append('genRLTGMN-sig-YESdiv_boot.csv')
-    
-    flavor_names.append('genRLTPREC-rbf-NOTdiv_boot.csv')
-    flavor_names.append('genRLTPREC-rbf-YESdiv_boot.csv')
-    flavor_names.append('genRLTPREC-sig-NOTdiv_boot.csv')
-    
-    flavor_names.append('genRLTREC-rbf-NOTdiv_boot.csv')
-    flavor_names.append('genRLTREC-rbf-YESdiv_boot.csv')
-    flavor_names.append('genRLTREC-sig-NOTdiv_boot.csv')
-    flavor_names.append('genRLTREC-sig-YESdiv_boot.csv')
-    
-    print(sample_name, 'calling tukey test from batch results')
-    directory ='/home/andrex/PostDoc/PaperSVM/python/scripts/stats_results/'+sample_name
-
-    for names in flavor_names:
-        input_data = pd.read_csv(directory+'/'+names)
-        #input_data = pd.read_csv("./test_results_condor.csv")
+    for i in range(len(flavor_names)):
+        if i % 2 == 0: continue
+        input_data = pd.read_csv(directory+'/'+flavor_names[i][0]+'_'+boot_kfold+'.csv')
+        nClass+=1
         auc =  np.array(input_data['auc'])
         prc =  np.array(input_data['prc'])
         f1  =  np.array(input_data['f1' ])
@@ -530,34 +471,15 @@ def tukey_call_batch(sample_name='titanic', stats_type='tukey'):
         std_rec = np.append(std_rec,  np.std(rec))
         std_acc = np.append(std_acc,  np.std(acc))
         std_gmn = np.append(std_gmn,  np.std(gmn))
-        
-            
-    # tukey tests
-    tukey_auc  =  tukey_test(np.array(auc_values))
-
-    # result_matix = np.matrix()
+                
 
     matrix = []
-
-    # for i in range(len(flavor_names)):
-    #     column = ([])
-    #     #print(tukey_auc.reject[i])
-    #     for j in range(len(flavor_names)):
-    #         # print(ttest_ind(auc_values[i], auc_values[j]).pvalue)
-    #         pval = ttest_ind(auc_values[i], auc_values[j]).pvalue
-    #         if pval < 0.05:
-    #             column = np.append(column, 1)
-    #         else:
-    #             column = np.append(column, 0)
-    #             # matrix.append(tukey_auc.group1[i])
-
-    #     matrix.append(column)
-
     if stats_type == 'tukey':
+        # tukey tests
+        tukey_auc  =  tukey_test(np.array(auc_values))
         counter  = 0
         counter2 = 0
-        flag = True
-        nClass = len(flavor_names)
+        flag = True        
         column = ([])
         for k in range(len(tukey_auc.reject)):
             counter2+=1
@@ -584,17 +506,33 @@ def tukey_call_batch(sample_name='titanic', stats_type='tukey'):
         matrix = np.array(matrix)
         #matrix = matrix.transpose()
 
-        for i in range(len(matrix)):
-            #print(matrix, len(matrix))
-            print(matrix[i], 'parrito test')
+    elif stats_type=='student':
+        for i in range(nClass):
+            column = ([])
+            for j in range(nClass):
+                # print(ttest_ind(auc_values[i], auc_values[j]).pvalue)
+                print('------------------------------------------------')
+                print(np.mean(auc_values[i]), np.mean(auc_values[j]), np.mean(auc_values[i]) - np.mean(auc_values[j]), np.std(auc_values[i]), np.std(auc_values[j]) , ttest_ind(auc_values[i], auc_values[j]).pvalue)
+                pval = ttest_ind(auc_values[i], auc_values[j]).pvalue
+                if pval < 0.05:
+                    column = np.append(column, 1)
+                else:
+                    column = np.append(column, -1)
+                    # matrix.append(tukey_auc.group1[i])        
+            matrix.append(column)
             
-        
-        sigmin = 0
-        sigmax = len(flavor_names)
-        cmin = 0
-        cmax = len(flavor_names)
-        sample_name+='_'+stats_type
-        dv.plot_stats_2d(matrix, sample_name)
+        matrix = np.array(matrix)
+
+    for i in range(len(matrix)):
+        #print(matrix, len(matrix))
+        print(matrix[i], 'parrito test')
+                
+    sigmin = 0
+    sigmax = len(flavor_names)
+    cmin = 0
+    cmax = len(flavor_names)
+    sample_name+='_'+boot_kfold+'_'+stats_type
+    dv.plot_stats_2d(matrix, sample_name)
     
     #print(len(tukey_auc.reject), 'size')
     # tukey_prc  =  tukey_test(np.array(prc_values))
@@ -614,17 +552,6 @@ def tukey_call_batch(sample_name='titanic', stats_type='tukey'):
     # dv.latex_table_tukey(names, True, mean_auc, std_auc, tukey_auc, mean_prc, std_prc,  tukey_prc, mean_f1, std_f1, tukey_f1,
     #                      mean_rec, std_rec,  tukey_rec, mean_acc, std_acc, tukey_acc, mean_gmn, std_gmn, tukey_gmn, f_tukey_div)
     # f_tukey_div.close()
-
-
-
-    
-
-    
-
-    
-
-
-    
 
     # p_gaus, alpha = ss.normal_test(sample=auc_svm_boost,     alpha=0.05, verbose=True)
     
