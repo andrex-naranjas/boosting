@@ -1,21 +1,16 @@
-
-# -*- coding: utf-8 -*-
 '''
 ---------------------------------------------------------------
  Code to improve SVM
  Authors: A. Ramirez-Morales and J. Salmon-Gamboa
  ---------------------------------------------------------------
 '''
-
 # visualization module
-
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 import pandas as pd
 import math as math
 from sklearn.metrics import auc
-
 
 # frame plots
 def plot_frame(frame,name,xlabel,ylabel,yUserRange,ymin,ymax,sample):
@@ -34,6 +29,28 @@ def plot_frame(frame,name,xlabel,ylabel,yUserRange,ymin,ymax,sample):
     plt.savefig('./plots/'+name+'_'+sample+'.pdf')
     plt.close()
 
+
+# simple plots
+def simple_plot(sample,name='AUC',xlabel='metric', pval=0, alpha_in=0.05):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    plt.hist(sample, 20, density=True, label = 'Sampling')
+    xmin, xmax = plt.xlim()
+    x = np.linspace(xmin, xmax, 100)
+    y = norm.pdf(x, np.mean(sample), np.std(sample))
+    p, alpha = pval, alpha_in
+    plt.plot(x,y,label='Gaussian fit')
+    plt.text(0.15, 0.9,'$\\mu$={}, $\\sigma$={}'.format(round(np.mean(sample),1), round(np.std(sample),4)),
+             ha='center', va='center', transform=ax.transAxes)
+    plt.text(0.15, 0.8,'$p_{{val}}$={}, $\\alpha$={}'.format(round(p,3), alpha),
+             ha='center', va='center', transform=ax.transAxes)
+    plt.legend(frameon=False)
+    plt.xlabel(xlabel)
+    plt.ylabel('Arbitrary Units')
+    #plt.title(quark+' mesons')
+    plt.savefig('./plots/'+name+'.pdf')
+    plt.close()
+    
 # 2d test error plot as function of sigma and c SVM parameters
 def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name):
 
@@ -157,14 +174,11 @@ def plot_roc_curve(TPR,FPR,sample,real,glob_local,name,kernel,nClass):
     plt.close()
     
 
-def latex_table_tukey(names, isDiverse, auc_val, auc_error, auc_test, prc_val, prc_error,  prc_test, f1_val,  f1_error,  f1_test,
-                                 rec_val, rec_error, rec_test, acc_val, acc_error,  acc_test, gmn_val, gmn_error, gmn_test,  f_out):
+def latex_table_tukey(names, sample, auc_val, auc_error, auc_test, prc_val, prc_error,  prc_test, f1_val,  f1_error,  f1_test,
+                      rec_val, rec_error, rec_test, acc_val, acc_error,  acc_test, gmn_val, gmn_error, gmn_test,  f_out):
                       
     print("\\begin{tabular}{c | c  c  c | c c c | c c c | c c c | c c c | c c c }\hline \hline", file=f_out)
-    print("Model & $\mu_{AUC}$  & p-val  &  Reject $H_{0}$ & $\mu_{prc}$  & p-val  &  Rjct. $H_{0}$ & $\mu_{f1}$  & p-val  &  Rjct. $H_{0}$ & $\mu_{rec}$  & p-val  &  Rjct. $H_{0}$ & $\mu_{acc}$  & p-val  &  Rjct. $H_{0}$ & $\mu_{gmn}$  & p-val  &  Rjct. $H_{0}$   \\\  \hline", file=f_out)
-
-    nAlgos = len(auc_val)-1
-    off_set = nAlgos
+    print("Model & $\mu_{AUC}$  & p-val  &  R.$H_{0}$ & $\mu_{prc}$  & p-val  &  R.$H_{0}$ & $\mu_{f1}$  & p-val  &  R.$H_{0}$ & $\mu_{rec}$  & p-val  &  R.$H_{0}$ & $\mu_{acc}$  & p-val  &  R.$H_{0}$ & $\mu_{gmn}$  & p-val  &  R.$H_{0}$   \\\  \hline", file=f_out)
 
     reject_auc = ''
     reject_prc = ''
@@ -173,19 +187,8 @@ def latex_table_tukey(names, isDiverse, auc_val, auc_error, auc_test, prc_val, p
     reject_acc = ''
     reject_gmn = ''
 
-    i_cf = 0
-    for i in range(nAlgos):
-        k=0
-        j = i + 1
-        if isDiverse:
-            i_cf = 1
-            if i==0:
-                k = i
-                j = i
-            else: k = i + off_set
-        else: k = i
-        
-            
+    for k in range(len(auc_val)-1): # loop number of algorithms
+        j = k + 1                    
         if auc_test.reject[k]: reject_auc = '\\checkmark'
         elif not auc_test.reject[k]: reject_auc = '\\xmark'        
         if prc_test.reject[k]: reject_prc = '\\checkmark'
@@ -199,25 +202,73 @@ def latex_table_tukey(names, isDiverse, auc_val, auc_error, auc_test, prc_val, p
         if gmn_test.reject[k]: reject_gmn = '\\checkmark'
         elif not gmn_test.reject[k]: reject_gmn = '\\xmark'        
         
-        print(names[j], ' & ',
-              round(auc_val[j],2),' & ', round(auc_test.pvalues[k],3), ' & ', reject_auc,' & ',
-              round(prc_val[j],2),' & ', round(prc_test.pvalues[k],3), ' & ', reject_prc,' & ',
-              round(f1_val[j],2), ' & ', round(f1_test.pvalues[k],3),  ' & ', reject_f1, ' & ',
-              round(rec_val[j],2),' & ', round(rec_test.pvalues[k],3), ' & ', reject_rec,' & ',
-              round(acc_val[j],2),' & ', round(acc_test.pvalues[k],3), ' & ', reject_acc,' & ',
-              round(gmn_val[j],2),' & ', round(gmn_test.pvalues[k],3), ' & ', reject_gmn,
+        print(names[j], '&',
+              '$', round(auc_val[j],2), '\\pm',round(auc_error[j],2), "$",'&', round(auc_test.pvalues[k],3), '&', reject_auc,' & ',
+              '$', round(prc_val[j],2), '\\pm',round(prc_error[j],2), "$",'&', round(prc_test.pvalues[k],3), '&', reject_prc,' & ',
+              '$', round(f1_val[j],2),  '\\pm',round( f1_error[j],2), "$",'&', round(f1_test.pvalues[k],3),  '&', reject_f1, ' & ',
+              '$', round(rec_val[j],2), '\\pm',round(rec_error[j],2), "$",'&', round(rec_test.pvalues[k],3), '&', reject_rec,' & ',
+              '$', round(acc_val[j],2), '\\pm',round(acc_error[j],2), "$",'&', round(acc_test.pvalues[k],3), '&', reject_acc,' & ',
+              '$', round(gmn_val[j],2), '\\pm',round(gmn_error[j],2), "$",'&', round(gmn_test.pvalues[k],3), '&', reject_gmn,
               ' \\\ ', file=f_out)
-        
-                
+                        
     print('\hline \hline', file=f_out)
     print('\end{tabular}', file=f_out)
-    print("\caption{Tukey statistics test. Scores of current classifier  --AUC:",round(auc_val[i_cf], 3),'$\\pm',round(auc_error[i_cf],3), "$",
-                                                                        "--prc:",round(prc_val[i_cf], 3),'$\\pm',round(prc_error[i_cf],3), "$",
-                                                                        "--f1s:",round( f1_val[i_cf], 3),'$\\pm',round( f1_error[i_cf],3), "$",
-                                                                        "--REC:",round(rec_val[i_cf], 3),'$\\pm',round(rec_error[i_cf],3), "$",
-                                                                       "-- acc:",round(acc_val[i_cf], 3),'$\\pm',round(acc_error[i_cf],3), "$",
-                                                                        "--gmn:",round(gmn_val[i_cf], 3),'$\\pm',round(gmn_error[i_cf],3), "$","}", file=f_out)
+    print("\caption{Tukey statistics test. Scores of \\textbf{",sample, names[0],"} --AUC:",round(auc_val[0], 3),'$\\pm',round(auc_error[0],3), "$",
+                                                                        "--prc:",round(prc_val[0], 3),'$\\pm',round(prc_error[0],3), "$",
+                                                                        "--f1s:",round( f1_val[0], 3),'$\\pm',round( f1_error[0],3), "$",
+                                                                        "--REC:",round(rec_val[0], 3),'$\\pm',round(rec_error[0],3), "$",
+                                                                       "-- acc:",round(acc_val[0], 3),'$\\pm',round(acc_error[0],3), "$",
+                                                                        "--gmn:",round(gmn_val[0], 3),'$\\pm',round(gmn_error[0],3), "$","}", file=f_out)
     print("\label{tab:tukey}", file=f_out)
+    
+
+def latex_table_student(names, sample, auc_val, auc_error, auc_pval, prc_val, prc_error,  prc_pval, f1_val,  f1_error,  f1_pval,
+                        rec_val, rec_error, rec_pval, acc_val, acc_error,  acc_pval, gmn_val, gmn_error, gmn_pval, f_out):
+    
+    print("\\begin{tabular}{c | c  c  c | c c c | c c c | c c c | c c c | c c c }\hline \hline", file=f_out)
+    print("Model & $\mu_{AUC}$  & p-val  &  R.$H_{0}$ & $\mu_{prc}$  & p-val  &  R.$H_{0}$ & $\mu_{f1}$  & p-val  &  R.$H_{0}$ & $\mu_{rec}$  & p-val  &  R.$H_{0}$ & $\mu_{acc}$  & p-val  &  R.$H_{0}$ & $\mu_{gmn}$  & p-val  &  R.$H_{0}$   \\\  \hline", file=f_out)
+
+    reject_auc = ''
+    reject_prc = ''
+    reject_f1  = ''
+    reject_rec = ''
+    reject_acc = ''
+    reject_gmn = ''
+    alpha = 0.05
+
+    for k in range(len(auc_val)-1): # loop number of algorithms
+        j = k + 1                    
+        if auc_pval[j] < alpha : reject_auc = '\\checkmark'
+        else:                    reject_auc = '\\xmark'        
+        if prc_pval[j] < alpha : reject_prc = '\\checkmark'
+        else:                    reject_prc = '\\xmark'
+        if f1_pval[j]  < alpha : reject_f1  = '\\checkmark'
+        else:                    reject_f1  = '\\xmark'
+        if rec_pval[j] < alpha:  reject_rec = '\\checkmark'
+        else:                    reject_rec = '\\xmark'
+        if acc_pval[j] < alpha : reject_acc = '\\checkmark'
+        else:                    reject_acc = '\\xmark'
+        if gmn_pval[j] < alpha:  reject_gmn = '\\checkmark'
+        else:                    reject_gmn = '\\xmark'        
+        
+        print(names[j], '&',
+              '$', round(auc_val[j],2), '\\pm',round(auc_error[j],2), "$",'&', round(auc_pval[j],3), '&', reject_auc,' & ',
+              '$', round(prc_val[j],2), '\\pm',round(prc_error[j],2), "$",'&', round(prc_pval[j],3), '&', reject_prc,' & ',
+              '$', round(f1_val[j],2),  '\\pm',round( f1_error[j],2), "$",'&', round( f1_pval[j],3), '&', reject_f1, ' & ',
+              '$', round(rec_val[j],2), '\\pm',round(rec_error[j],2), "$",'&', round(rec_pval[j],3), '&', reject_rec,' & ',
+              '$', round(acc_val[j],2), '\\pm',round(acc_error[j],2), "$",'&', round(acc_pval[j],3), '&', reject_acc,' & ',
+              '$', round(gmn_val[j],2), '\\pm',round(gmn_error[j],2), "$",'&', round(gmn_pval[j],3), '&', reject_gmn,
+              ' \\\ ', file=f_out)
+                        
+    print('\hline \hline', file=f_out)
+    print('\end{tabular}', file=f_out)
+    print("\caption{t-student statistics test. Scores of \\textbf{",sample, names[0],"} --AUC:",round(auc_val[0], 3),'$\\pm',round(auc_error[0],3), "$",
+                                                                        "--prc:",round(prc_val[0], 3),'$\\pm',round(prc_error[0],3), "$",
+                                                                        "--f1s:",round( f1_val[0], 3),'$\\pm',round( f1_error[0],3), "$",
+                                                                        "--REC:",round(rec_val[0], 3),'$\\pm',round(rec_error[0],3), "$",
+                                                                       "-- acc:",round(acc_val[0], 3),'$\\pm',round(acc_error[0],3), "$",
+                                                                        "--gmn:",round(gmn_val[0], 3),'$\\pm',round(gmn_error[0],3), "$","}", file=f_out)
+    print("\label{tab:student}", file=f_out)
 
 
 
@@ -248,4 +299,4 @@ def latex_table_mcnemar(names, p_values,stats,rejects, area2s, prec2s, f1_2s, re
     print('\hline \hline', file=f_out)
     print('\end{tabular}', file=f_out)
     print("\caption{Mc-Nemar statistics test. Scores of current classifier}", file=f_out)
-    print("\label{tab:tukey}", file=f_out)
+    print("\label{tab:mcnemar}", file=f_out)

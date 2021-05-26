@@ -4,7 +4,6 @@
  Authors: A. Ramirez-Morales and J. Salmon-Gamboa
  ---------------------------------------------------------------
 '''
-from os import popen
 import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score,auc,precision_score,roc_auc_score,f1_score,recall_score
@@ -330,7 +329,7 @@ def tukey_test(score_array):
     return MultiComp2.tukeyhsd(0.05)
     
 
-def normal_test(sample,alpha,verbose):
+def normal_test(sample,alpha=0.05,verbose=False):
     # hypothesis test: null hypothesis, the data is gaussian distributed
 
     # Shapiro-Wilk
@@ -429,27 +428,43 @@ def stats_results(name, n_cycles, kfolds, n_reps, boot_kfold ='', split_frac=0.6
     f_tukey_div.close()
 
 
-def tukey_call_batch(sample_name='titanic', stats_type='tukey', boot_kfold='boot'):
+def tukey_call_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', stats_type='tukey', boot_kfold='boot'):
     # arrays to store the scores
     mean_auc,mean_prc,mean_f1,mean_rec,mean_acc,mean_gmn = ([]),([]),([]),([]),([]),([])
     std_auc,std_prc,std_f1,std_rec,std_acc,std_gmn = ([]),([]),([]),([]),([]),([])
     auc_values,prc_values,f1_values,rec_values,acc_values,gmn_values = [],[],[],[],[],[]
-    
-    current_path = popen('pwd').read().strip()    
-    flavor_names = mm.model_loader_batch(0)[0]
-    directory = current_path+'/stats_results/'+sample_name+'/'+boot_kfold
-    nClass = 0    
+    student_auc,student_prc,student_f1,student_rec,student_acc,student_gmn = ([]),([]),([]),([]),([]),([])
+
+    # make the list of classifier flavors, the top classifier is the we want to compare and show in tables
+    i_names, flavor_names = [],[]
+    for i in range(len(mm.model_loader_batch(0)[0])): i_names.append(mm.model_loader_batch(0)[0][i][0])
+    flavor_names.append(class_interest)
+    for i in range(len(i_names)):
+        if i_names[i] != class_interest:
+                flavor_names.append(i_names[i])
+                
+    directory = './stats_results/'+sample_name+'/'+boot_kfold
+    nClass = 0
+    f_names = []
 
     for i in range(len(flavor_names)):
-        if i % 2 == 0: continue
-        input_data = pd.read_csv(directory+'/'+flavor_names[i][0]+'_'+boot_kfold+'.csv')
+        # if i % 2 == 0 and
+        # if flavor_names[i] != class_interest: continue        
+        input_data = pd.read_csv(directory+'/'+flavor_names[i]+'_'+boot_kfold+'.csv')        
         nClass+=1
+        f_names.append(flavor_names[i])
         auc =  np.array(input_data['auc'])
         prc =  np.array(input_data['prc'])
         f1  =  np.array(input_data['f1' ])
         rec =  np.array(input_data['rec'])
         acc =  np.array(input_data['acc'])
         gmn =  np.array(input_data['gmn'])
+
+        # check normality
+        p,alpha = normal_test(acc,alpha=0.05,verbose=True)
+        print(flavor_names[i])
+        dv.simple_plot(acc, pval=p, alpha_in=alpha)
+        input()
 
         auc_values.append(auc)
         prc_values.append(prc)
@@ -471,8 +486,8 @@ def tukey_call_batch(sample_name='titanic', stats_type='tukey', boot_kfold='boot
         std_rec = np.append(std_rec,  np.std(rec))
         std_acc = np.append(std_acc,  np.std(acc))
         std_gmn = np.append(std_gmn,  np.std(gmn))
-                
 
+            
     matrix = []
     if stats_type == 'tukey':
         # tukey tests
@@ -505,16 +520,33 @@ def tukey_call_batch(sample_name='titanic', stats_type='tukey', boot_kfold='boot
         matrix.append(last_column)
         matrix = np.array(matrix)
         #matrix = matrix.transpose()
+        tukey_auc  =  tukey_test(np.array(auc_values))
+        tukey_prc  =  tukey_test(np.array(prc_values))
+        tukey_f1   =  tukey_test(np.array(f1_values))  
+        tukey_rec  =  tukey_test(np.array(rec_values)) 
+        tukey_acc  =  tukey_test(np.array(acc_values))
+        tukey_gmn  =  tukey_test(np.array(gmn_values))                                 
+        # latex tables
+        sample_name+='-'+boot_kfold+'-'+stats_type
+        f_tukey_table = open('./tables/tukey_'+sample_name+'_'+class_interest+'.tex', "w")
+        dv.latex_table_tukey(f_names, sample_name, mean_auc, std_auc, tukey_auc, mean_prc, std_prc,  tukey_prc, mean_f1, std_f1,  tukey_f1,
+                             mean_rec, std_rec, tukey_rec, mean_acc, std_acc,  tukey_acc, mean_gmn, std_gmn,  tukey_gmn,  f_tukey_table)
+        f_tukey_table.close()        
 
     elif stats_type=='student':
         for i in range(nClass):
             column = ([])
             for j in range(nClass):
                 # print(ttest_ind(auc_values[i], auc_values[j]).pvalue)
-                print('------------------------------------------------')
-                print(np.mean(auc_values[i]), np.mean(auc_values[j]), np.mean(auc_values[i]) - np.mean(auc_values[j]), np.std(auc_values[i]), np.std(auc_values[j]) , ttest_ind(auc_values[i], auc_values[j]).pvalue)
-                pval = ttest_ind(auc_values[i], auc_values[j]).pvalue
-                if pval < 0.05:
+                if(i==0):
+                    student_auc = np.append(student_auc, ttest_ind(auc_values[i], auc_values[j]).pvalue)
+                    student_prc = np.append(student_prc, ttest_ind(prc_values[i], prc_values[j]).pvalue)
+                    student_f1  = np.append(student_f1 , ttest_ind( f1_values[i],  f1_values[j]).pvalue)
+                    student_rec = np.append(student_rec, ttest_ind(rec_values[i], rec_values[j]).pvalue)
+                    student_acc = np.append(student_acc, ttest_ind(acc_values[i], acc_values[j]).pvalue)
+                    student_gmn = np.append(student_gmn, ttest_ind(gmn_values[i], gmn_values[j]).pvalue)
+                    pvalue = ttest_ind(auc_values[i], auc_values[j]).pvalue
+                if pvalue < 0.05:
                     column = np.append(column, 1)
                 else:
                     column = np.append(column, -1)
@@ -522,36 +554,25 @@ def tukey_call_batch(sample_name='titanic', stats_type='tukey', boot_kfold='boot
             matrix.append(column)
             
         matrix = np.array(matrix)
+        # latex tables
+        sample_name+='-'+boot_kfold+'-'+stats_type
+        f_student_table = open('./tables/student_'+sample_name+'_'+class_interest+'.tex', "w")
+        dv.latex_table_student(f_names, sample_name, mean_auc, std_auc, student_auc, mean_prc, std_prc,  student_prc, mean_f1, std_f1,  student_f1,
+                               mean_rec, std_rec, student_rec, mean_acc, std_acc, student_acc, mean_gmn, std_gmn,  student_gmn,  f_student_table)
+        f_student_table.close()
 
-    for i in range(len(matrix)):
-        #print(matrix, len(matrix))
+    
+    for i in range(len(matrix)): #print(matrix, len(matrix))
         print(matrix[i], 'parrito test')
                 
     sigmin = 0
     sigmax = len(flavor_names)
     cmin = 0
     cmax = len(flavor_names)
-    sample_name+='_'+boot_kfold+'_'+stats_type
+
     dv.plot_stats_2d(matrix, sample_name)
-    
-    #print(len(tukey_auc.reject), 'size')
-    # tukey_prc  =  tukey_test(np.array(prc_values))
-    # tukey_f1   =  tukey_test(np.array(f1_values))  
-    # tukey_rec  =  tukey_test(np.array(rec_values)) 
-    # tukey_acc  =  tukey_test(np.array(acc_values))
-    # tukey_gmn  =  tukey_test(np.array(gmn_values))
 
-                                 
-    # # latex tables
-    # f_tukey_noDiv = open('./tables/tukey_'+name+'_'+boot_kfold+'_noDiv.tex', "w")
-    # dv.latex_table_tukey(names, False, mean_auc, std_auc, tukey_auc, mean_prc, std_prc,  tukey_prc, mean_f1, std_f1,  tukey_f1,
-    #                      mean_rec, std_rec,  tukey_rec, mean_acc, std_acc,  tukey_acc, mean_gmn, std_gmn,  tukey_gmn,  f_tukey_noDiv)
-    # f_tukey_noDiv.close()
 
-    # f_tukey_div = open('./tables/tukey_'+name+'_'+boot_kfold+'_div.tex', "w")
-    # dv.latex_table_tukey(names, True, mean_auc, std_auc, tukey_auc, mean_prc, std_prc,  tukey_prc, mean_f1, std_f1, tukey_f1,
-    #                      mean_rec, std_rec,  tukey_rec, mean_acc, std_acc, tukey_acc, mean_gmn, std_gmn, tukey_gmn, f_tukey_div)
-    # f_tukey_div.close()
 
     # p_gaus, alpha = ss.normal_test(sample=auc_svm_boost,     alpha=0.05, verbose=True)
     
