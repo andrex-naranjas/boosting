@@ -54,10 +54,12 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
     n_samples = int(split_frac*data_size)
     
     # bootstrap score calculations
+    i_sample = 0
     for _ in range(n_cycles): # arbitrary number of bootstrap samples to produce
+        i_sample+=1
         
         if not train_test:
-            sampled_data_train = resample(sample_df, replace = True, n_samples = n_samples, random_state = None)
+            sampled_data_train = resample(sample_df, replace = True, n_samples = n_samples, random_state = i_sample)
             
             if selection == 'trad':
                 # test data are the complement of full input data that is not considered for training
@@ -138,7 +140,7 @@ def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_sco
                        sampling=True, split_sample=0.0)
     
     # n-k fold cross validation, n_cycles = n_splits * n_repeats
-    rkf = RepeatedKFold(n_splits = kfolds, n_repeats = n_reps, random_state = None)
+    rkf = RepeatedKFold(n_splits = kfolds, n_repeats = n_reps, random_state = 1)
     for train_index, test_index in rkf.split(X):
         X_train, X_test = X.loc[train_index], X.loc[test_index]
         Y_train, Y_test = Y.loc[train_index], Y.loc[test_index]
@@ -461,9 +463,9 @@ def tukey_call_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', st
         gmn =  np.array(input_data['gmn'])
 
         # check normality
-        p,alpha = normal_test(acc,alpha=0.05,verbose=True)
+        p,alpha = normal_test(auc,alpha=0.05,verbose=True)
         print(flavor_names[i])
-        dv.simple_plot(acc, pval=p, alpha_in=alpha)
+        dv.simple_plot(auc, pval=p, alpha_in=alpha)
         input()
 
         auc_values.append(auc)
