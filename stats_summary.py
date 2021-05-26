@@ -463,10 +463,10 @@ def tukey_call_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', st
         gmn =  np.array(input_data['gmn'])
 
         # check normality
-        p,alpha = normal_test(auc,alpha=0.05,verbose=True)
-        print(flavor_names[i])
-        dv.simple_plot(auc, pval=p, alpha_in=alpha)
-        input()
+        # p,alpha = normal_test(auc,alpha=0.05,verbose=True)
+        # print(flavor_names[i])
+        # dv.simple_plot(auc, pval=p, alpha_in=alpha)
+        # input()
 
         auc_values.append(auc)
         prc_values.append(prc)
@@ -540,14 +540,27 @@ def tukey_call_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', st
             column = ([])
             for j in range(nClass):
                 # print(ttest_ind(auc_values[i], auc_values[j]).pvalue)
-                if(i==0):
-                    student_auc = np.append(student_auc, ttest_ind(auc_values[i], auc_values[j]).pvalue)
-                    student_prc = np.append(student_prc, ttest_ind(prc_values[i], prc_values[j]).pvalue)
-                    student_f1  = np.append(student_f1 , ttest_ind( f1_values[i],  f1_values[j]).pvalue)
-                    student_rec = np.append(student_rec, ttest_ind(rec_values[i], rec_values[j]).pvalue)
-                    student_acc = np.append(student_acc, ttest_ind(acc_values[i], acc_values[j]).pvalue)
-                    student_gmn = np.append(student_gmn, ttest_ind(gmn_values[i], gmn_values[j]).pvalue)
-                    pvalue = ttest_ind(auc_values[i], auc_values[j]).pvalue
+                if(i==0 and j!=0):
+                    #wilcoxon, ttest_ind
+                    student_auc = np.append(student_auc, wilcoxon(auc_values[i], auc_values[j]).pvalue)
+                    student_prc = np.append(student_prc, wilcoxon(prc_values[i], prc_values[j]).pvalue)
+                    student_f1  = np.append(student_f1 , wilcoxon( f1_values[i],  f1_values[j]).pvalue)
+                    student_rec = np.append(student_rec, wilcoxon(rec_values[i], rec_values[j]).pvalue)
+                    student_acc = np.append(student_acc, wilcoxon(acc_values[i], acc_values[j]).pvalue)
+                    student_gmn = np.append(student_gmn, wilcoxon(gmn_values[i], gmn_values[j]).pvalue)
+                elif(i==0 and j==0):
+                    student_auc = np.append(student_auc, 1.)
+                    student_prc = np.append(student_prc, 1.)
+                    student_f1  = np.append(student_f1 , 1.)
+                    student_rec = np.append(student_rec, 1.)
+                    student_acc = np.append(student_acc, 1.)
+                    student_gmn = np.append(student_gmn, 1.)
+                    
+                if(i!=j):
+                    pvalue      =                        wilcoxon(auc_values[i], auc_values[j]).pvalue
+                else:
+                    pvalue = 1.
+                    
                 if pvalue < 0.05:
                     column = np.append(column, 1)
                 else:

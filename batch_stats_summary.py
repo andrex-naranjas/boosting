@@ -21,7 +21,7 @@ n_cycles = 40
 k_folds  = 10
 n_reps   = 4
 
-print('sample:', name, 'model name:', model_auc[0])
+print('sample:', name, 'model name:', model_auc[0], '  validation', boot_kfold)
 start = datetime.datetime.now()
 if(boot_kfold=="boot"):
     auc, prc, f1, rec, acc, gmn = ss.bootstrap(sample_name=name, model=model_auc[1], roc_area=model_auc[2],
