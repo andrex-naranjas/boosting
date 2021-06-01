@@ -430,14 +430,14 @@ def stats_results(name, n_cycles, kfolds, n_reps, boot_kfold ='', split_frac=0.6
     f_tukey_div.close()
 
 
-def tukey_call_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', stats_type='tukey', boot_kfold='boot'):
+def stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', stats_type='student', boot_kfold='boot'):
     # arrays to store the scores
     mean_auc,mean_prc,mean_f1,mean_rec,mean_acc,mean_gmn = ([]),([]),([]),([]),([]),([])
     std_auc,std_prc,std_f1,std_rec,std_acc,std_gmn = ([]),([]),([]),([]),([]),([])
     auc_values,prc_values,f1_values,rec_values,acc_values,gmn_values = [],[],[],[],[],[]
     student_auc,student_prc,student_f1,student_rec,student_acc,student_gmn = ([]),([]),([]),([]),([]),([])
 
-    # make the list of classifier flavors, the top classifier is the we want to compare and show in tables
+    # make the list of classifier flavors,set here the top classifier we want to compare against to and show in tables
     i_names, flavor_names = [],[]
     for i in range(len(mm.model_loader_batch(0)[0])): i_names.append(mm.model_loader_batch(0)[0][i][0])
     flavor_names.append(class_interest)
@@ -450,24 +450,20 @@ def tukey_call_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', st
     f_names = []
 
     for i in range(len(flavor_names)):
-        # if i % 2 == 0 and
-        # if flavor_names[i] != class_interest: continue        
+        if i % 4 == 0 and flavor_names[i] != class_interest: continue        
         input_data = pd.read_csv(directory+'/'+flavor_names[i]+'_'+boot_kfold+'.csv')        
         nClass+=1
         f_names.append(flavor_names[i])
-        auc =  np.array(input_data['auc'])
-        prc =  np.array(input_data['prc'])
-        f1  =  np.array(input_data['f1' ])
-        rec =  np.array(input_data['rec'])
-        acc =  np.array(input_data['acc'])
-        gmn =  np.array(input_data['gmn'])
-
+        auc = np.array(input_data['auc'])
+        prc = np.array(input_data['prc'])
+        f1  = np.array(input_data['f1' ])
+        rec = np.array(input_data['rec'])
+        acc = np.array(input_data['acc'])
+        gmn = np.array(input_data['gmn'])
         # check normality
-        # p,alpha = normal_test(auc,alpha=0.05,verbose=True)
-        # print(flavor_names[i])
+        # p,alpha = normal_test(auc,alpha=0.05,verbose=True)        
         # dv.simple_plot(auc, pval=p, alpha_in=alpha)
-        # input()
-
+        
         auc_values.append(auc)
         prc_values.append(prc)
         f1_values.append(f1)
@@ -489,7 +485,7 @@ def tukey_call_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', st
         std_acc = np.append(std_acc,  np.std(acc))
         std_gmn = np.append(std_gmn,  np.std(gmn))
 
-            
+
     matrix = []
     if stats_type == 'tukey':
         # tukey tests
@@ -557,7 +553,7 @@ def tukey_call_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', st
                     student_gmn = np.append(student_gmn, 1.)
                     
                 if(i!=j):
-                    pvalue      =                        wilcoxon(auc_values[i], auc_values[j]).pvalue
+                    pvalue = wilcoxon(auc_values[i], auc_values[j]).pvalue
                 else:
                     pvalue = 1.
                     
@@ -575,7 +571,7 @@ def tukey_call_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', st
         dv.latex_table_student(f_names, sample_name, mean_auc, std_auc, student_auc, mean_prc, std_prc,  student_prc, mean_f1, std_f1,  student_f1,
                                mean_rec, std_rec, student_rec, mean_acc, std_acc, student_acc, mean_gmn, std_gmn,  student_gmn,  f_student_table)
         f_student_table.close()
-
+        
     
     for i in range(len(matrix)): #print(matrix, len(matrix))
         print(matrix[i], 'parrito test')
@@ -584,7 +580,6 @@ def tukey_call_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', st
     sigmax = len(flavor_names)
     cmin = 0
     cmax = len(flavor_names)
-
     dv.plot_stats_2d(matrix, sample_name)
 
 

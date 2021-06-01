@@ -257,7 +257,7 @@ class AdaBoostSVM:
             self.test_scores = np.append(self.test_scores, test_score)
             return False
 
-        min_test_score = np.amin(self.test_scores)
+        min_test_score = np.amin(self.test_scores) # stop if we reached perfect testing score
         if(min_test_score==0):
             print(min_test_score, 'min_test_score')
             return True
