@@ -130,39 +130,39 @@ def model_flavors():
     # tuple = (model_latex_name, model, auc, selection, GA_mutation, GA_selection, GA_highLow_coef)
 
     models_auc = []
-    models_auc.append(("trad-lin-NOTdiv", adaboost_svm(div_flag=False, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
+    # models_auc.append(("trad-lin-NOTdiv", adaboost_svm(div_flag=False, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
     # models_auc.append(("trad-rbf-NOTdiv", adaboost_svm(div_flag=False, myKernel='rbf',     myDegree=1, myCoef0=1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
-    # models_auc.append(("trad-pol-NOTdiv", adaboost_svm(div_flag=False, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
+    models_auc.append(("trad-pol-NOTdiv", adaboost_svm(div_flag=False, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
     # models_auc.append(("trad-sig-NOTdiv", adaboost_svm(div_flag=False, myKernel='sigmoid', myDegree=1, myCoef0=1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
 
-    models_auc.append(("trad-lin-YESdiv", adaboost_svm(div_flag=True, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
+    # models_auc.append(("trad-lin-YESdiv", adaboost_svm(div_flag=True, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
     # models_auc.append(("trad-rbf-YESdiv", adaboost_svm(div_flag=True, myKernel='rbf',     myDegree=1, myCoef0=1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
-    # models_auc.append(("trad-pol-YESdiv", adaboost_svm(div_flag=True, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
+    models_auc.append(("trad-pol-YESdiv", adaboost_svm(div_flag=True, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
     # models_auc.append(("trad-sig-YESdiv", adaboost_svm(div_flag=True, myKernel='sigmoid', myDegree=2, myCoef0=1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
     
-    models_auc.append(("genHLAUC-lin-NOTdiv", adaboost_svm(div_flag=False, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "auc", "highlow", 0.5))
+    # models_auc.append(("genHLAUC-lin-NOTdiv", adaboost_svm(div_flag=False, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "auc", "highlow", 0.5))
     # models_auc.append(("genHLAUC-rbf-NOTdiv", adaboost_svm(div_flag=False, myKernel='rbf',     myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "auc", "highlow", 0.5))
-    # models_auc.append(("genHLAUC-pol-NOTdiv", adaboost_svm(div_flag=False, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "auc", "highlow", 0.5))
+    models_auc.append(("genHLAUC-pol-NOTdiv", adaboost_svm(div_flag=False, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "auc", "highlow", 0.5))
     # models_auc.append(("genHLAUC-sig-NOTdiv", adaboost_svm(div_flag=False, myKernel='sigmoid', myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "auc", "highlow", 0.5))
 
-    models_auc.append(("genHLAUC-lin-YESdiv", adaboost_svm(div_flag=True, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "auc", "highlow", 0.5))
+    # models_auc.append(("genHLAUC-lin-YESdiv", adaboost_svm(div_flag=True, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "auc", "highlow", 0.5))
     # models_auc.append(("genHLAUC-rbf-YESdiv", adaboost_svm(div_flag=True, myKernel='rbf',     myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "auc", "highlow", 0.5))
-    # models_auc.append(("genHLAUC-pol-YESdiv", adaboost_svm(div_flag=True, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "auc", "highlow", 0.5))
+    models_auc.append(("genHLAUC-pol-YESdiv", adaboost_svm(div_flag=True, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "auc", "highlow", 0.5))
     # models_auc.append(("genHLAUC-sig-YESdiv", adaboost_svm(div_flag=True, myKernel='sigmoid', myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "auc", "highlow", 0.5))
     
-    models_auc.append(("genHLACC-lin-NOTdiv", adaboost_svm(div_flag=False, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "acc", "highlow", 0.5))
+    # models_auc.append(("genHLACC-lin-NOTdiv", adaboost_svm(div_flag=False, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "acc", "highlow", 0.5))
     # models_auc.append(("genHLACC-rbf-NOTdiv", adaboost_svm(div_flag=False, myKernel='rbf',     myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "acc", "highlow", 0.5))
-    # models_auc.append(("genHLACC-pol-NOTdiv", adaboost_svm(div_flag=False, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "acc", "highlow", 0.5))
+    models_auc.append(("genHLACC-pol-NOTdiv", adaboost_svm(div_flag=False, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "acc", "highlow", 0.5))
     # models_auc.append(("genHLACC-sig-NOTdiv", adaboost_svm(div_flag=False, myKernel='sigmoid', myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "acc", "highlow", 0.5))
     
-    models_auc.append(("genHLACC-lin-YESdiv", adaboost_svm(div_flag=True, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "acc", "highlow", 0.5))
+    # models_auc.append(("genHLACC-lin-YESdiv", adaboost_svm(div_flag=True, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "acc", "highlow", 0.5))
     # models_auc.append(("genHLACC-rbf-YESdiv", adaboost_svm(div_flag=True, myKernel='rbf',     myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "acc", "highlow", 0.5))
-    # models_auc.append(("genHLACC-pol-YESdiv", adaboost_svm(div_flag=True, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "acc", "highlow", 0.5))
+    models_auc.append(("genHLACC-pol-YESdiv", adaboost_svm(div_flag=True, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "acc", "highlow", 0.5))
     # models_auc.append(("genHLACC-sig-YESdiv", adaboost_svm(div_flag=True, myKernel='sigmoid', myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "acc", "highlow", 0.5))
     
-    models_auc.append(("genHLPREC-lin-NOTdiv", adaboost_svm(div_flag=False, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "prec", "highlow", 0.5))
+    # models_auc.append(("genHLPREC-lin-NOTdiv", adaboost_svm(div_flag=False, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "prec", "highlow", 0.5))
     # models_auc.append(("genHLPREC-rbf-NOTdiv", adaboost_svm(div_flag=False, myKernel='rbf',     myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "prec", "highlow", 0.5))
-    # models_auc.append(("genHLPREC-pol-NOTdiv", adaboost_svm(div_flag=False, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "prec", "highlow", 0.5))
+    models_auc.append(("genHLPREC-pol-NOTdiv", adaboost_svm(div_flag=False, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "prec", "highlow", 0.5))
     # models_auc.append(("genHLPREC-sig-NOTdiv", adaboost_svm(div_flag=False, myKernel='sigmoid', myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "prec", "highlow", 0.5))
 
     
@@ -201,34 +201,34 @@ def model_flavors():
     # models_auc.append(("genHLGMN-pol-YESdiv", adaboost_svm(div_flag=True, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "gmean", "highlow", 0.5))
     # models_auc.append(("genHLGMN-sig-YESdiv", adaboost_svm(div_flag=True, myKernel='sigmoid', myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "gmean", "highlow", 0.5))
     
-    models_auc.append(("genRLTAUC-lin-NOTdiv", adaboost_svm(div_flag=False, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "auc", "roulette", 0.5))
+    # models_auc.append(("genRLTAUC-lin-NOTdiv", adaboost_svm(div_flag=False, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "auc", "roulette", 0.5))
     # models_auc.append(("genRLTAUC-rbf-NOTdiv", adaboost_svm(div_flag=False, myKernel='rbf',     myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "auc", "roulette", 0.5))
-    # models_auc.append(("genRLTAUC-pol-NOTdiv", adaboost_svm(div_flag=False, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "auc", "roulette", 0.5))
+    models_auc.append(("genRLTAUC-pol-NOTdiv", adaboost_svm(div_flag=False, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "auc", "roulette", 0.5))
     # models_auc.append(("genRLTAUC-sig-NOTdiv", adaboost_svm(div_flag=False, myKernel='sigmoid', myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "auc", "roulette", 0.5))
     
-    models_auc.append(("genRLTAUC-lin-YESdiv", adaboost_svm(div_flag=True, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "auc", "roulette", 0.5))
+    # models_auc.append(("genRLTAUC-lin-YESdiv", adaboost_svm(div_flag=True, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "auc", "roulette", 0.5))
     # models_auc.append(("genRLTAUC-rbf-YESdiv", adaboost_svm(div_flag=True, myKernel='rbf',     myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "auc", "roulette", 0.5))
-    # models_auc.append(("genRLTAUC-pol-YESdiv", adaboost_svm(div_flag=True, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "auc", "roulette", 0.5))
+    models_auc.append(("genRLTAUC-pol-YESdiv", adaboost_svm(div_flag=True, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "auc", "roulette", 0.5))
     # models_auc.append(("genRLTAUC-sig-YESdiv", adaboost_svm(div_flag=True, myKernel='sigmoid', myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "auc", "roulette", 0.5))
     
-    models_auc.append(("genRLTACC-lin-NOTdiv", adaboost_svm(div_flag=False, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "acc", "roulette", 0.5))
+    # models_auc.append(("genRLTACC-lin-NOTdiv", adaboost_svm(div_flag=False, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "acc", "roulette", 0.5))
     # models_auc.append(("genRLTACC-rbf-NOTdiv", adaboost_svm(div_flag=False, myKernel='rbf',     myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "acc", "roulette", 0.5))
-    # models_auc.append(("genRLTACC-pol-NOTdiv", adaboost_svm(div_flag=False, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "acc", "roulette", 0.5))
+    models_auc.append(("genRLTACC-pol-NOTdiv", adaboost_svm(div_flag=False, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "acc", "roulette", 0.5))
     # models_auc.append(("genRLTACC-sig-NOTdiv", adaboost_svm(div_flag=False, myKernel='sigmoid', myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "acc", "roulette", 0.5))
     
-    models_auc.append(("genRLTACC-lin-YESdiv", adaboost_svm(div_flag=True, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "acc", "roulette", 0.5))
+    # models_auc.append(("genRLTACC-lin-YESdiv", adaboost_svm(div_flag=True, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "acc", "roulette", 0.5))
     # models_auc.append(("genRLTACC-rbf-YESdiv", adaboost_svm(div_flag=True, myKernel='rbf',     myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "acc", "roulette", 0.5))
-    # models_auc.append(("genRLTACC-pol-YESdiv", adaboost_svm(div_flag=True, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "acc", "roulette", 0.5))
+    models_auc.append(("genRLTACC-pol-YESdiv", adaboost_svm(div_flag=True, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "acc", "roulette", 0.5))
     # models_auc.append(("genRLTACC-sig-YESdiv", adaboost_svm(div_flag=True, myKernel='sigmoid', myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "acc", "roulette", 0.5))
     
-    models_auc.append(("genRLTPREC-lin-NOTdiv", adaboost_svm(div_flag=False, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "prec", "roulette", 0.5))
+    # models_auc.append(("genRLTPREC-lin-NOTdiv", adaboost_svm(div_flag=False, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "prec", "roulette", 0.5))
     # models_auc.append(("genRLTPREC-rbf-NOTdiv", adaboost_svm(div_flag=False, myKernel='rbf',     myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "prec", "roulette", 0.5))
-    # models_auc.append(("genRLTPREC-pol-NOTdiv", adaboost_svm(div_flag=False, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "prec", "roulette", 0.5))
+    models_auc.append(("genRLTPREC-pol-NOTdiv", adaboost_svm(div_flag=False, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "prec", "roulette", 0.5))
     # models_auc.append(("genRLTPREC-sig-NOTdiv", adaboost_svm(div_flag=False, myKernel='sigmoid', myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "prec", "roulette", 0.5))
     
-    models_auc.append(("genRLTPREC-lin-YESdiv", adaboost_svm(div_flag=True, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "prec", "roulette", 0.5))
+    # models_auc.append(("genRLTPREC-lin-YESdiv", adaboost_svm(div_flag=True, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "prec", "roulette", 0.5))
     # models_auc.append(("genRLTPREC-rbf-YESdiv", adaboost_svm(div_flag=True, myKernel='rbf',     myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "prec", "roulette", 0.5))
-    # models_auc.append(("genRLTPREC-pol-YESdiv", adaboost_svm(div_flag=True, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "prec", "roulette", 0.5))
+    models_auc.append(("genRLTPREC-pol-YESdiv", adaboost_svm(div_flag=True, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "prec", "roulette", 0.5))
     # models_auc.append(("genRLTPREC-sig-YESdiv", adaboost_svm(div_flag=True, myKernel='sigmoid', myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "prec", "roulette", 0.5))
     
     # models_auc.append(("genRLTF1-lin-NOTdiv", adaboost_svm(div_flag=False, myKernel='linear',  myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "f1", "roulette", 0.5))
@@ -260,9 +260,6 @@ def model_flavors():
     # models_auc.append(("genRLTGMN-rbf-YESdiv", adaboost_svm(div_flag=True, myKernel='rbf',     myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "gmean", "roulette", 0.5))
     # models_auc.append(("genRLTGMN-pol-YESdiv", adaboost_svm(div_flag=True, myKernel='poly',    myDegree=2, myCoef0=1), "absv",  "gene", 0.3, "gmean", "roulette", 0.5))
     # models_auc.append(("genRLTGMN-sig-YESdiv", adaboost_svm(div_flag=True, myKernel='sigmoid', myDegree=1, myCoef0=1), "absv",  "gene", 0.3, "gmean", "roulette", 0.5))
-
-
-
 
 
 
