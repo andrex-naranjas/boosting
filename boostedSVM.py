@@ -51,7 +51,7 @@ class AdaBoostSVM:
                        kernel=self.myKernel,
                        degree=self.myDegree,
                        coef0=self.myCoef0,
-                       gamma=1/(2*(myGamma**2)),
+                       gamma=1/(2*(10**2)),                       #gamma=1/(2*(myGamma**2)),
                        shrinking=True,
                        probability=True,
                        tol=0.001,
