@@ -37,7 +37,7 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.linear_model import PassiveAggressiveClassifier
 
 
-def adaboost_svm(div_flag=False, my_c=100, my_gamma=5; myKernel='rbf', myDegree=1, myCoef0=1, early_stop=True, debug=True):
+def adaboost_svm(div_flag=False, my_c=100, my_gamma=5, myKernel='rbf', myDegree=1, myCoef0=1, early_stop=True, debug=True):
     # boosted support vector machine (ensemble)
     svmb = AdaBoostSVM(C=my_c, gammaIni=my_gamma, myKernel=myKernel, myDegree=myDegree, myCoef0=myCoef0,
                        Diversity=div_flag, early_stop=early_stop, debug=debug)
