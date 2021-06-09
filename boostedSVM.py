@@ -44,7 +44,7 @@ class AdaBoostSVM:
         if count == 0: myGamma = 0.00001
 
         while True:
-            if myGamma < 0: return 0, 0, None, None
+            if myGamma > self.gammaEnd: return 0, 0, None, None
 
             errorOut = 0.0            
             svcB = SVC(C=self.C,
