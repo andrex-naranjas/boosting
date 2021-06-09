@@ -12,9 +12,9 @@ from sklearn.model_selection import train_test_split
 # AdaBoost class
 class AdaBoostSVM:
 
-    def __init__(self, C, gammaIni, myKernel, myDegree=1, myCoef0=1, Diversity=False, early_stop=False, debug=False, train_verbose=False):        
+    def __init__(self, C, gammaEnd, myKernel, myDegree=1, myCoef0=1, Diversity=False, early_stop=False, debug=False, train_verbose=False):        
         self.C = C
-        self.gammaIni = gammaIni
+        self.gammaEnd = gammaEnd
         self.myKernel = myKernel
         self.myDegree = myDegree
         self.myCoef0 = myCoef0
@@ -41,17 +41,17 @@ class AdaBoostSVM:
 
     def svc_train(self, myGamma, stepGamma, x_train, y_train, myWeights, count, flag_div, value_div):
 
-        if count == 0: myGamma = self.gammaIni
+        if count == 0: myGamma = 0.00001
 
         while True:
-            if myGamma <= 0: return 0, 0, None, None
+            if myGamma < 0: return 0, 0, None, None
 
             errorOut = 0.0            
             svcB = SVC(C=self.C,
                        kernel=self.myKernel,
                        degree=self.myDegree,
                        coef0=self.myCoef0,
-                       gamma=1/(2*(myGamma**2)),                       #gamma=1/(2*(myGamma**2)),
+                       gamma=myGamma,                       #gamma=1/(2*(myGamma**2)),
                        shrinking=True,
                        probability=True,
                        tol=0.001,
@@ -77,7 +77,7 @@ class AdaBoostSVM:
                 #myGamma -= stepGamma
                 break
 
-            myGamma -= stepGamma
+            myGamma += stepGamma
 
         return myGamma, errorOut, y_pred, svcB
 
@@ -96,7 +96,8 @@ class AdaBoostSVM:
 
         div_flag, div_value = self.div_flag, 0
         
-        gammaMin, gammaStep, gammaVar = 0.1, 0.1, 0.0
+        gammaMax = self.gammaEnd
+        gammaStep, gammaVar = gammaMax/50., 0.0
         cost, count, norm = 1, 0, 0.0
         h_list = []
 
@@ -116,7 +117,7 @@ class AdaBoostSVM:
             # call svm, weight samples, iterate sigma(gamma), get errors, obtain predicted classifier (h as an array)
             gammaVar, error, h, learner = self.svc_train(gammaVar, gammaStep, X_train, Y_train, new_weights, count, div_flag, div_value)
 
-            if(gammaVar <= 0 or error <= 0):# or learner == None or h == None):
+            if(gammaVar > gammaMax or error <= 0):# or learner == None or h == None):
                 break
 
             # count how many times SVM we add the ensemble
@@ -161,7 +162,7 @@ class AdaBoostSVM:
                 norm += weights[i] * np.exp(x)
 
             # do loop as long gamma > gammaMin, if gamma < 0, SVM fails exit loop
-            if gammaVar <= gammaMin:#) or (gammaVar < 0):
+            if gammaVar >= gammaMax:#) or (gammaVar < 0):
                 break
             # end of adaboost loop
 
@@ -178,7 +179,7 @@ class AdaBoostSVM:
             #              kernel=self.myKernel,
             #              degree=self.myDegree,
             #              coef0=self.myCoef0,
-            #              gamma=1/(2*(self.gammaIni**2)),
+            #              gamma=1/(2*(self.gammaEnd**2)),
             #              shrinking=True,
             #              probability=True,
             #              tol=0.001,

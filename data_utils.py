@@ -183,7 +183,7 @@ def grid_param_gauss(train_x, train_y, test_x, test_y, sigmin=-5, sigmax=5, cmin
     log_step_sigma = np.logspace(sigmax,sigmin,20,endpoint=True,base=math.e)
 
     sigmax,sigmin=0.1,0.00
-    cmax,cmin=10.,0.0
+    cmax,cmin=100.,0.0
     log_step_c     = np.linspace(cmax,    cmin,10,endpoint=False)
     log_step_sigma = np.linspace(sigmax,sigmin,10,endpoint=False)
 
@@ -197,7 +197,7 @@ def grid_param_gauss(train_x, train_y, test_x, test_y, sigmin=-5, sigmax=5, cmin
             my_gamma= log_step_sigma[j]
             my_c = log_step_c[i]
             #my_c = 10
-            svc = SVC(C=my_c, kernel='poly', degree=2, gamma=my_gamma, coef0=1, shrinking = True, probability = True, tol = 0.001)
+            svc = SVC(C=my_c, kernel='sigmoid', degree=2, gamma=my_gamma, coef0=-1, shrinking = True, probability = True, tol = 0.001)
 
             svc.fit(train_x, train_y)
             
