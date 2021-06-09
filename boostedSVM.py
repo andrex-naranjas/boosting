@@ -41,10 +41,10 @@ class AdaBoostSVM:
 
     def svc_train(self, myGamma, stepGamma, x_train, y_train, myWeights, count, flag_div, value_div):
 
-        if count == 0: myGamma = 0.0
+        if count == 0: myGamma = stepGamma
 
         while True:
-            if myGamma > self.gammaEnd: return 0, 0, None, None
+            if myGamma > self.gammaEnd+stepGamma: return 0, 0, None, None
 
             errorOut = 0.0            
             svcB = SVC(C=self.C,
