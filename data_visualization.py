@@ -54,7 +54,9 @@ def simple_plot(sample,name='AUC',xlabel='metric', pval=0, alpha_in=0.05):
 # 2d test error plot as function of sigma and c SVM parameters
 def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name):
 
-    tick_x = [math.floor(sigmin),0,math.floor(sigmax)]
+    #tick_x = [math.floor(sigmin),0,math.floor(sigmax)]
+    sigmax,sigmin=10,1
+    tick_x = [math.floor(sigmax),0,math.floor(sigmin)]
     tick_y = [math.floor(cmax),math.floor(cmax/2),math.floor(cmin)]
 
     fig, ax = plt.subplots()
@@ -81,8 +83,6 @@ def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name):
     plt.savefig('./plots/2dplot_'+sample_name+'.pdf')
     plt.close()
 
-
-# 2d test error plot as function of sigma and c SVM parameters
 def plot_stats_2d(matrix, sample_name):
 
     # tick_x = [math.floor(sigmin),0,math.floor(sigmax)]

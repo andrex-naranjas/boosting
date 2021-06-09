@@ -175,22 +175,40 @@ def error_number(sample_name, myC, myGammaIni, train_test):
 
     return pd.DataFrame(final_final,np.arange(np.amax(number)))
 
-
 # grid svm-hyperparameters (sigma and C) to explore test errors
-def grid_param_gauss(train_x, train_y, test_x, test_y, sigmin, sigmax, cmin, cmax):
+def grid_param_gauss(train_x, train_y, test_x, test_y, sigmin=-5, sigmax=5, cmin=0, cmax=6):
 
     # inverted limits, to acommodate the manner at which the arrays are stored and plotted as a matrix
-    log_step_c     = np.logspace(cmax,    cmin,15,endpoint=True,base=math.e)
-    log_step_sigma = np.logspace(sigmax,sigmin,15,endpoint=True,base=math.e)
+    log_step_c     = np.logspace(cmax,    cmin,20,endpoint=True,base=math.e)
+    log_step_sigma = np.logspace(sigmax,sigmin,20,endpoint=True,base=math.e)
+
+    sigmax,sigmin=0.1,0.00
+    cmax,cmin=10.,0.0
+    log_step_c     = np.linspace(cmax,    cmin,10,endpoint=False)
+    log_step_sigma = np.linspace(sigmax,sigmin,10,endpoint=False)
+
 
     error_matrix = []
     for i in range(len(log_step_c)): # C loop
+        print('************************************************************************')
         errors = ([])
         for j in range(len(log_step_sigma)): # sigma loop
-            svc = SVC(C= log_step_c[i], kernel='rbf', gamma=1/(2*((log_step_sigma[j])**2)), shrinking = True, probability = True, tol = 0.001)
+            #my_gamma=1/(2*((log_step_sigma[j])**2))
+            my_gamma= log_step_sigma[j]
+            my_c = log_step_c[i]
+            #my_c = 10
+            svc = SVC(C=my_c, kernel='poly', degree=2, gamma=my_gamma, coef0=1, shrinking = True, probability = True, tol = 0.001)
+
             svc.fit(train_x, train_y)
-            pred_y = svc.predict(test_x)
-            acc, prec, recall, f1 = generate_report(test_y, pred_y, verbose=False)
+            
+            # pred_y = svc.predict(test_x)
+            # acc, prec, recall, f1 = generate_report(test_y, pred_y, verbose=False)
+            pred_y = svc.predict(train_x)
+            acc, prec, recall, f1 = generate_report(train_y, pred_y, verbose=False)
+
+            print('creating matrix element:', i,j, round(log_step_c[i],2), round(log_step_sigma[j],2), round(my_gamma,2),
+                  round((0.01)*(100-acc),2), round(np.log(log_step_sigma[j]),2) )
+
             errors = np.append(errors,[(0.01)*(100-acc)])
 
         error_matrix.append(errors)
