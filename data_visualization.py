@@ -52,18 +52,39 @@ def simple_plot(sample,name='AUC',xlabel='metric', pval=0, alpha_in=0.05):
     plt.close()
     
 # 2d test error plot as function of sigma and c SVM parameters
-def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name):
+def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name, my_kernel='rbf'):
 
-    #tick_x = [math.floor(sigmin),0,math.floor(sigmax)]
-    sigmax,sigmin=10,1
-    tick_x = [math.floor(sigmax),0,math.floor(sigmin)]
-    tick_y = [math.floor(cmax),math.floor(cmax/2),math.floor(cmin)]
+    if my_kernel == 'rbf':
+        sigmax,sigmin=100,0.00
+        cmax,cmin=100,0
+    elif my_kernel == 'sigmoid':
+        sigmax,sigmin=0.1,0.00
+        cmax,cmin=100,0
+    elif my_kernel == 'poly' or my_kernel == 'linear':
+        sigmax,sigmin=0.1,0.00
+        cmax,cmin=10,0
+
+    # tick_x = [math.floor(sigmax), math.floor(sigmax/2) , math.floor(sigmin)]
+    # tick_y = [math.floor(cmax),math.floor(cmax/2),math.floor(cmin)]
+    half_sig = sigmax/2
+    if my_kernel =='rbf': half_sig = int(half_sig)
+    
+    tick_x = [sigmax, half_sig, int(sigmin)]
+    tick_y = [cmax,   int(cmax/2),   cmin]
 
     fig, ax = plt.subplots()
     im = ax.imshow(matrix)
-
-    ax.set_xticklabels(tick_x)
+    
     ax.set_yticklabels(tick_y)
+    ax.yaxis.label.set_size(15)
+    
+    ax.set_xticklabels(tick_x)
+    ax.xaxis.set_label_position('top')
+    ax.xaxis.tick_top()
+    ax.xaxis.label.set_size(15)
+    ax.set_xlabel('$\gamma$')
+    
+    #ax.spines['left'].set_visible(False)
 
     # ax.set_xticks(np.arange(matrix.shape[1])) # show all ticks
     # ax.set_yticks(np.arange(matrix.shape[0]))
@@ -76,11 +97,11 @@ def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name):
             text = ax.text(j, i, math.floor(100*matrix[i,j]),
                            ha="center", va="center", color="black")
 
-    ax.set_title('Test Error (%) - '+sample_name+' dataset')
+    #ax.set_title('Test Error (%) - '+sample_name+' dataset')
     fig.tight_layout()
-    plt.xlabel('ln $\sigma$')
-    plt.ylabel('ln C')
-    plt.savefig('./plots/2dplot_'+sample_name+'.pdf')
+    #plt.xlabel('$\gamma$')
+    plt.ylabel('C')
+    plt.savefig('./plots/2dplot_'+sample_name+'.pdf', bbox_inches='tight', pad_inches = 0)
     plt.close()
 
 def plot_stats_2d(matrix, sample_name):

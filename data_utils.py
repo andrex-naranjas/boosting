@@ -176,17 +176,26 @@ def error_number(sample_name, myC, myGammaIni, train_test):
     return pd.DataFrame(final_final,np.arange(np.amax(number)))
 
 # grid svm-hyperparameters (sigma and C) to explore test errors
-def grid_param_gauss(train_x, train_y, test_x, test_y, sigmin=-5, sigmax=5, cmin=0, cmax=6):
+def grid_param_gauss(train_x, train_y, test_x, test_y, sigmin=-5, sigmax=5, cmin=0, cmax=6, my_kernel='rbf', train_test='train'):
 
     # inverted limits, to acommodate the manner at which the arrays are stored and plotted as a matrix
-    log_step_c     = np.logspace(cmax,    cmin,20,endpoint=True,base=math.e)
-    log_step_sigma = np.logspace(sigmax,sigmin,20,endpoint=True,base=math.e)
-
-    sigmax,sigmin=0.1,0.00
-    cmax,cmin=100.,0.0
+    # sigmin = -5    sigmax = 5    cmin = 0    cmax = 6
+    # log_step_c     = np.logspace(cmax,    cmin,20,endpoint=True,base=math.e)
+    # log_step_sigma = np.logspace(sigmax,sigmin,20,endpoint=True,base=math.e)
+    my_coef = 1
+    if my_kernel == 'rbf':
+        sigmax,sigmin=100,0.00
+        cmax,cmin=100.,0.0
+    elif my_kernel == 'sigmoid':
+        sigmax,sigmin=0.1,0.00
+        cmax,cmin=100.,00.
+        my_coef = -1        
+    elif my_kernel == 'poly' or my_kernel == 'linear':
+        sigmax,sigmin=0.1,0.00
+        cmax,cmin=10.,0.0
+        
     log_step_c     = np.linspace(cmax,    cmin,10,endpoint=False)
     log_step_sigma = np.linspace(sigmax,sigmin,10,endpoint=False)
-
 
     error_matrix = []
     for i in range(len(log_step_c)): # C loop
@@ -197,17 +206,18 @@ def grid_param_gauss(train_x, train_y, test_x, test_y, sigmin=-5, sigmax=5, cmin
             my_gamma= log_step_sigma[j]
             my_c = log_step_c[i]
             #my_c = 10
-            svc = SVC(C=my_c, kernel='sigmoid', degree=2, gamma=my_gamma, coef0=-1, shrinking = True, probability = True, tol = 0.001)
-
+            svc = SVC(C=my_c, kernel=my_kernel, degree=2, gamma=my_gamma, coef0=my_coef, shrinking = True, probability = True, tol = 0.001)
             svc.fit(train_x, train_y)
-            
-            # pred_y = svc.predict(test_x)
-            # acc, prec, recall, f1 = generate_report(test_y, pred_y, verbose=False)
-            pred_y = svc.predict(train_x)
-            acc, prec, recall, f1 = generate_report(train_y, pred_y, verbose=False)
+
+            if train_test == 'train':
+                pred_y = svc.predict(train_x)
+                acc, prec, recall, f1 = generate_report(train_y, pred_y, verbose=False)
+            elif train_test == 'test':
+                pred_y = svc.predict(test_x)
+                acc, prec, recall, f1 = generate_report(test_y, pred_y, verbose=False)
 
             print('creating matrix element:', i,j, round(log_step_c[i],2), round(log_step_sigma[j],2), round(my_gamma,2),
-                  round((0.01)*(100-acc),2), round(np.log(log_step_sigma[j]),2) )
+                  round((0.01)*(100-acc),2), my_kernel)
 
             errors = np.append(errors,[(0.01)*(100-acc)])
 

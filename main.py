@@ -58,8 +58,13 @@ for name in sample_list:
     sigmax = 5
     cmin = 0
     cmax = 6
-    matrix = du.grid_param_gauss(X_train, Y_train, X_test, Y_test, sigmin, sigmax, cmin, cmax)
-    dv.plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,name)
+    kernel = 'rbf'
+
+    kernels = ['rbf', 'poly', 'sigmoid', 'linear']
+
+    for kernel in kernels:        
+        matrix = du.grid_param_gauss(X_train, Y_train, X_test, Y_test, sigmin, sigmax, cmin, cmax, my_kernel=kernel)
+        dv.plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,name+'_'+kernel, my_kernel=kernel)
 
     
     # # run AdaBoost support vector machine
