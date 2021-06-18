@@ -19,7 +19,7 @@ import data_utils as du
 # Genetic algorithm for training sub-dataset selection
 class genetic_selection:
 
-    def __init__(self, model, model_type, X_train, Y_train, X_test, Y_test, pop_size, chrom_len, n_gen, coef, mut_rate, score_type='acc', selec_type='highlow'):
+    def __init__(self, model, model_type, X_train, Y_train, X_test, Y_test, pop_size, chrom_len, n_gen, coef, mut_rate, score_type='acc', selec_type='tournament'):
         self.model = model
         self.model_type = model_type
         self.X_train = X_train
@@ -60,8 +60,10 @@ class genetic_selection:
             else:
                 if(self.selec_type == 'roulette'):
                     pa_x, pa_y, pb_x, pb_y, ind_a, ind_b = self.roulette_wheel(scores, popx, popy, index)
+                elif(self.selec_type == 'tournament'):
+                    pa_x, pa_y, pb_x, pb_y, ind_a, ind_b = self.tournament_selection(scores, popx, popy, index)
                 else:
-                    pa_x, pa_y, pb_x, pb_y, ind_a, ind_b = self.selection(popx, popy, index, self.coef)                    
+                    pa_x, pa_y, pb_x, pb_y, ind_a, ind_b = self.selection(popx, popy, index, self.coef)
                 new_population_x , new_population_y, new_index = self.crossover(pa_x, pa_y, pb_x, pb_y, ind_a, ind_b, self.population_size)
                 new_offspring_x, new_offspring_y, new_offs_index = self.mutation(new_population_x, new_population_y, new_index, self.mutation_rate)
                 best_score.append(scores[0])
@@ -182,6 +184,27 @@ class genetic_selection:
 
         return pa_x, pa_y, pb_x, pb_y, in_a, in_b
 
+    def tournament_selection(self, scores, popx, popy, data_index, size_k=3):
+        ''' Tournament selection '''
+
+        indices = np.array([i for i in range(len(pop_x))])
+        parents_indices = []
+
+        for _ in range(2):
+            competitors = np.random.choice(indices, size_k, replace=False)
+            best_competitor = min(competitors)
+            indices.remove(best_competitor)
+            parents_indices.append(best_competitor)
+
+        pa_x = pop_x[parents_indices[0]]
+        pa_y = pop_y[parents_indices[0]]
+        in_a = data_index[parents_indices[0]]
+
+        pb_x = pop_x[parents_indices[1]]
+        pb_y = pop_y[parents_indices[1]]
+        in_b = data_index[parents_indices[1]]
+
+        return pa_x, pa_y, pb_x, pb_y, in_a, in_b
 
     def roulette_wheel(self, scores, popx, popy, data_index):
         '''Roulette wheel selection'''
@@ -296,7 +319,7 @@ class genetic_selection:
         random_x = self.X_train.loc[class_type_index].sample(random_state=rand_st)
         random_y = self.Y_train.loc[class_type_index].sample(random_state=rand_st)
         random_index = random_x.index
-    
+
         return random_x, random_y, random_index
 
 
