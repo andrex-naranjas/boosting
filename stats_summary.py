@@ -450,7 +450,7 @@ def stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', st
     f_names = []
 
     for i in range(len(flavor_names)):
-        if i % 4 == 0 and flavor_names[i] != class_interest: continue        
+        #if i % 4 == 0 and flavor_names[i] != class_interest: continue        
         input_data = pd.read_csv(directory+'/'+flavor_names[i]+'_'+boot_kfold+'.csv')        
         nClass+=1
         f_names.append(flavor_names[i])
