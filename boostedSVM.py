@@ -244,7 +244,7 @@ class AdaBoostSVM:
         # threshold_div = self.eta * np.max(self.diversities)        
         # if val_div >= threshold_div:
         threshold_div = self.eta
-        if val_div >= threshold_div:
+        if div_ens >= threshold_div:
             self.diversities = np.append(self.diversities, val_div)                
             return True, threshold_div
         else:
