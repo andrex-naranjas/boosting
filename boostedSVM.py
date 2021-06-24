@@ -222,6 +222,7 @@ class AdaBoostSVM:
 
     def diversity(self, x_train, y_pred, count):
         if count==1: return len(y_pred)/len(y_pred) # for first selected classifer, set max diversity
+        print('SUUUUUUUUUUUUUUUUUUUUUUUUUUUPER PAAAARRRRRRRRRRRRRRRIIITTTTTTTTTTTTTOOOOOOOOOOOOOOo')
         div = 0
         ensemble_pred = self.predict(x_train) # uses the already selected classifiers in ensemble
         for i in range(len(y_pred)):
