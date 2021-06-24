@@ -132,13 +132,13 @@ def model_flavors():
     models_auc = []
     models_auc.append(("trad-rbf-NOTdiv", adaboost_svm(div_flag=False, my_c=100, my_gamma=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
     models_auc.append(("trad-sig-NOTdiv", adaboost_svm(div_flag=False, my_c=100, my_gamma=0.1, myKernel='sigmoid', myDegree=1, myCoef0=-1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
-    # models_auc.append(("trad-pol-NOTdiv", adaboost_svm(div_flag=False, my_c= 10, my_gamma=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
-    # models_auc.append(("trad-lin-NOTdiv", adaboost_svm(div_flag=False, my_c= 10, my_gamma=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
+    models_auc.append(("trad-pol-NOTdiv", adaboost_svm(div_flag=False, my_c= 10, my_gamma=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
+    models_auc.append(("trad-lin-NOTdiv", adaboost_svm(div_flag=False, my_c= 10, my_gamma=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
 
-    # models_auc.append(("trad-rbf-YESdiv", adaboost_svm(div_flag=True, my_c=100, my_gamma=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
-    # models_auc.append(("trad-sig-YESdiv", adaboost_svm(div_flag=True, my_c=100, my_gamma=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
-    # models_auc.append(("trad-pol-YESdiv", adaboost_svm(div_flag=True, my_c= 10, my_gamma=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
-    # models_auc.append(("trad-lin-YESdiv", adaboost_svm(div_flag=True, my_c= 10, my_gamma=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
+    models_auc.append(("trad-rbf-YESdiv", adaboost_svm(div_flag=True, my_c=100, my_gamma=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
+    models_auc.append(("trad-sig-YESdiv", adaboost_svm(div_flag=True, my_c=100, my_gamma=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
+    models_auc.append(("trad-pol-YESdiv", adaboost_svm(div_flag=True, my_c= 10, my_gamma=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
+    models_auc.append(("trad-lin-YESdiv", adaboost_svm(div_flag=True, my_c= 10, my_gamma=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "trad", 0.3, "auc", "roulette", 0.0))
 
     
     # models_auc.append(("genHLAUC-rbf-NOTdiv", adaboost_svm(div_flag=False, my_c=100, my_gamma=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", 0.3, "auc", "highlow", 0.5))
