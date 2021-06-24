@@ -221,13 +221,13 @@ class AdaBoostSVM:
     
 
     def diversity(self, x_train, y_pred, count):
-        if count==1: return len(y_pred) # for first selected classifer, set max diversity
+        if count==1: return len(y_pred)/len(y_pred) # for first selected classifer, set max diversity
         div = 0
         ensemble_pred = self.predict(x_train) # uses the already selected classifiers in ensemble
         for i in range(len(y_pred)):
             if  (y_pred[i] != ensemble_pred[i]):  div += 1
             elif(y_pred[i] == ensemble_pred[i]):  div += 0                        
-        return div
+        return div/len(y_pred)
     
 
     def pass_diversity(self, flag_div, val_div, count, pass_error):
@@ -238,9 +238,12 @@ class AdaBoostSVM:
 
         if(len(self.diversities)==0):
             self.diversities = np.append(self.diversities, val_div)
+
+        div_ens = np.mean(self.diversities)
         
-        threshold_div = self.eta * np.max(self.diversities)
-        
+        # threshold_div = self.eta * np.max(self.diversities)        
+        # if val_div >= threshold_div:
+        threshold_div = self.eta
         if val_div >= threshold_div:
             self.diversities = np.append(self.diversities, val_div)                
             return True, threshold_div
