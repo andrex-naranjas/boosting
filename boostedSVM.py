@@ -28,8 +28,8 @@ class AdaBoostSVM:
         self.count_over_train = ([])
         self.count_over_train_equal = ([])
         # Diversity threshold-constant and empty list
-        self.div_flag = Diversity
-        self.eta = 0.5
+        self.m_div_flag = Diversity
+        self.eta = 0.6
         self.diversities = ([])
         self.Div_total = ([])
         self.Div_partial = ([])
@@ -67,7 +67,7 @@ class AdaBoostSVM:
 
             error_pass = errorOut < 0.49 and errorOut > 0.0
             # Diverse_AdaBoost, if Diversity=False, diversity plays no role in classifier selection
-            div_pass,tres = self.pass_diversity(flag_div, value_div, count, error_pass)
+            div_pass, tres = self.pass_diversity(flag_div, value_div, count, error_pass)
             if(error_pass and not div_pass): value_div = self.diversity(x_train, y_pred, count)
             if self.debug: print('error_flag: %5s | div_flag: %5s | div_value: %5s | Threshold: %5s | no. data: %5s | count: %5s | error: %5.2f | gamma: %5.2f | diversities  %3s '
                   %(error_pass, div_pass, value_div, tres, len(y_pred), count, errorOut, myGamma, len(self.diversities)))
@@ -94,10 +94,10 @@ class AdaBoostSVM:
         n = X_train.shape[0]
         weights = np.ones(n)/n
 
-        div_flag, div_value = self.div_flag, 0
-        
-        gammaMax = self.gammaEnd
-        gammaStep, gammaVar = gammaMax/50., 0.0
+        div_flag, div_value = self.m_div_flag, 0
+
+        gammaMax = self.gammaEnd        
+        gammaStep, gammaVar = gammaMax/100., 1/100.
         cost, count, norm = 1, 0, 0.0
         h_list = []
 
@@ -122,6 +122,7 @@ class AdaBoostSVM:
 
             # count how many times SVM we add the ensemble
             count += 1
+            self.n_classifiers +=1
 
             # calculate training precision
             fp,tp = 0,0
@@ -138,7 +139,8 @@ class AdaBoostSVM:
             self.precision = np.append(self.precision, [tp / (tp + fp)])
             
             # calculate diversity
-            div_value = self.diversity(X_train, h, count) # cf. h == y_pred
+            if self.m_div_flag:
+                div_value = self.diversity(X_train, h, count) # cf. h == y_pred
         
             # classifier weights (alpha), obtain and store
             x = (1 - error)/error
@@ -220,14 +222,13 @@ class AdaBoostSVM:
         return np.sign(np.dot(self.alphas, svm_preds))
     
 
-    def diversity(self, x_train, y_pred, count):
-        if count==1: return len(y_pred)/len(y_pred) # for first selected classifer, set max diversity
-        print('SUUUUUUUUUUUUUUUUUUUUUUUUUUUPER PAAAARRRRRRRRRRRRRRRIIITTTTTTTTTTTTTOOOOOOOOOOOOOOo')
+    def diversity(self, x_train, y_pred, count): # this function gets div for a single classifier 
+        if count==1: return len(y_pred)/len(y_pred) # for 1st selected classifer, set max diversity
         div = 0
         ensemble_pred = self.predict(x_train) # uses the already selected classifiers in ensemble
         for i in range(len(y_pred)):
             if  (y_pred[i] != ensemble_pred[i]):  div += 1
-            elif(y_pred[i] == ensemble_pred[i]):  div += 0                        
+            elif(y_pred[i] == ensemble_pred[i]):  div += 0
         return div/len(y_pred)
     
 
@@ -239,12 +240,12 @@ class AdaBoostSVM:
 
         if(len(self.diversities)==0):
             self.diversities = np.append(self.diversities, val_div)
+            return True, threshold_div
+        else:
+            div_ens = np.mean(np.append(self.diversities, val_div)) # d_ens=sum/t_cycles_accepted
 
-        div_ens = np.mean(self.diversities)
-        
-        # threshold_div = self.eta * np.max(self.diversities)        
-        # if val_div >= threshold_div:
-        threshold_div = self.eta
+        #print(self.diversities, val_div, div_ens, self.n_classifiers) # check behavoir diversity
+        threshold_div = self.eta # self.eta * np.max(self.diversities)
         if div_ens >= threshold_div:
             self.diversities = np.append(self.diversities, val_div)                
             return True, threshold_div
@@ -365,7 +366,7 @@ class AdaBoostSVM:
 
     
     def clean(self):
-        # clean in case running several times is needed
+        # clean is needed in case of running several times
         # when creating only one instance 
         self.weak_svm = ([])
         self.alphas = ([])
@@ -389,20 +390,3 @@ check = 0.
 for i in range(len(myWeights,)):
     check+=myWeights[i] #weights must add one, i.e. check=1.
 '''
-
-    # def pass_diversity(self, flag_div, val_div, y_pred, count):
-
-    #     if not flag_div: return True
-        
-    #     if count == 0: return True
-    #     else:
-    #         self.diversities = np.append(self.diversities, val_div)
-    #         self.Div_partial = np.sum(self.diversities)/(len(y_pred) * len(self.diversities))                
-    #         self.Div_total = np.append(self.Div_total, self.Div_partial)
-    #         self.Div_threshold = self.eta * np.max(self.Div_total)
-            
-    #     # # if(self.Div_threshold > 0 and self.Div_partial > 0):
-    #     # if(count!=0):
-    #     #     print("Local value: ", val_div, len(y_pred), self.Div_partial, self.Div_threshold, count, "Diversity check", self.Div_partial > self.Div_threshold)#, "ratio: ", self.Div_partial/self.Div_threshold)
-
-    #     return self.Div_partial > self.Div_threshold

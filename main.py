@@ -54,38 +54,38 @@ for name in sample_list:
         data.dataset(sample_name=name,
                      sampling=False,split_sample=0.4)
 
-    sigmin = -5
-    sigmax = 5
-    cmin = 0
-    cmax = 6
-    kernel = 'rbf'
+    # sigmin = -5
+    # sigmax = 5
+    # cmin = 0
+    # cmax = 6
+    # kernel = 'rbf'
 
-    kernels = ['rbf', 'poly', 'sigmoid', 'linear']
+    # kernels = ['rbf', 'poly', 'sigmoid', 'linear']
 
-    for kernel in kernels:        
-        matrix = du.grid_param_gauss(X_train, Y_train, X_test, Y_test, sigmin, sigmax, cmin, cmax, my_kernel=kernel)
-        dv.plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,name+'_'+kernel, my_kernel=kernel)
+    # for kernel in kernels:        
+    #     matrix = du.grid_param_gauss(X_train, Y_train, X_test, Y_test, sigmin, sigmax, cmin, cmax, my_kernel=kernel)
+    #     dv.plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,name+'_'+kernel, my_kernel=kernel)
 
     
-    # # run AdaBoost support vector machine
-    # print("AdaBoost-support vector machines")
-    # model = mm.adaboost_svm()
-    # #model = AdaBoostSVM(C=50, gammaIni=5, myKernel=myKernel)
+    # run AdaBoost support vector machine
+    print("AdaBoost-support vector machines")
+    model = mm.adaboost_svm(div_flag=False)
+    #model = AdaBoostSVM(C=50, gammaIni=5, myKernel=myKernel)
 
-    # start = datetime.datetime.now()
-    # model.fit(X_train, Y_train)
-    # end = datetime.datetime.now()
-    # elapsed_time = pd.DataFrame({"Elapsed time": [end - start]})
+    start = datetime.datetime.now()
+    model.fit(X_train, Y_train)
+    end = datetime.datetime.now()
+    elapsed_time = pd.DataFrame({"Elapsed time": [end - start]})
 
-    # elapsed_time.to_csv("output/" + name +  "/" + "AdaBoostSVM_time.csv", index=False)
-    # y_preda = model.predict(X_test)
-    # print("Final test prediction:   ", accuracy_score(Y_test, y_preda))
-    # y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
-    # TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
+    elapsed_time.to_csv("output/" + name +  "/" + "AdaBoostSVM_time.csv", index=False)
+    y_preda = model.predict(X_test)
+    print("Final test prediction:   ", accuracy_score(Y_test, y_preda))
+    y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
+    TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
 
-    # nWeaks = len(model.alphas) # print on plot no. classifiers
-    # dv.plot_roc_curve(TPR,FPR,name,"sorted", glob_local=True, name="nom", kernel=myKernel, nClass=nWeaks)        
-    # print("End adaboost")
+    nWeaks = len(model.alphas) # print on plot no. classifiers
+    dv.plot_roc_curve(TPR,FPR,name,"sorted", glob_local=True, name="nom", kernel=myKernel, nClass=nWeaks)        
+    print("End adaboost")
     
     # # run Diverse-AdaBoost Diversity support vector machine
     # print("Diverse-AdaBoost-support vector machines")
