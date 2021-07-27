@@ -29,7 +29,7 @@ class AdaBoostSVM:
         self.count_over_train_equal = ([])
         # Diversity threshold-constant and empty list
         self.m_div_flag = Diversity
-        self.eta = 0.6
+        self.eta = 0.7
         self.diversities = ([])
         self.Div_total = ([])
         self.Div_partial = ([])

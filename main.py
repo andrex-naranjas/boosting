@@ -32,7 +32,6 @@ if len(sys.argv) != 2:
 #states = "omega" # All, omega, cascades, sigmaLamb
 sample_input = sys.argv[1]
 
-
 # make directories
 sample_list = ["titanic", "cancer", "german", "heart", "solar","car","contra","tac_toe", "belle2_i", "belle2_ii","belle_iii"]
 du.make_directories(sample_list)
@@ -69,23 +68,24 @@ for name in sample_list:
     
     # run AdaBoost support vector machine
     print("AdaBoost-support vector machines")
-    model = mm.adaboost_svm(div_flag=False)
-    #model = AdaBoostSVM(C=50, gammaIni=5, myKernel=myKernel)
+    # model = mm.adaboost_svm(div_flag=True, my_gamma_end=0.1, myKernel='poly', myDegree=2)
+    # #adaboost_svm(div_flag=False, my_c=100, my_gamma_end=100, myKernel='rbf', myDegree=1, myCoef0=1, early_stop=True, debug=True)
+    # #model = AdaBoostSVM(C=50, gammaIni=5, myKernel=myKernel)
 
-    start = datetime.datetime.now()
-    model.fit(X_train, Y_train)
-    end = datetime.datetime.now()
-    elapsed_time = pd.DataFrame({"Elapsed time": [end - start]})
+    # start = datetime.datetime.now()
+    # model.fit(X_train, Y_train)
+    # end = datetime.datetime.now()
+    # elapsed_time = pd.DataFrame({"Elapsed time": [end - start]})
 
-    elapsed_time.to_csv("output/" + name +  "/" + "AdaBoostSVM_time.csv", index=False)
-    y_preda = model.predict(X_test)
-    print("Final test prediction:   ", accuracy_score(Y_test, y_preda))
-    y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
-    TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
+    # elapsed_time.to_csv("output/" + name +  "/" + "AdaBoostSVM_time.csv", index=False)
+    # y_preda = model.predict(X_test)
+    # print("Final test prediction:   ", accuracy_score(Y_test, y_preda))
+    # y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
+    # TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
 
-    nWeaks = len(model.alphas) # print on plot no. classifiers
-    dv.plot_roc_curve(TPR,FPR,name,"sorted", glob_local=True, name="nom", kernel=myKernel, nClass=nWeaks)        
-    print("End adaboost")
+    # nWeaks = len(model.alphas) # print on plot no. classifiers
+    # dv.plot_roc_curve(TPR,FPR,name,"sorted", glob_local=True, name="nom", kernel=myKernel, nClass=nWeaks)        
+    # print("End adaboost")
     
     # # run Diverse-AdaBoost Diversity support vector machine
     # print("Diverse-AdaBoost-support vector machines")
@@ -116,23 +116,25 @@ for name in sample_list:
     # print(len(X_train), len(Y_train), len(X_test), len(Y_test))
 
     # test genetic selection
-    # model_test = AdaBoostSVM(C=10, gammaIni=10, myKernel="rbf", #myDegree=2, myCoef0=1,
-    #                          Diversity=True, early_stop=True, debug=False)
+    model_test = mm.adaboost_svm(div_flag=False, my_gamma_end=100, myKernel='rbf', myDegree=2, debug=False)
+    #adaboost_svm(div_flag=False, my_c=100, my_gamma_end=100, myKernel='rbf', myDegree=1, myCoef0=1, early_stop=True, debug=True)
+    #model = AdaBoostSVM(C=50, gammaIni=5, myKernel=myKernel)
+    
+    start_GA = datetime.datetime.now()
+    GA_selection = genetic_selection(model_test, "absv", X_train, Y_train, X_test, Y_test,
+                                     pop_size=10, chrom_len=500, n_gen=50, coef=0.5, mut_rate=0.3, score_type="auc", selec_type="roulette")
+    
+    GA_selection.execute()
+    GA_train_indexes = GA_selection.best_population()
+    end_GA = datetime.datetime.now()
+    elapsed_time_GA = end_GA - start_GA
 
-    # start_GA = datetime.datetime.now()
-    # GA_selection = genetic_selection(model_test, "absv", X_train, Y_train, X_test, Y_test,
-    #                                  pop_size=10, chrom_len=500, n_gen=50, coef=0.5, mut_rate=0.3, score_type="auc", selec_type="roulette")
-    # GA_selection.execute()
-    # GA_train_indexes = GA_selection.best_population()
-    # end_GA = datetime.datetime.now()
-    # elapsed_time_GA = end_GA - start_GA
+    print(len(GA_train_indexes), type(GA_train_indexes), 'PARRITO PRECIOSO' )
 
-    # print(len(GA_train_indexes), type(GA_train_indexes), 'PARRITO PRECIOSO' )
+    X_train_GA, Y_train_GA, X_test_GA, Y_test_GA = \
+        data.dataset(sample_name=name, indexes=GA_train_indexes)
 
-    # X_train_GA, Y_train_GA, X_test_GA, Y_test_GA = \
-    #     data.dataset(sample_name=name, indexes=GA_train_indexes)
-
-    # print(len(X_train_GA), len(Y_train_GA), len(X_test_GA), len(Y_test_GA) )
+    print(len(X_train_GA), len(Y_train_GA), len(X_test_GA), len(Y_test_GA) )
 
     # compare between data inputs
     # traditional input
