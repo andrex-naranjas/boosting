@@ -67,7 +67,7 @@ for name in sample_list:
 
     
     # run AdaBoost support vector machine
-    print("AdaBoost-support vector machines")
+    # print("AdaBoost-support vector machines")
     # model = mm.adaboost_svm(div_flag=True, my_gamma_end=0.1, myKernel='poly', myDegree=2)
     # #adaboost_svm(div_flag=False, my_c=100, my_gamma_end=100, myKernel='rbf', myDegree=1, myCoef0=1, early_stop=True, debug=True)
     # #model = AdaBoostSVM(C=50, gammaIni=5, myKernel=myKernel)
@@ -116,25 +116,25 @@ for name in sample_list:
     # print(len(X_train), len(Y_train), len(X_test), len(Y_test))
 
     # test genetic selection
-    model_test = mm.adaboost_svm(div_flag=False, my_gamma_end=100, myKernel='rbf', myDegree=2, debug=False)
-    #adaboost_svm(div_flag=False, my_c=100, my_gamma_end=100, myKernel='rbf', myDegree=1, myCoef0=1, early_stop=True, debug=True)
-    #model = AdaBoostSVM(C=50, gammaIni=5, myKernel=myKernel)
+    # model_test = mm.adaboost_svm(div_flag=False, my_gamma_end=100, myKernel='rbf', myDegree=2, debug=False)
+    # #adaboost_svm(div_flag=False, my_c=100, my_gamma_end=100, myKernel='rbf', myDegree=1, myCoef0=1, early_stop=True, debug=True)
+    # #model = AdaBoostSVM(C=50, gammaIni=5, myKernel=myKernel)
     
-    start_GA = datetime.datetime.now()
-    GA_selection = genetic_selection(model_test, "absv", X_train, Y_train, X_test, Y_test,
-                                     pop_size=10, chrom_len=500, n_gen=50, coef=0.5, mut_rate=0.3, score_type="auc", selec_type="roulette")
+    # start_GA = datetime.datetime.now()
+    # GA_selection = genetic_selection(model_test, "absv", X_train, Y_train, X_test, Y_test,
+    #                                  pop_size=10, chrom_len=500, n_gen=50, coef=0.5, mut_rate=0.3, score_type="auc", selec_type="roulette")
     
-    GA_selection.execute()
-    GA_train_indexes = GA_selection.best_population()
-    end_GA = datetime.datetime.now()
-    elapsed_time_GA = end_GA - start_GA
+    # GA_selection.execute()
+    # GA_train_indexes = GA_selection.best_population()
+    # end_GA = datetime.datetime.now()
+    # elapsed_time_GA = end_GA - start_GA
 
-    print(len(GA_train_indexes), type(GA_train_indexes), 'PARRITO PRECIOSO' )
+    # print(len(GA_train_indexes), type(GA_train_indexes), 'PARRITO PRECIOSO' )
 
-    X_train_GA, Y_train_GA, X_test_GA, Y_test_GA = \
-        data.dataset(sample_name=name, indexes=GA_train_indexes)
+    # X_train_GA, Y_train_GA, X_test_GA, Y_test_GA = \
+    #     data.dataset(sample_name=name, indexes=GA_train_indexes)
 
-    print(len(X_train_GA), len(Y_train_GA), len(X_test_GA), len(Y_test_GA) )
+    # print(len(X_train_GA), len(Y_train_GA), len(X_test_GA), len(Y_test_GA) )
 
     # compare between data inputs
     # traditional input
@@ -178,6 +178,9 @@ for name in sample_list:
     # end = datetime.datetime.now()
     # elapsed_time = end - start
     # print("Elapsed total time GENETIC = " + str(elapsed_time))
+
+    ss.stats_test_batch(sample_name=name)
+    #stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', stats_type='student', boot_kfold='boot')
 
         
 #performance = model_performance(model, X_train, Y_train, X_test, Y_test)

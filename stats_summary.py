@@ -58,7 +58,7 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
     for _ in range(n_cycles): # arbitrary number of bootstrap samples to produce
         i_sample+=1
         
-        if not train_test:
+        if not train_test: # train_test == True means we're given separate files for train and test
             sampled_data_train = resample(sample_df, replace = True, n_samples = n_samples, random_state = i_sample)
             
             if selection == 'trad':
