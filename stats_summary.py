@@ -489,14 +489,12 @@ def stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', st
     # select and plot the flavours we want to further analize
 
     # sort the first list and map ordered indexes to the second list
-    mean_list, name_list = zip(*sorted(zip(mean_acc, f_names)))
+    mean_list_acc, name_list_acc = zip(*sorted(zip(mean_acc, f_names)))
+    mean_list_auc, name_list_auc = zip(*sorted(zip(mean_auc, f_names)))
+    mean_list_prc, name_list_pcc = zip(*sorted(zip(mean_prc, f_names)))
 
-    print(mean_list, name_list)
-    print(mean_auc, f_names)
-
-    input()
+    dv.plot_ordered_stats_summary(mean_list_acc, name_list_acc)
         
-
 
     matrix = []
     if stats_type == 'tukey':

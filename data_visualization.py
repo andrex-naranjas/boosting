@@ -104,6 +104,34 @@ def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name, my_kernel='rbf'):
     plt.savefig('./plots/2dplot_'+sample_name+'.pdf', bbox_inches='tight', pad_inches = 0)
     plt.close()
 
+
+def plot_ordered_stats_summary(values, names):
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    size_x = len(values)
+    
+
+    x = np.linspace(0, 10, size_x)
+    y = values
+    
+    plt.plot(x,y,label='random label')
+
+    
+    # plt.text(0.15, 0.9,'$\\mu$={}, $\\sigma$={}'.format(round(np.mean(sample),1), round(np.std(sample),4)),
+    #          ha='center', va='center', transform=ax.transAxes)
+    # plt.text(0.15, 0.8,'$p_{{val}}$={}, $\\alpha$={}'.format(round(p,3), alpha),
+    #          ha='center', va='center', transform=ax.transAxes)
+    
+    #plt.xlabel(xlabel)
+    plt.ylabel('Arbitrary Units')
+    #plt.title(quark+' mesons')
+    plt.savefig('./gordito.pdf')
+    plt.close()
+
+
+    
+    
 def plot_stats_2d(matrix, sample_name):
 
     # tick_x = [math.floor(sigmin),0,math.floor(sigmax)]
