@@ -112,7 +112,7 @@ def plot_ordered_stats_summary(values, names):
     size_x = len(values)
     
 
-    x = np.linspace(0, 10, size_x)
+    x = np.linspace(0, size_x, size_x)
     y = values
 
     ax.set_xticklabels(names, rotation=45, ha='right')
