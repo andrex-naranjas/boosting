@@ -492,6 +492,9 @@ def stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', st
     mean_list, name_list = zip(*sorted(zip(mean_auc, f_names)))
 
     print(mean_list, name_list)
+    print(mean_auc, f_names)
+
+    input()
         
 
 
