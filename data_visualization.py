@@ -114,14 +114,10 @@ def plot_ordered_stats_summary(values, names):
 
     x = np.linspace(0, size_x, size_x)
     y = values
-
-    ax.set_xticklabels(names, rotation=45, ha='right')
-    
+    ax.set_xticklabels(names, rotation=45, ha='right')    
     plt.scatter(x,y,label='random label')
     
-
-    
-
+    plt.rcParams["figure.figsize"] = (20,3)
     
     # plt.text(0.15, 0.9,'$\\mu$={}, $\\sigma$={}'.format(round(np.mean(sample),1), round(np.std(sample),4)),
     #          ha='center', va='center', transform=ax.transAxes)
