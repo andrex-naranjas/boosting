@@ -115,7 +115,9 @@ def plot_ordered_stats_summary(values, names):
     x = np.linspace(0, 10, size_x)
     y = values
     
-    plt.plot(x,y,label='random label')
+    plt.scatter(x,y,label='random label')
+
+    
 
     
     # plt.text(0.15, 0.9,'$\\mu$={}, $\\sigma$={}'.format(round(np.mean(sample),1), round(np.std(sample),4)),
