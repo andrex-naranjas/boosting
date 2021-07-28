@@ -115,7 +115,7 @@ def plot_ordered_stats_summary(values, names):
     x = np.linspace(0, 10, size_x)
     y = values
 
-    ax.set_xticklabels(names)
+    ax.set_xticklabels(names, rotation=45, ha='right')
     
     plt.scatter(x,y,label='random label')
     
