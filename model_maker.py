@@ -159,9 +159,7 @@ def model_flavors():
     models_auc.append(("genHLACC-sig-YESdiv", adaboost_svm(div_flag=True, my_c=100, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", 0.3, "acc", "highlow", 0.5))
     models_auc.append(("genHLACC-pol-YESdiv", adaboost_svm(div_flag=True, my_c= 10, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", 0.3, "acc", "highlow", 0.5))
     models_auc.append(("genHLACC-lin-YESdiv", adaboost_svm(div_flag=True, my_c= 10, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", 0.3, "acc", "highlow", 0.5))
-
-
-
+    
     
     models_auc.append(("genRLTAUC-rbf-NOTdiv", adaboost_svm(div_flag=False, my_c=100, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", 0.3, "auc", "roulette", 0.5))
     models_auc.append(("genRLTAUC-sig-NOTdiv", adaboost_svm(div_flag=False, my_c=100, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", 0.3, "auc", "roulette", 0.5))

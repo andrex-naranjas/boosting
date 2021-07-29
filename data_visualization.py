@@ -105,29 +105,32 @@ def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name, my_kernel='rbf'):
     plt.close()
 
 
-def plot_ordered_stats_summary(values, names):
+def plot_ordered_stats_summary(values, names, sample_name, metric='auc'):
 
     fig = plt.figure()
+    fig.subplots_adjust(bottom=0.275, top=0.99)
     ax = fig.add_subplot(111)
     size_x = len(values)
     
-
     x = np.linspace(0, size_x, size_x)
     y = values
-    ax.set_xticklabels(names, rotation=45, ha='right')    
+    ax.set_xticks(x)
+    ax.set_xticklabels(names, rotation=90, ha='center', fontsize=7)
+    
     plt.scatter(x,y,label='random label')
     
-    plt.rcParams["figure.figsize"] = (20,3)
-    
+    #plt.rcParams["figure.figsize"] = (20,30)    
     # plt.text(0.15, 0.9,'$\\mu$={}, $\\sigma$={}'.format(round(np.mean(sample),1), round(np.std(sample),4)),
     #          ha='center', va='center', transform=ax.transAxes)
     # plt.text(0.15, 0.8,'$p_{{val}}$={}, $\\alpha$={}'.format(round(p,3), alpha),
     #          ha='center', va='center', transform=ax.transAxes)
+    print(sample_name, size_x)
+    input()
     
     #plt.xlabel(xlabel)
-    plt.ylabel('Arbitrary Units')
+    plt.ylabel(metric)
     #plt.title(quark+' mesons')
-    plt.savefig('./gordito.pdf')
+    plt.savefig('./plots/rank_'+metric+'_'+sample_name+'.pdf')
     plt.close()
 
 

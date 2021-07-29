@@ -6,6 +6,7 @@
 '''
 import numpy as np
 import pandas as pd
+import time
 from sklearn.metrics import accuracy_score,auc,precision_score,roc_auc_score,f1_score,recall_score
 from sklearn.utils import resample
 from sklearn.model_selection import RepeatedKFold
@@ -48,7 +49,7 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
     if not train_test: sample_df = sample_df_temp
     else: sample_train_df, sample_test_df = sample_df_temp
         
-    area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores = ([]),([]),([]),([]),([]),([])
+    area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores,time_scores = ([]),([]),([]),([]),([]),([]),([])
 
     data_size = sample_df.shape[0]
     n_samples = int(split_frac*data_size)
@@ -57,6 +58,7 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
     i_sample = 0
     for _ in range(n_cycles): # arbitrary number of bootstrap samples to produce
         i_sample+=1
+        start = time.time()
         
         if not train_test: # train_test == True means we're given separate files for train and test
             sampled_data_train = resample(sample_df, replace = True, n_samples = n_samples, random_state = i_sample)
@@ -108,6 +110,8 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
                 Y_pred_dec = model.decision_function(X_test)
                 area = roc_auc_score(Y_test, Y_pred_dec)
                     
+            end=time.time()
+            time_scores   = np.append(time_scores, end-start)
             area_scores   = np.append(area_scores, area)
             prec_scores   = np.append(prec_scores, prec)
             f1_scores     = np.append(f1_scores,   f1)
@@ -115,6 +119,8 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
             acc_scores    = np.append(acc_scores, acc)
             gmean_scores  = np.append(gmean_scores, gmean)
         else: # this needs to be re-checked carefully
+            end=time.time()
+            time_scores   = np.append(time_scores, end-start)
             area_scores   = np.append(area_scores, 0)
             prec_scores   = np.append(prec_scores, 0)
             f1_scores     = np.append(f1_scores,   0)
@@ -122,7 +128,7 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
             acc_scores    = np.append(acc_scores, 0)
             gmean_scores  = np.append(gmean_scores, 0)
             
-    return area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores
+    return area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores,time_scores
 
 
 def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', GA_selec='', GA_coef=0.5, kfolds=1, n_reps=1, path='.'):
@@ -134,7 +140,7 @@ def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_sco
     if not train_test: sample_df = sample_df_temp
     else: sample_train_df, sample_test_df = sample_df_temp
 
-    area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores = ([]),([]),([]),([]),([]),([])
+    area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores,time_scores = ([]),([]),([]),([]),([]),([]),([])
         
     X,Y = data.dataset(sample_name=sample_name, data_set=sample_df,
                        sampling=True, split_sample=0.0)
@@ -144,6 +150,7 @@ def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_sco
     for train_index, test_index in rkf.split(X):
         X_train, X_test = X.loc[train_index], X.loc[test_index]
         Y_train, Y_test = Y.loc[train_index], Y.loc[test_index]
+        start = time.time()
 
         if selection == 'gene': # genetic selection
             GA_selection = genetic_selection(model, roc_area, X_train, Y_train, X_test, Y_test,
@@ -172,7 +179,9 @@ def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_sco
             elif roc_area=="deci":
                 Y_pred_dec = model.decision_function(X_test)
                 area = roc_auc_score(Y_test, Y_pred_dec)
-                    
+
+            end=time.time()
+            time_scores   = np.append(time_scores, end-start)                    
             area_scores   = np.append(area_scores, area)
             prec_scores   = np.append(prec_scores, prec)
             f1_scores     = np.append(f1_scores,   f1)
@@ -180,6 +189,8 @@ def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_sco
             acc_scores    = np.append(acc_scores, acc)
             gmean_scores  = np.append(gmean_scores, gmean)
         else: # this needs to be re-checked carefully
+            end=time.time()
+            time_scores   = np.append(time_scores, end-start)
             area_scores   = np.append(area_scores, 0)
             prec_scores   = np.append(prec_scores, 0)
             f1_scores     = np.append(f1_scores,   0)
@@ -187,7 +198,7 @@ def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_sco
             acc_scores    = np.append(acc_scores, 0)
             gmean_scores  = np.append(gmean_scores, 0)
 
-    return area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores
+    return area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores,time_scores
 
 
 def mcnemar_table(y_pred1, y_pred2, y_test):
@@ -487,13 +498,13 @@ def stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', st
 
 
     # select and plot the flavours we want to further analize
-
     # sort the first list and map ordered indexes to the second list
     mean_list_acc, name_list_acc = zip(*sorted(zip(mean_acc, f_names)))
     mean_list_auc, name_list_auc = zip(*sorted(zip(mean_auc, f_names)))
     mean_list_prc, name_list_pcc = zip(*sorted(zip(mean_prc, f_names)))
-
-    dv.plot_ordered_stats_summary(mean_list_acc, name_list_acc)
+    #mean_list_auc, name_list_auc = mean_auc, f_names
+    dv.plot_ordered_stats_summary(mean_list_auc, name_list_auc, sample_name, metric='auc')
+    
         
 
     matrix = []
@@ -591,6 +602,9 @@ def stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', st
     cmin = 0
     cmax = len(flavor_names)
     dv.plot_stats_2d(matrix, sample_name)
+
+
+
 
 
 
