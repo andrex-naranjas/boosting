@@ -499,14 +499,15 @@ def stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', st
 
     # select and plot the flavours we want to further analize
     # sort the first list and map ordered indexes to the second list
-    mean_list_acc, name_list_acc = zip(*sorted(zip(mean_acc, f_names)))
-    mean_list_auc, name_list_auc = zip(*sorted(zip(mean_auc, f_names)))
-    mean_list_prc, name_list_pcc = zip(*sorted(zip(mean_prc, f_names)))
     #mean_list_auc, name_list_auc = mean_auc, f_names
-    dv.plot_ordered_stats_summary(mean_list_auc, name_list_auc, sample_name, metric='auc')
-    
-        
+    mean_list_auc, name_list, mean_list_acc, mean_list_prc = zip(*sorted(zip(mean_auc, f_names, mean_acc, mean_prc), reverse=True))
 
+    dv.plot_ordered_stats_summary(mean_list_auc, mean_list_acc, mean_list_prc, name_list, sample_name, metric='auc')
+    
+    # select the best 10 AUC, with the requirement that the ACC and PRC are above average
+    dv.save_df_selected_classifiers(mean_list_auc, mean_list_acc, mean_list_prc, name_list, f_names, sample_name)
+
+            
     matrix = []
     if stats_type == 'tukey':
         # tukey tests

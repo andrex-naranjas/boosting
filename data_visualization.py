@@ -105,19 +105,31 @@ def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name, my_kernel='rbf'):
     plt.close()
 
 
-def plot_ordered_stats_summary(values, names, sample_name, metric='auc'):
+def plot_ordered_stats_summary(val_auc, val_acc, val_prc, names, sample_name, metric='auc'):
 
     fig = plt.figure()
-    fig.subplots_adjust(bottom=0.275, top=0.99)
+    fig.subplots_adjust(bottom=0.275, top=0.99, right=0.99, left=0.085)
     ax = fig.add_subplot(111)
-    size_x = len(values)
+    size_x = len(val_auc)
     
     x = np.linspace(0, size_x, size_x)
-    y = values
+    y1 = val_auc
+    y2 = val_acc
+    y3 = val_prc
     ax.set_xticks(x)
+    #ax.set_ylim([-0.05,1.05])
     ax.set_xticklabels(names, rotation=90, ha='center', fontsize=7)
+
+    ax.scatter(x,y1, c='b', marker="^", label='AUC')
+    ax.scatter(x,y2, c='r', marker="+", label='ACC')
+    ax.scatter(x,y3, c='k', marker=".", label='PRC')
+
     
-    plt.scatter(x,y,label='random label')
+    plt.axhline(y=np.mean(y2), color="r", linewidth=0.75, linestyle="--")
+    plt.axhline(y=np.mean(y3), color="k", linewidth=0.75, linestyle="--")
+    #plt.plot(x, 0.95, '-k')
+
+    plt.legend(loc=4, fancybox=False, title_fontsize='medium')
     
     #plt.rcParams["figure.figsize"] = (20,30)    
     # plt.text(0.15, 0.9,'$\\mu$={}, $\\sigma$={}'.format(round(np.mean(sample),1), round(np.std(sample),4)),
@@ -128,13 +140,68 @@ def plot_ordered_stats_summary(values, names, sample_name, metric='auc'):
     input()
     
     #plt.xlabel(xlabel)
-    plt.ylabel(metric)
+    plt.ylabel('Metric A.U.')
     #plt.title(quark+' mesons')
     plt.savefig('./plots/rank_'+metric+'_'+sample_name+'.pdf')
     plt.close()
 
 
+def save_df_selected_classifiers(mean_list_auc, mean_list_acc, mean_list_prc, name_list, f_names, sample_name):    
+    # select the best 10 AUC, with the requirement that the ACC and PRC are above average
+    thres_acc = np.mean(mean_list_acc)
+    thres_prc = np.mean(mean_list_prc)
+    selected_classifiers = []
+    for i in range(len(mean_list_auc)):
+        
+        if mean_list_acc[i] > thres_acc and mean_list_prc[i] > thres_prc:
+            selected_classifiers.append(name_list[i])
+
+        if len(selected_classifiers) == 5:
+            break
+        
+    total_selected_classifier_val = []
+    for i in range(len(f_names)):
+
+        fill_flag = True
+        for j in range(len(selected_classifiers)):
+            if f_names[i] == selected_classifiers[j]:
+                total_selected_classifier_val.append(1)
+                fill_flag = False
+                break
+
+        if fill_flag:
+            total_selected_classifier_val.append(0)
+
     
+    col_val = pd.DataFrame(data=np.array(total_selected_classifier_val), columns=[sample_name])
+    col_nam = pd.DataFrame(data=np.array(f_names), columns=["classifier"])
+    df = pd.concat([col_nam["classifier"], col_val[sample_name]],
+                   axis=1, keys=["classifier", sample_name])
+
+    df.to_csv(str(sample_name+'_selected_classifier.csv'), index=False)
+    
+
+def voting_table():
+    # create voting table to decide which classifiers go to the olympics
+    titanic =  pd.read_csv("./titanic_selected_classifier.csv")["titanic"]
+    cancer  =  pd.read_csv("./cancer_selected_classifier.csv")["cancer"]
+    german  =  pd.read_csv("./german_selected_classifier.csv")["german"]
+    heart   =  pd.read_csv("./heart_selected_classifier.csv")["heart"]
+    solar   =  pd.read_csv("./solar_selected_classifier.csv")["solar"]
+    car     =  pd.read_csv("./car_selected_classifier.csv")["car"]
+    ecoli   =  pd.read_csv("./ecoli_selected_classifier.csv")["ecoli"]
+    wine    =  pd.read_csv("./wine_selected_classifier.csv")["wine"]
+    abalone =  pd.read_csv("./abalone_selected_classifier.csv")["abalone"]
+    names   =  pd.read_csv("./abalone_selected_classifier.csv")["classifier"]
+
+    total = titanic + cancer + german + heart + solar + car + ecoli + wine + abalone
+
+    df = pd.concat([names, titanic, cancer, german, heart, solar,  car, ecoli, wine, abalone, total], axis=1,
+                   keys=["classifier","titanic","cancer","german","heart","solar","car","ecoli","wine","abalone","total"])
+    
+    df.to_csv("rank_voting.csv")
+    
+
     
 def plot_stats_2d(matrix, sample_name):
 

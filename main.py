@@ -180,6 +180,7 @@ for name in sample_list:
     # print("Elapsed total time GENETIC = " + str(elapsed_time))
 
     ss.stats_test_batch(sample_name=name)
+    dv.voting_table()
     #stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', stats_type='student', boot_kfold='boot')
 
         
