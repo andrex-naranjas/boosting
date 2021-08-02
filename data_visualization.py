@@ -156,7 +156,7 @@ def save_df_selected_classifiers(mean_list_auc, mean_list_acc, mean_list_prc, na
         if mean_list_acc[i] > thres_acc and mean_list_prc[i] > thres_prc:
             selected_classifiers.append(name_list[i])
 
-        if len(selected_classifiers) == 5:
+        if len(selected_classifiers) == 10:
             break
         
     total_selected_classifier_val = []

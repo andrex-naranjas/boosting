@@ -79,7 +79,7 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
                 print(len(X_train.index),  len(Y_train.index), 'X_train, Y_train sizes')
 
                 GA_selection = genetic_selection(model, roc_area, X_train, Y_train, X_test, Y_test,
-                                                 pop_size=10, chrom_len=100, n_gen=50, coef=GA_coef, mut_rate=GA_mut, score_type=GA_score, selec_type=GA_selec)
+                                                 pop_size=10, chrom_len=int(data_size*0.20), n_gen=50, coef=GA_coef, mut_rate=GA_mut, score_type=GA_score, selec_type=GA_selec)
                 GA_selection.execute()
                 GA_train_indexes = GA_selection.best_population()
                 X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, indexes=GA_train_indexes)            
