@@ -18,8 +18,8 @@ boot_kfold = str(sys.argv[4]) # use bootstrap or kfold
 model_auc = mm.model_loader_batch(process)[1]
 model_auc_names = mm.model_loader_batch(process)[0]
 n_cycles = 10
-k_folds  = 10
-n_reps   = 4
+k_folds  = 5
+n_reps   = 2
 
 print('sample:', name, 'model name:', model_auc[0], '  validation', boot_kfold)
 start = datetime.datetime.now()
