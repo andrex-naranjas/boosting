@@ -51,6 +51,7 @@ class genetic_selection:
             n_p_y = len(next_generation_y[next_generation_y==1])
             n_n_y = len(next_generation_y[next_generation_y==-1])
             print(n_p_y, n_n_y, n_p_y+n_n_y, 'balance check for every generation')
+            print(type(next_generation_x), len(next_generation_x[0]))
 
             scores, popx, popy, index = self.fitness_score(next_generation_x, next_generation_y, next_generation_indexes)
             scores, popx, popy, index = self.set_population_size(scores, popx, popy, index, generation, self.population_size)

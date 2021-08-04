@@ -147,7 +147,7 @@ def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_sco
                        sampling=True, split_sample=0.0)
     
     # n-k fold cross validation, n_cycles = n_splits * n_repeats
-    rkf = RepeatedKFold(n_splits = kfolds, n_repeats = n_reps, random_state = 1)
+    rkf = RepeatedKFold(n_splits = kfolds, n_repeats = n_reps, random_state = 1) # set random state=1 for reproducibility
     for train_index, test_index in rkf.split(X):
         X_train, X_test = X.loc[train_index], X.loc[test_index]
         Y_train, Y_test = Y.loc[train_index], Y.loc[test_index]
@@ -155,11 +155,11 @@ def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_sco
 
         if selection == 'gene': # genetic selection
             GA_selection = genetic_selection(model, roc_area, X_train, Y_train, X_test, Y_test,
-                                             pop_size=10, chrom_len=int(len(Y_train)*0.20), n_gen=50, coef=GA_coef,
+                                             pop_size=10, chrom_len=int(len(Y_train)*0.15), n_gen=50, coef=GA_coef,
                                              mut_rate=GA_mut, score_type=GA_score, selec_type=GA_selec)
             GA_selection.execute()
             GA_train_indexes = GA_selection.best_population()
-            X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name,  indexes=GA_train_indexes)
+            X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, indexes=GA_train_indexes)
             
         model.fit(X_train, Y_train)
         if(model.n_classifiers!=0):
@@ -464,7 +464,7 @@ def stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', st
 
     for i in range(len(flavor_names)):
         #if i % 4 == 0 and flavor_names[i] != class_interest: continue        
-        input_data = pd.read_csv(directory+'/'+flavor_names[i]+'_'+boot_kfold+'.csv')        
+        input_data = pd.read_csv(directory+'/'+flavor_names[i]+'_'+boot_kfold+'.csv')
         nClass+=1
         f_names.append(flavor_names[i])
         auc = np.array(input_data['auc'])

@@ -344,6 +344,9 @@ class AdaBoostSVM:
                 # print('check point: ', len(steps), len(decision))
                 decision_temp = np.array([np.sign(decision[j] + steps[i] ) for j in range(len(decision))]) #*svm_biases[j]
                 thres_decision.append(decision_temp)
+                for k in range(len(decision)):
+                    print(decision[k], steps[i])
+                    input()
                         
             return np.array(thres_decision)
             

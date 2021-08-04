@@ -178,8 +178,15 @@ for name in sample_list:
     # end = datetime.datetime.now()
     # elapsed_time = end - start
     # print("Elapsed total time GENETIC = " + str(elapsed_time))
+    # model = mm.adaboost_svm(div_flag=False, my_c=100, my_gamma_end=100, myKernel='rbf',  myDegree=1, myCoef0=+1)
 
-    ss.stats_test_batch(sample_name=name)
+    # ss.cross_validation(name, model, "absv", "gene",
+    #                     GA_mut=0.5, GA_score="ACC", GA_selec="highlow", GA_coef=0.5, kfolds=5, n_reps=2, path='.')
+
+
+    #models_auc.append(("genHLACC-rbf-NOTdiv", , "absv",  "gene", mut_rate, "acc", "highlow", 0.5))
+        
+    ss.stats_test_batch(sample_name=name, boot_kfold='kfold')
     dv.voting_table()
     #stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', stats_type='student', boot_kfold='boot')
 
