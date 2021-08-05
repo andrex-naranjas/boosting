@@ -160,6 +160,7 @@ def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_sco
             GA_selection.execute()
             GA_train_indexes = GA_selection.best_population()
             X_train, Y_train, X_test, Y_test = data.dataset(sample_name=sample_name, indexes=GA_train_indexes)
+            print(len(X_train), len(Y_test), len(GA_train_indexes), 'important test for GA outcome')
             
         model.fit(X_train, Y_train)
         if(model.n_classifiers!=0):
