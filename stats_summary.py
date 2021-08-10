@@ -155,7 +155,7 @@ def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_sco
 
         if selection == 'gene': # genetic selection
             GA_selection = genetic_selection(model, roc_area, X_train, Y_train, X_test, Y_test,
-                                             pop_size=10, chrom_len=int(len(Y_train)*0.15), n_gen=50, coef=GA_coef,
+                                             pop_size=10, chrom_len=int(len(Y_train)*0.85), n_gen=50, coef=GA_coef,
                                              mut_rate=GA_mut, score_type=GA_score, selec_type=GA_selec)
             GA_selection.execute()
             GA_train_indexes = GA_selection.best_population()
