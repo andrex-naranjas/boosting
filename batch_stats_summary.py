@@ -10,13 +10,14 @@ import stats_summary as ss
 import model_maker as mm
 import datetime
 
-process = int(sys.argv[1])    # batch process
-name = str(sys.argv[2])       # sample name
-path = str(sys.argv[3])       # path where code lives
-boot_kfold = str(sys.argv[4]) # use bootstrap or kfold
+process = int(sys.argv[1])     # batch process
+name = str(sys.argv[2])        # sample name
+path = str(sys.argv[3])        # path where code lives
+boot_kfold = str(sys.argv[4])  # use bootstrap or kfold
+ensem_single = str(sys.argv[5])# use ensemble or stardad classifiers
 
-model_auc = mm.model_loader_batch(process)[1]
-model_auc_names = mm.model_loader_batch(process)[0]
+model_auc = mm.model_loader_batch(process, ensemble_single=ensem_single)[1]
+model_auc_names = mm.model_loader_batch(process, ensemble_single=ensem_single)[0]
 n_cycles = 10
 k_folds  = 5
 n_reps   = 2

@@ -450,7 +450,7 @@ def stats_results(name, n_cycles, kfolds, n_reps, boot_kfold ='', split_frac=0.6
     f_tukey_div.close()
 
 
-def stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', stats_type='student', boot_kfold='boot'):
+def best_absvm_ensemble(sample_name='titanic', class_interest='trad-rbf-NOTdiv', stats_type='student', boot_kfold='boot'):
     # arrays to store the scores
     mean_auc,mean_prc,mean_f1,mean_rec,mean_acc,mean_gmn = ([]),([]),([]),([]),([]),([])
     std_auc,std_prc,std_f1,std_rec,std_acc,std_gmn = ([]),([]),([]),([]),([]),([])
@@ -505,7 +505,6 @@ def stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', st
         std_acc = np.append(std_acc,  np.std(acc))
         std_gmn = np.append(std_gmn,  np.std(gmn))
 
-
     # select and plot the flavours we want to further analize
     # sort the first list and map ordered indexes to the second list
     #mean_list_auc, name_list_auc = mean_auc, f_names
@@ -515,8 +514,16 @@ def stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', st
     
     # select the best 10 AUC, with the requirement that the ACC and PRC are above average
     dv.save_df_selected_classifiers(mean_list_auc, mean_list_acc, mean_list_prc, name_list, f_names, sample_name)
+    
 
-            
+def statistical_tests():
+    # arrays to store the scores
+    mean_auc,mean_prc,mean_f1,mean_rec,mean_acc,mean_gmn = ([]),([]),([]),([]),([]),([])
+    std_auc,std_prc,std_f1,std_rec,std_acc,std_gmn = ([]),([]),([]),([]),([]),([])
+    auc_values,prc_values,f1_values,rec_values,acc_values,gmn_values = [],[],[],[],[],[]
+    student_auc,student_prc,student_f1,student_rec,student_acc,student_gmn = ([]),([]),([]),([]),([]),([])
+
+    
     matrix = []
     if stats_type == 'tukey':
         # tukey tests
@@ -612,20 +619,3 @@ def stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', st
     cmin = 0
     cmax = len(flavor_names)
     dv.plot_stats_2d(matrix, sample_name)
-
-
-
-
-
-
-    # p_gaus, alpha = ss.normal_test(sample=auc_svm_boost,     alpha=0.05, verbose=True)
-    
-    # ss.anova_test(auc_svm_boost,     
-    #               auc_svm_boost_div, 
-    #               auc_svm_single,    
-    #               auc_ran_forest,    
-    #               auc_bdt_forest,    
-    #               auc_net_neural,    
-    #               auc_knn_neighb
-
-
