@@ -19,8 +19,9 @@ if(len(argv)!=3):
   sample_name = 'titanic'
   boot_kfold = 'boot'
 elif(len(argv)==4):
-  sample_name = argv[1]
-  boot_kfold = argv[2]
+  print('gordito')
+  sample_name  = argv[1]
+  boot_kfold   = argv[2]
   ensem_single = argv[3]
 
 if ensem_single=='ensemble':
