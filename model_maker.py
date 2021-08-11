@@ -43,9 +43,13 @@ def adaboost_svm(div_flag=False, my_c=150, my_gamma_end=100, myKernel='rbf', myD
                        Diversity=div_flag, early_stop=early_stop, debug=debug)
     return svmb
 
-def single_svm():
+def single_svm(my_kernel):
     # support vector machine (single case)
-    return SVC(C=150.0, kernel='rbf', gamma=1/(2*(10**2)), shrinking = True, probability = True, tol = 0.001)
+    my_coef = +1
+    if my_kernel == 'sigmoid':
+        my_coef = -1
+            
+    return SVC(C=150.0, kernel=my_kernel, degree=2, coef0=my_coef, gamma=1/(2*(10**2)), shrinking = True, probability = True, tol = 0.001)
 
 def linear_svm():
     # support vector machine (linear case)
@@ -131,56 +135,83 @@ def model_flavors():
 
     models_auc = []
     mut_rate = 0.5
-    models_auc.append(("trad-rbf-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "trad", mut_rate, "auc", "roulette", 0.0))
-    models_auc.append(("trad-sig-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=1, myCoef0=-1), "absv",  "trad", mut_rate, "auc", "roulette", 0.0))
-    models_auc.append(("trad-pol-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "trad", mut_rate, "auc", "roulette", 0.0))
-    models_auc.append(("trad-lin-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "trad", mut_rate, "auc", "roulette", 0.0))
+    # models_auc.append(("trad-rbf-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "trad", mut_rate, "auc", "roulette", 0.0))
+    # models_auc.append(("trad-sig-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=1, myCoef0=-1), "absv",  "trad", mut_rate, "auc", "roulette", 0.0))
+    # models_auc.append(("trad-pol-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "trad", mut_rate, "auc", "roulette", 0.0))
+    # models_auc.append(("trad-lin-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "trad", mut_rate, "auc", "roulette", 0.0))
 
-    models_auc.append(("trad-rbf-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "trad", mut_rate, "auc", "roulette", 0.0))
-    models_auc.append(("trad-sig-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "trad", mut_rate, "auc", "roulette", 0.0))
-    models_auc.append(("trad-pol-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "trad", mut_rate, "auc", "roulette", 0.0))
-    models_auc.append(("trad-lin-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "trad", mut_rate, "auc", "roulette", 0.0))
+    # models_auc.append(("trad-rbf-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "trad", mut_rate, "auc", "roulette", 0.0))
+    # models_auc.append(("trad-sig-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "trad", mut_rate, "auc", "roulette", 0.0))
+    # models_auc.append(("trad-pol-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "trad", mut_rate, "auc", "roulette", 0.0))
+    # models_auc.append(("trad-lin-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "trad", mut_rate, "auc", "roulette", 0.0))
     
-    models_auc.append(("genHLAUC-rbf-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "highlow", 0.5))
-    models_auc.append(("genHLAUC-sig-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "auc", "highlow", 0.5))
-    models_auc.append(("genHLAUC-pol-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "highlow", 0.5))
-    models_auc.append(("genHLAUC-lin-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "highlow", 0.5))
+    # models_auc.append(("genHLAUC-rbf-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "highlow", 0.5))
+    # models_auc.append(("genHLAUC-sig-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "auc", "highlow", 0.5))
+    # models_auc.append(("genHLAUC-pol-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "highlow", 0.5))
+    # models_auc.append(("genHLAUC-lin-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "highlow", 0.5))
 
-    models_auc.append(("genHLAUC-rbf-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "highlow", 0.5))
-    models_auc.append(("genHLAUC-sig-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "auc", "highlow", 0.5))
-    models_auc.append(("genHLAUC-pol-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "highlow", 0.5))
-    models_auc.append(("genHLAUC-lin-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "highlow", 0.5))
+    # models_auc.append(("genHLAUC-rbf-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "highlow", 0.5))
+    # models_auc.append(("genHLAUC-sig-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "auc", "highlow", 0.5))
+    # models_auc.append(("genHLAUC-pol-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "highlow", 0.5))
+    # models_auc.append(("genHLAUC-lin-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "highlow", 0.5))
     
-    models_auc.append(("genHLACC-rbf-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "highlow", 0.5))
-    models_auc.append(("genHLACC-sig-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "acc", "highlow", 0.5))
-    models_auc.append(("genHLACC-pol-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "highlow", 0.5))
-    models_auc.append(("genHLACC-lin-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "highlow", 0.5))
+    # models_auc.append(("genHLACC-rbf-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "highlow", 0.5))
+    # models_auc.append(("genHLACC-sig-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "acc", "highlow", 0.5))
+    # models_auc.append(("genHLACC-pol-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "highlow", 0.5))
+    # models_auc.append(("genHLACC-lin-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "highlow", 0.5))
 
-    models_auc.append(("genHLACC-rbf-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "highlow", 0.5))
-    models_auc.append(("genHLACC-sig-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "acc", "highlow", 0.5))
-    models_auc.append(("genHLACC-pol-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "highlow", 0.5))
-    models_auc.append(("genHLACC-lin-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "highlow", 0.5))
+    # models_auc.append(("genHLACC-rbf-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "highlow", 0.5))
+    # models_auc.append(("genHLACC-sig-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "acc", "highlow", 0.5))
+    # models_auc.append(("genHLACC-pol-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "highlow", 0.5))
+    # models_auc.append(("genHLACC-lin-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "highlow", 0.5))
     
     
-    models_auc.append(("genRLTAUC-rbf-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "roulette", 0.5))
-    models_auc.append(("genRLTAUC-sig-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "auc", "roulette", 0.5))
-    models_auc.append(("genRLTAUC-pol-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "roulette", 0.5))
-    models_auc.append(("genRLTAUC-lin-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "roulette", 0.5))
+    # models_auc.append(("genRLTAUC-rbf-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "roulette", 0.5))
+    # models_auc.append(("genRLTAUC-sig-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "auc", "roulette", 0.5))
+    # models_auc.append(("genRLTAUC-pol-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "roulette", 0.5))
+    # models_auc.append(("genRLTAUC-lin-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "roulette", 0.5))
 
-    models_auc.append(("genRLTAUC-rbf-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "roulette", 0.5))
-    models_auc.append(("genRLTAUC-sig-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "auc", "roulette", 0.5))
-    models_auc.append(("genRLTAUC-pol-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "roulette", 0.5))
-    models_auc.append(("genRLTAUC-lin-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "roulette", 0.5))
+    # models_auc.append(("genRLTAUC-rbf-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "roulette", 0.5))
+    # models_auc.append(("genRLTAUC-sig-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "auc", "roulette", 0.5))
+    # models_auc.append(("genRLTAUC-pol-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "roulette", 0.5))
+    # models_auc.append(("genRLTAUC-lin-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "roulette", 0.5))
 
-    models_auc.append(("genRLTACC-rbf-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "roulette", 0.5))
-    models_auc.append(("genRLTACC-sig-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "acc", "roulette", 0.5))
-    models_auc.append(("genRLTACC-pol-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "roulette", 0.5))
-    models_auc.append(("genRLTACC-lin-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "roulette", 0.5))
+    # models_auc.append(("genRLTACC-rbf-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "roulette", 0.5))
+    # models_auc.append(("genRLTACC-sig-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "acc", "roulette", 0.5))
+    # models_auc.append(("genRLTACC-pol-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "roulette", 0.5))
+    # models_auc.append(("genRLTACC-lin-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "roulette", 0.5))
 
-    models_auc.append(("genRLTACC-rbf-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "roulette", 0.5))
-    models_auc.append(("genRLTACC-sig-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "acc", "roulette", 0.5))
-    models_auc.append(("genRLTACC-pol-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "roulette", 0.5))
-    models_auc.append(("genRLTACC-lin-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "roulette", 0.5))
+    # models_auc.append(("genRLTACC-rbf-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "roulette", 0.5))
+    # models_auc.append(("genRLTACC-sig-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "acc", "roulette", 0.5))
+    # models_auc.append(("genRLTACC-pol-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "roulette", 0.5))
+    # models_auc.append(("genRLTACC-lin-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "roulette", 0.5))
+
+    # different models
+    models_auc.append(("rbf-svm", single_svm("rbf"),        "prob", "trad", mut_rate, "auc", "roulette", 0.0))
+    models_auc.append(("poly-svm", single_svm("poly"),      "prob", "trad", mut_rate, "auc", "roulette", 0.0))
+    models_auc.append(("sigmoid-svm", single_svm("sigmoid"),"prob", "trad", mut_rate, "auc", "roulette", 0.0))
+    models_auc.append(("linear-svm", linear_svm(),          "deci", "trad", mut_rate, "auc", "roulette", 0.0))
+    models_auc.append(("bdt-svm",    bdt_svm(),             "prob", "trad", mut_rate, "auc", "roulette", 0.0))
+    models_auc.append(("bag-svm",    bag_svm(),             "prob", "trad", mut_rate, "auc", "roulette", 0.0))
+    models_auc.append(("rand-forest",rand_forest(),         "prob", "trad", mut_rate, "auc", "roulette", 0.0))
+    models_auc.append(("bdt-forest", bdt_forest(),          "prob", "trad", mut_rate, "auc", "roulette", 0.0))
+    models_auc.append(("bag-forest", bag_forest(),          "prob", "trad", mut_rate, "auc", "roulette", 0.0))
+    models_auc.append(("grad-forest",grad_forest(),         "prob", "trad", mut_rate, "auc", "roulette", 0.0))
+    models_auc.append(("neural-net", neural_net(),          "prob", "trad", mut_rate, "auc", "roulette", 0.0))
+    models_auc.append(("k-neigh",    k_neighbors(),         "prob", "trad", mut_rate, "auc", "roulette", 0.0))
+    models_auc.append(("gauss-nb",   gauss_nb(),            "prob", "trad", mut_rate, "auc", "roulette", 0.0))
+    models_auc.append(("gauss-pc",   gauss_pc(),            "prob", "trad", mut_rate, "auc", "roulette", 0.0))
+    models_auc.append(("log-reg",    log_reg(),             "prob", "trad", mut_rate, "auc", "roulette", 0.0))
+    models_auc.append(("ridge-cl",   ridge_class(),         "deci", "trad", mut_rate, "auc", "roulette", 0.0))
+    models_auc.append(("sgdc-cl",    sgdc_class(),          "deci", "trad", mut_rate, "auc", "roulette", 0.0))
+    models_auc.append(("pass-agre",  pass_agre(),           "deci", "trad", mut_rate, "auc", "roulette", 0.0))
+    models_auc.append(("linear-dis", linear_dis(),          "prob", "trad", mut_rate, "auc", "roulette", 0.0))
+    models_auc.append(("quad-dis",   quad_dis(),            "prob", "trad", mut_rate, "auc", "roulette", 0.0))
+
+    
+    # if sample_name != "belle2_ii" and sample_name != "solar": # ugly fix
+    #     models_auc.append((linear_dis(),  "prob", "linear-dis", "trad"))
+    #     models_auc.append((quad_dis(),    "prob", "quad-dis", "trad"))
     
     return models_auc
 
