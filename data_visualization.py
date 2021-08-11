@@ -176,30 +176,29 @@ def save_df_selected_classifiers(mean_list_auc, mean_list_acc, mean_list_prc, na
     df = pd.concat([col_nam["classifier"], col_val[sample_name]],
                    axis=1, keys=["classifier", sample_name])
 
-    df.to_csv(str(sample_name+'_selected_classifier.csv'), index=False)
+    df.to_csv(str('./tables/CSV/'+sample_name+'_selected_classifier.csv'), index=False)
     
 
 def voting_table():
     # create voting table to decide which classifiers go to the olympics
-    titanic =  pd.read_csv("./titanic_selected_classifier.csv")["titanic"]
-    cancer  =  pd.read_csv("./cancer_selected_classifier.csv")["cancer"]
-    german  =  pd.read_csv("./german_selected_classifier.csv")["german"]
-    heart   =  pd.read_csv("./heart_selected_classifier.csv")["heart"]
-    solar   =  pd.read_csv("./solar_selected_classifier.csv")["solar"]
-    car     =  pd.read_csv("./car_selected_classifier.csv")["car"]
-    ecoli   =  pd.read_csv("./ecoli_selected_classifier.csv")["ecoli"]
-    wine    =  pd.read_csv("./wine_selected_classifier.csv")["wine"]
-    abalone =  pd.read_csv("./abalone_selected_classifier.csv")["abalone"]
-    names   =  pd.read_csv("./abalone_selected_classifier.csv")["classifier"]
+    titanic =  pd.read_csv("./tables/CSV/titanic_selected_classifier.csv")["titanic"]
+    cancer  =  pd.read_csv("./tables/CSV/cancer_selected_classifier.csv")["cancer"]
+    german  =  pd.read_csv("./tables/CSV/german_selected_classifier.csv")["german"]
+    heart   =  pd.read_csv("./tables/CSV/heart_selected_classifier.csv")["heart"]
+    solar   =  pd.read_csv("./tables/CSV/solar_selected_classifier.csv")["solar"]
+    car     =  pd.read_csv("./tables/CSV/car_selected_classifier.csv")["car"]
+    ecoli   =  pd.read_csv("./tables/CSV/ecoli_selected_classifier.csv")["ecoli"]
+    wine    =  pd.read_csv("./tables/CSV/wine_selected_classifier.csv")["wine"]
+    abalone =  pd.read_csv("./tables/CSV/abalone_selected_classifier.csv")["abalone"]
+    names   =  pd.read_csv("./tables/CSV/abalone_selected_classifier.csv")["classifier"]
 
     total = titanic + cancer + german + heart + solar + car + ecoli + wine + abalone
 
     df = pd.concat([names, titanic, cancer, german, heart, solar,  car, ecoli, wine, abalone, total], axis=1,
                    keys=["classifier","titanic","cancer","german","heart","solar","car","ecoli","wine","abalone","total"])
     
-    df.to_csv("rank_voting.csv")
+    df.to_csv("./tables/CSV/rank_voting.csv")
     
-
     
 def plot_stats_2d(matrix, sample_name):
 

@@ -509,7 +509,6 @@ def statistical_tests(sample_name='titanic', class_interest='trad-rbf-NOTdiv', s
     # check normality
     # p,alpha = normal_test(auc,alpha=0.05,verbose=True)        
     # dv.simple_plot(auc, pval=p, alpha_in=alpha)
-
     
     matrix = []
     if stats_type == 'tukey':
