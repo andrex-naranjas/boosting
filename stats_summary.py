@@ -164,7 +164,12 @@ def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_sco
             print(len(Y_train[Y_train==1]), 'important check for GA outcome')
             
         model.fit(X_train, Y_train)
-        if(model.n_classifiers!=0):
+        no_zero_classifiers = True
+        if roc_area=="absv":
+            if model.n_classifiers==0:
+                no_zero_classifiers = False
+                
+        if no_zero_classifiers:
             y_pred = model.predict(X_test)
             prec = precision_score(Y_test, y_pred)
             f1 = f1_score(Y_test, y_pred)
