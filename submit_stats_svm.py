@@ -16,10 +16,10 @@ import model_maker as mm
 workpath=getcwd()
 
 if(len(argv)!=3):
+  print('gordito', len(argv))
   sample_name = 'titanic'
   boot_kfold = 'boot'
 elif(len(argv)==4):
-  print('gordito')
   sample_name  = argv[1]
   boot_kfold   = argv[2]
   ensem_single = argv[3]
