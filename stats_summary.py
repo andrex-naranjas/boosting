@@ -450,7 +450,43 @@ def stats_results(name, n_cycles, kfolds, n_reps, boot_kfold ='', split_frac=0.6
     f_tukey_div.close()
 
 
-def best_absvm_ensemble(sample_name='titanic', class_interest='trad-rbf-NOTdiv', stats_type='student', boot_kfold='boot'):
+def best_absvm_ensemble(sample_name='titanic', boot_kfold='boot'):
+    # arrays to store the scores
+    mean_auc,mean_prc,mean_f1,mean_rec,mean_acc,mean_gmn = ([]),([]),([]),([]),([]),([])
+
+    # make the list of classifier flavors,set here the top classifier we want to compare against to and show in tables
+    flavor_names = []
+    for i in range(len(mm.model_loader_batch(0, ensemble_single='ensemble')[0])):
+        flavor_names.append(mm.model_loader_batch(0, ensemble_single='ensemble')[0][i][0])
+                
+    directory = './stats_results/'+sample_name+'/'+boot_kfold
+
+    for i in range(len(flavor_names)):
+        input_data = pd.read_csv(directory+'/'+flavor_names[i]+'_'+boot_kfold+'.csv')
+        auc = np.array(input_data['auc'])
+        prc = np.array(input_data['prc'])
+        f1  = np.array(input_data['f1' ])
+        rec = np.array(input_data['rec'])
+        acc = np.array(input_data['acc'])
+        gmn = np.array(input_data['gmn'])
+                
+        mean_auc = np.append(mean_auc,  np.mean(auc))
+        mean_prc = np.append(mean_prc,  np.mean(prc))
+        mean_f1  = np.append(mean_f1,   np.mean(f1))
+        mean_rec = np.append(mean_rec,  np.mean(rec))
+        mean_acc = np.append(mean_acc,  np.mean(acc))
+        mean_gmn = np.append(mean_gmn,  np.mean(gmn))
+        
+    # select and plot the flavours we want to further analize
+    # sort the first list and map ordered indexes to the second list
+    mean_list_auc, name_list, mean_list_acc, mean_list_prc = zip(*sorted(zip(mean_auc, flavor_names, mean_acc, mean_prc), reverse=True))
+    dv.plot_ordered_stats_summary(mean_list_auc, mean_list_acc, mean_list_prc, name_list, sample_name, metric='auc')
+    
+    # select the best 10 AUC, with the requirement that the ACC and PRC are above average
+    dv.save_df_selected_classifiers(mean_list_auc, mean_list_acc, mean_list_prc, name_list, flavor_names, sample_name)
+    
+
+def statistical_tests(sample_name='titanic', class_interest='trad-rbf-NOTdiv', stats_type='student', boot_kfold='boot'):
     # arrays to store the scores
     mean_auc,mean_prc,mean_f1,mean_rec,mean_acc,mean_gmn = ([]),([]),([]),([]),([]),([])
     std_auc,std_prc,std_f1,std_rec,std_acc,std_gmn = ([]),([]),([]),([]),([]),([])
@@ -464,64 +500,15 @@ def best_absvm_ensemble(sample_name='titanic', class_interest='trad-rbf-NOTdiv',
     for i in range(len(i_names)):
         if i_names[i] != class_interest:
                 flavor_names.append(i_names[i])
-                
+
+
     directory = './stats_results/'+sample_name+'/'+boot_kfold
     nClass = 0
     f_names = []
-
-    for i in range(len(flavor_names)):
-        #if i % 4 == 0 and flavor_names[i] != class_interest: continue        
-        input_data = pd.read_csv(directory+'/'+flavor_names[i]+'_'+boot_kfold+'.csv')
-        nClass+=1
-        f_names.append(flavor_names[i])
-        auc = np.array(input_data['auc'])
-        prc = np.array(input_data['prc'])
-        f1  = np.array(input_data['f1' ])
-        rec = np.array(input_data['rec'])
-        acc = np.array(input_data['acc'])
-        gmn = np.array(input_data['gmn'])
-        # check normality
-        # p,alpha = normal_test(auc,alpha=0.05,verbose=True)        
-        # dv.simple_plot(auc, pval=p, alpha_in=alpha)
-        
-        auc_values.append(auc)
-        prc_values.append(prc)
-        f1_values.append(f1)
-        rec_values.append(rec)
-        acc_values.append(acc)
-        gmn_values.append(gmn)
-        
-        mean_auc = np.append(mean_auc,  np.mean(auc))
-        mean_prc = np.append(mean_prc,  np.mean(prc))
-        mean_f1  = np.append(mean_f1,   np.mean(f1))
-        mean_rec = np.append(mean_rec,  np.mean(rec))
-        mean_acc = np.append(mean_acc,  np.mean(acc))
-        mean_gmn = np.append(mean_gmn,  np.mean(gmn))
-        
-        std_auc = np.append(std_auc,  np.std(auc))
-        std_prc = np.append(std_prc,  np.std(prc))
-        std_f1  = np.append(std_f1,   np.std(f1))
-        std_rec = np.append(std_rec,  np.std(rec))
-        std_acc = np.append(std_acc,  np.std(acc))
-        std_gmn = np.append(std_gmn,  np.std(gmn))
-
-    # select and plot the flavours we want to further analize
-    # sort the first list and map ordered indexes to the second list
-    #mean_list_auc, name_list_auc = mean_auc, f_names
-    mean_list_auc, name_list, mean_list_acc, mean_list_prc = zip(*sorted(zip(mean_auc, f_names, mean_acc, mean_prc), reverse=True))
-
-    dv.plot_ordered_stats_summary(mean_list_auc, mean_list_acc, mean_list_prc, name_list, sample_name, metric='auc')
-    
-    # select the best 10 AUC, with the requirement that the ACC and PRC are above average
-    dv.save_df_selected_classifiers(mean_list_auc, mean_list_acc, mean_list_prc, name_list, f_names, sample_name)
-    
-
-def statistical_tests():
-    # arrays to store the scores
-    mean_auc,mean_prc,mean_f1,mean_rec,mean_acc,mean_gmn = ([]),([]),([]),([]),([]),([])
-    std_auc,std_prc,std_f1,std_rec,std_acc,std_gmn = ([]),([]),([]),([]),([]),([])
-    auc_values,prc_values,f1_values,rec_values,acc_values,gmn_values = [],[],[],[],[],[]
-    student_auc,student_prc,student_f1,student_rec,student_acc,student_gmn = ([]),([]),([]),([]),([]),([])
+            
+    # check normality
+    # p,alpha = normal_test(auc,alpha=0.05,verbose=True)        
+    # dv.simple_plot(auc, pval=p, alpha_in=alpha)
 
     
     matrix = []

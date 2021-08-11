@@ -190,6 +190,8 @@ def model_flavors_ensemble():
     models_auc.append(("genRLTACC-pol-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "roulette", 0.5))
     models_auc.append(("genRLTACC-lin-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "roulette", 0.5))
 
+    return models_auc
+
 
 def model_flavors_single():
     # set the models,their method to calculate the ROC(AUC), table name and selection

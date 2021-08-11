@@ -186,7 +186,7 @@ for name in sample_list:
 
     #models_auc.append(("genHLACC-rbf-NOTdiv", , "absv",  "gene", mut_rate, "acc", "highlow", 0.5))
         
-    ss.stats_test_batch(sample_name=name, boot_kfold='kfold')
+    ss.best_absvm_ensemble(sample_name=name, boot_kfold='kfold')
     dv.voting_table()
     #stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', stats_type='student', boot_kfold='boot')
 

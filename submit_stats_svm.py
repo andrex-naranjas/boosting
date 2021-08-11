@@ -16,7 +16,6 @@ import model_maker as mm
 workpath=getcwd()
 
 if(len(argv)<=3):
-  print('gordito', len(argv))
   sample_name = 'titanic'
   boot_kfold = 'boot'
 elif(len(argv)==4):

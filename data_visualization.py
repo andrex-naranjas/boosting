@@ -136,8 +136,6 @@ def plot_ordered_stats_summary(val_auc, val_acc, val_prc, names, sample_name, me
     #          ha='center', va='center', transform=ax.transAxes)
     # plt.text(0.15, 0.8,'$p_{{val}}$={}, $\\alpha$={}'.format(round(p,3), alpha),
     #          ha='center', va='center', transform=ax.transAxes)
-    print(sample_name, size_x)
-    input()
     
     #plt.xlabel(xlabel)
     plt.ylabel('Metric A.U.')
