@@ -198,6 +198,38 @@ def voting_table():
                    keys=["classifier","titanic","cancer","german","heart","solar","car","ecoli","wine","abalone","total"])
     
     df.to_csv("./tables/CSV/rank_voting.csv")
+
+    # latex table
+    f_out = open('./tables/rank_voting.tex', "w")
+    
+    print("\\begin{tabular}{c | c  c  c  c c  c  c  c c  c  c  c}\hline \hline", file=f_out)
+    print("Model &  Titanic  &  Cancer  &  German  &  Heart  & Solar & Car & Ecoli  &  Wine  & Abalone & Adult  & Connect & Total  \\\  \hline", file=f_out)
+
+    for k in range(len(titanic)): # loop number of ensembles
+        titanic_v, cancer_v, german_v, heart_v, solar_v = '\\checkmark','\\checkmark','\\checkmark','\\checkmark','\\checkmark'
+        car_v, ecoli_v, wine_v, abalone_v, adult_v, connect_v  = '\\checkmark','\\checkmark','\\checkmark','\\checkmark','\\checkmark','\\checkmark'
+
+        if titanic[k] == 0: titanic_v  = '\\xmark'
+        if cancer[k]  == 0: cancer_v   = '\\xmark'
+        if german[k]  == 0: german_v   = '\\xmark'
+        if heart[k]   == 0: heart_v    = '\\xmark'
+        if solar[k]   == 0: solar_v    = '\\xmark'
+        if car[k]     == 0: car_v      = '\\xmark'
+        if ecoli[k]   == 0: ecoli_v    = '\\xmark'
+        if wine[k]    == 0: wine_v     = '\\xmark'
+        if abalone[k] == 0: abalone_v  = '\\xmark'
+        if 0 == 0: adult_v    = '\\xmark'
+        if 0 == 0: connect_v  = '\\xmark'
+        
+        print(names[k], '&', titanic_v, '&', cancer_v, '&', german_v, '&', heart_v, '&', solar_v, '&', car_v, '&',
+              ecoli_v, '&', wine_v, '&', abalone_v, '&', adult_v, '&', connect_v, '&', total[k], ' \\\ ', file=f_out)
+                        
+    print('\hline \hline', file=f_out)
+    print('\end{tabular}', file=f_out)
+    print("\label{tab:student}", file=f_out)
+
+    f_out.close()
+
     
     
 def plot_stats_2d(matrix, sample_name):
@@ -338,7 +370,7 @@ def latex_table_tukey(names, sample, auc_val, auc_error, auc_test, prc_val, prc_
                                                                         "--gmn:",round(gmn_val[0], 3),'$\\pm',round(gmn_error[0],3), "$","}", file=f_out)
     print("\label{tab:tukey}", file=f_out)
     
-
+    
 def latex_table_student(names, sample, auc_val, auc_error, auc_pval, prc_val, prc_error,  prc_pval, f1_val,  f1_error,  f1_pval,
                         rec_val, rec_error, rec_pval, acc_val, acc_error,  acc_pval, gmn_val, gmn_error, gmn_pval, f_out):
     
@@ -383,11 +415,74 @@ def latex_table_student(names, sample, auc_val, auc_error, auc_pval, prc_val, pr
                                                                         "--prc:",round(prc_val[0], 3),'$\\pm',round(prc_error[0],3), "$",
                                                                         "--f1s:",round( f1_val[0], 3),'$\\pm',round( f1_error[0],3), "$",
                                                                         "--REC:",round(rec_val[0], 3),'$\\pm',round(rec_error[0],3), "$",
-                                                                       "-- acc:",round(acc_val[0], 3),'$\\pm',round(acc_error[0],3), "$",
+                                                                        "--acc:",round(acc_val[0], 3),'$\\pm',round(acc_error[0],3), "$",
                                                                         "--gmn:",round(gmn_val[0], 3),'$\\pm',round(gmn_error[0],3), "$","}", file=f_out)
     print("\label{tab:student}", file=f_out)
 
 
+
+def latex_table_student_single(names, sample, metric_name=None, metric_val=None, metric_error=None,
+                               pvalues=None, mean_values=None, error_values=None, f_out=None):
+
+    mean_err_1 = '$'+str(round(mean_values[0],2))+'\\pm'+str(round(error_values[0],2))+'$'
+    mean_err_2 = '$'+str(round(mean_values[1],2))+'\\pm'+str(round(error_values[1],2))+'$'
+    mean_err_3 = '$'+str(round(mean_values[2],2))+'\\pm'+str(round(error_values[2],2))+'$'
+    mean_err_4 = '$'+str(round(mean_values[3],2))+'\\pm'+str(round(error_values[3],2))+'$'
+
+    pval_1 = pvalues[0]
+    pval_2 = pvalues[1]
+    pval_3 = pvalues[2]
+    pval_4 = pvalues[3]
+
+    reject_1 = ''
+    reject_2 = ''
+    reject_3 = ''
+    reject_4 = ''
+    alpha = 0.05
+    
+    print("\\begin{tabular}{c  c | c  c  c  c}\hline \hline", file=f_out)
+    print(sample,     "&         &  Model1        &  Model2         &  Model3         &  Model4         \\\  \hline", file=f_out)
+    print(metric_name,"&         &", mean_err_1, "&", mean_err_2,  "&", mean_err_3,  "&", mean_err_3, " \\\  \hline", file=f_out)
+    print("Model & $\mu_{mtrc}$  &  R.$H_{0}$ &  R.$H_{0}$ & R.$H_{0}$  &  R.$H_{0}$   \\\  \hline", file=f_out)
+
+    for k in range(len(metric_val)-1): # loop number of algorithms
+        j = k + 1
+        if pval_1[j] < alpha:
+            if metric_val[j] < mean_values[0]:
+                reject_1 = '\\textcolor{blue}{\\checkmark}'
+            else:
+                reject_1 = '\\textcolor{red}{\\checkmark}'        
+        else:   reject_1 = '\\xmark'
+
+        if pval_2[j] < alpha:
+            if metric_val[j] < mean_values[1]:
+                reject_2 = '\\textcolor{blue}{\\checkmark}'
+            else:
+                reject_2 = '\\textcolor{red}{\\checkmark}'        
+        else:   reject_2 = '\\xmark'
+
+        if pval_3[j] < alpha:
+            if metric_val[j] < mean_values[2]:
+                reject_3 = '\\textcolor{blue}{\\checkmark}'
+            else:
+                reject_3 = '\\textcolor{red}{\\checkmark}'        
+        else:   reject_3 = '\\xmark'
+
+        if pval_4[j] < alpha:
+            if metric_val[j] < mean_values[3]:
+                reject_4 = '\\textcolor{blue}{\\checkmark}'
+            else:
+                reject_4 = '\\textcolor{red}{\\checkmark}'        
+        else:   reject_4 = '\\xmark'
+        
+        
+        print(names[j], '&',
+              '$', str(round(metric_val[j],2))+'\\pm'+ str(round(metric_error[j],2)), "$",'&', reject_1, '&', reject_2,' & ',
+              reject_3, '&', reject_4, ' \\\ ', file=f_out)
+                        
+    print('\hline \hline', file=f_out)
+    print('\end{tabular}', file=f_out)
+    print("\label{tab:student}", file=f_out)
 
 def latex_table_mcnemar(names, p_values,stats,rejects, area2s, prec2s, f1_2s, recall2s, acc2s, gmean2s,
                                                 area1,  prec1,  f1_1, recall1,  acc1,  gmean1, f_out):

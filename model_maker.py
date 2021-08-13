@@ -204,7 +204,7 @@ def model_flavors_single():
     models_auc.append(("poly-svm", single_svm("poly"),      "prob", "trad", mut_rate, "auc", "roulette", 0.0))
     models_auc.append(("sigmoid-svm", single_svm("sigmoid"),"prob", "trad", mut_rate, "auc", "roulette", 0.0))
     models_auc.append(("linear-svm", linear_svm(),          "deci", "trad", mut_rate, "auc", "roulette", 0.0))
-    models_auc.append(("bdt-svm",    bdt_svm(),             "prob", "trad", mut_rate, "auc", "roulette", 0.0))
+    # models_auc.append(("bdt-svm",    bdt_svm(),             "prob", "trad", mut_rate, "auc", "roulette", 0.0))
     models_auc.append(("bag-svm",    bag_svm(),             "prob", "trad", mut_rate, "auc", "roulette", 0.0))
     models_auc.append(("rand-forest",rand_forest(),         "prob", "trad", mut_rate, "auc", "roulette", 0.0))
     models_auc.append(("bdt-forest", bdt_forest(),          "prob", "trad", mut_rate, "auc", "roulette", 0.0))

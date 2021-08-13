@@ -188,6 +188,11 @@ for name in sample_list:
         
     ss.best_absvm_ensemble(sample_name=name, boot_kfold='kfold')
     dv.voting_table()
+    selected_ensembles = ['trad-rbf-YESdiv', 'genHLACC-lin-NOTdiv', 'genRLTAUC-lin-NOTdiv', 'genRLTACC-lin-YESdiv']
+    ss.statistical_tests(sample_name=name, class_interest=selected_ensembles, metric='AUC', stats_type='student', boot_kfold='kfold')
+    ss.statistical_tests(sample_name=name, class_interest=selected_ensembles, metric='ACC', stats_type='student', boot_kfold='kfold')
+    ss.statistical_tests(sample_name=name, class_interest=selected_ensembles, metric='PRC', stats_type='student', boot_kfold='kfold')
+        
     #stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', stats_type='student', boot_kfold='boot')
 
         
