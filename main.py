@@ -42,9 +42,9 @@ myKernel = "rbf"
 
 # get the data
 data = data_preparation(GA_selection=True)
-sample_list = ["titanic"]
-sample_list = [sample_input]
 
+sample_list = [sample_input]
+sample_list = ["titanic", "cancer", "german", "heart", "car", "ecoli", "wine", "abalone"] # solar, cancer
 # loop over datasets in sample_list for AdaBoostSVM and other classifiers. get ROC curves & metrics
 for name in sample_list:
     print("Analysing sample: ", name)
@@ -116,13 +116,13 @@ for name in sample_list:
     # print(len(X_train), len(Y_train), len(X_test), len(Y_test))
 
     # test genetic selection
-    # model_test = mm.adaboost_svm(div_flag=False, my_gamma_end=100, myKernel='rbf', myDegree=2, debug=False)
+    # model_test = mm.adaboost_svm(div_flag=True, my_gamma_end=100, myKernel='poly', myDegree=2, debug=False)
     # #adaboost_svm(div_flag=False, my_c=100, my_gamma_end=100, myKernel='rbf', myDegree=1, myCoef0=1, early_stop=True, debug=True)
     # #model = AdaBoostSVM(C=50, gammaIni=5, myKernel=myKernel)
-    
+    # # genRLTAUC-sig-YESdiv_kfold
     # start_GA = datetime.datetime.now()
     # GA_selection = genetic_selection(model_test, "absv", X_train, Y_train, X_test, Y_test,
-    #                                  pop_size=10, chrom_len=500, n_gen=50, coef=0.5, mut_rate=0.3, score_type="auc", selec_type="roulette")
+    #                                  pop_size=10, chrom_len=250, n_gen=50, coef=0.5, mut_rate=0.3, score_type="auc", selec_type="roulette")
     
     # GA_selection.execute()
     # GA_train_indexes = GA_selection.best_population()
@@ -134,7 +134,7 @@ for name in sample_list:
     # X_train_GA, Y_train_GA, X_test_GA, Y_test_GA = \
     #     data.dataset(sample_name=name, indexes=GA_train_indexes)
 
-    # print(len(X_train_GA), len(Y_train_GA), len(X_test_GA), len(Y_test_GA) )
+    # print(len(Y_train_GA[Y_train_GA==+1]),len(Y_train_GA[Y_train_GA==-1]), len(X_train_GA), len(X_test_GA), len(Y_test_GA) )
 
     # compare between data inputs
     # traditional input
@@ -185,10 +185,26 @@ for name in sample_list:
 
 
     #models_auc.append(("genHLACC-rbf-NOTdiv", , "absv",  "gene", mut_rate, "acc", "highlow", 0.5))
-        
+
+    # genHLAUC-rbf-NOTdiv, genHLAUC-rbf-YESdiv, genHLACC-rbf-NOTdiv, genRLTAUC-rbf-NOTdiv
+    # genRLTAUC-rbf-YESdiv, genRLTACC-rbf-YESdiv
+
+    
     ss.best_absvm_ensemble(sample_name=name, boot_kfold='kfold')
     dv.voting_table()
-    selected_ensembles = ['trad-rbf-YESdiv', 'genHLACC-lin-NOTdiv', 'genRLTAUC-lin-NOTdiv', 'genRLTACC-lin-YESdiv']
+    #selected_ensembles = ['trad-rbf-YESdiv', 'genHLACC-lin-NOTdiv', 'genRLTAUC-lin-NOTdiv', 'genRLTACC-lin-YESdiv']
+
+    # mix of two worlds
+    selected_ensembles = ['trad-rbf-YESdiv', 'genHLAUC-rbf-NOTdiv', 'genHLAUC-lin-NOTdiv', 'genRLTACC-lin-YESdiv']
+    # selected_ensembles = ['trad-rbf-YESdiv', 'trad-rbf-YESdiv', 'trad-rbf-YESdiv', 'trad-rbf-YESdiv']
+
+    # all about RBF
+    # selected_ensembles = ['genHLAUC-rbf-NOTdiv',
+    #                       'genHLAUC-rbf-YESdiv',
+    #                       'genHLACC-rbf-NOTdiv',
+    #                       'genRLTAUC-rbf-NOTdiv']
+    
+    #selected_ensembles = ['genRLTACC-lin-YESdiv', 'genRLTAUC-lin-NOTdiv', 'genHLACC-lin-NOTdiv', 'genHLAUC-lin-YESdiv']
     ss.statistical_tests(sample_name=name, class_interest=selected_ensembles, metric='AUC', stats_type='student', boot_kfold='kfold')
     ss.statistical_tests(sample_name=name, class_interest=selected_ensembles, metric='ACC', stats_type='student', boot_kfold='kfold')
     ss.statistical_tests(sample_name=name, class_interest=selected_ensembles, metric='PRC', stats_type='student', boot_kfold='kfold')

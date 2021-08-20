@@ -77,7 +77,9 @@ class genetic_selection:
 
     def best_population(self):
         ''' fetches the best trained indexes, removing repetitions'''
-        best_train_indexes = self.best_pop.flatten()
+        best_train_indexes = np.unique(self.best_pop.flatten())
+        Y_final = self.Y_train[best_train_indexes]
+        print(len(Y_final[Y_final==1]), len(Y_final[Y_final==-1]), len(best_train_indexes), len(Y_final), len(self.Y_train), ' mi perrito genetico balanceado?' )
         return np.unique(best_train_indexes)
 
 

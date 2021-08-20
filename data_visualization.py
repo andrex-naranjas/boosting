@@ -442,7 +442,7 @@ def latex_table_student_single(names, sample, metric_name=None, metric_val=None,
     
     print("\\begin{tabular}{c  c | c  c  c  c}\hline \hline", file=f_out)
     print(sample,     "&         &  Model1        &  Model2         &  Model3         &  Model4         \\\  \hline", file=f_out)
-    print(metric_name,"&         &", mean_err_1, "&", mean_err_2,  "&", mean_err_3,  "&", mean_err_3, " \\\  \hline", file=f_out)
+    print(metric_name,"&         &", mean_err_1, "&", mean_err_2,  "&", mean_err_3,  "&", mean_err_4, " \\\  \hline", file=f_out)
     print("Model & $\mu_{mtrc}$  &  R.$H_{0}$ &  R.$H_{0}$ & R.$H_{0}$  &  R.$H_{0}$   \\\  \hline", file=f_out)
 
     for k in range(len(metric_val)-1): # loop number of algorithms

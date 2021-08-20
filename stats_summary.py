@@ -153,9 +153,16 @@ def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_sco
         Y_train, Y_test = Y.loc[train_index], Y.loc[test_index]
         start = time.time()
 
+        # keep the chromosome size under the limit [100,1000]
+        sample_chromn_len = int(len(Y_train)*0.25)
+        if sample_chromn_len > 1000:
+            sample_chromn_len = 1000
+        elif sample_chromn_len < 100:
+            sample_chromn_len = 100
+            
         if selection == 'gene': # genetic selection
             GA_selection = genetic_selection(model, roc_area, X_train, Y_train, X_test, Y_test,
-                                             pop_size=10, chrom_len=int(len(Y_train)*0.5), n_gen=50, coef=GA_coef,
+                                             pop_size=10, chrom_len=sample_chromn_len, n_gen=50, coef=GA_coef,
                                              mut_rate=GA_mut, score_type=GA_score, selec_type=GA_selec)
             GA_selection.execute()
             GA_train_indexes = GA_selection.best_population()
@@ -386,7 +393,118 @@ def normal_test(sample,alpha=0.05,verbose=False):
 
     return p,alpha
 
+def outlier_detection(data, k_value=1.5):
+    '''outlier data cleaning via interquartile method'''
 
+    # calculate interquartile range
+    q25, q75 = np.percentile(data, 25), np.percentile(data, 75)
+    iqr = q75 - q25
+    
+    # calculate the outlier cutoff
+    cut_off = iqr * k_value
+    lower, upper = q25 - cut_off, q75 + cut_off
+
+    # identify outliers
+    outliers = [x for x in data if x < lower or x > upper]
+
+    # remove outliers
+    clean_data = [x for x in data if x > lower and x < upper]
+    clean_data = np.array(clean_data)
+    mean_clean = np.ones(abs(len(data)-len(clean_data))) * np.mean(clean_data)
+    # print('-----------------------------------------------------')
+    # print(clean_data, mean_clean, data)
+    
+    clean_data = np.append(clean_data, mean_clean)    
+    
+    print(len(data), len(clean_data), len(outliers))
+
+    return clean_data
+
+
+def outlier_detection_multivariable(data_auc, data_prc, data_f1, data_rec, data_acc, data_gmn, k_value=1.5):
+    '''outlier data cleaning via interquartile method multivariable'''
+    
+    # calculate interquartile range
+    q25_auc, q75_auc = np.percentile(data_auc, 25), np.percentile(data_auc, 75)
+    q25_prc, q75_prc = np.percentile(data_prc, 25), np.percentile(data_prc, 75)
+    q25_f1,  q75_f1  = np.percentile(data_f1,  25), np.percentile(data_f1,  75)
+    q25_rec, q75_rec = np.percentile(data_rec, 25), np.percentile(data_rec, 75)
+    q25_acc, q75_acc = np.percentile(data_acc, 25), np.percentile(data_acc, 75)
+    q25_gmn, q75_gmn = np.percentile(data_gmn, 25), np.percentile(data_gmn, 75)
+        
+    # calculate the outlier cutoff
+    cut_off_auc = (q75_auc - q25_auc) * k_value
+    cut_off_prc = (q75_prc - q25_prc) * k_value
+    cut_off_f1  = (q75_f1  - q25_f1 ) * k_value
+    cut_off_rec = (q75_rec - q25_rec) * k_value
+    cut_off_acc = (q75_acc - q25_acc) * k_value
+    cut_off_gmn = (q75_gmn - q25_gmn) * k_value
+    
+    lower_auc, upper_auc = q25_auc - cut_off_auc, q75_auc + cut_off_auc
+    lower_prc, upper_prc = q25_prc - cut_off_prc, q75_prc + cut_off_prc
+    lower_f1 , upper_f1  = q25_f1  - cut_off_f1 , q75_f1  + cut_off_f1 
+    lower_rec, upper_rec = q25_rec - cut_off_rec, q75_rec + cut_off_rec
+    lower_acc, upper_acc = q25_acc - cut_off_acc, q75_acc + cut_off_acc
+    lower_gmn, upper_gmn = q25_gmn - cut_off_gmn, q75_gmn + cut_off_gmn
+
+    col_auc = pd.DataFrame(data=data_auc, columns=["auc"])
+    col_prc = pd.DataFrame(data=data_prc, columns=["prc"])
+    col_f1  = pd.DataFrame(data=data_f1,  columns=["f1"])
+    col_rec = pd.DataFrame(data=data_rec, columns=["rec"])
+    col_acc = pd.DataFrame(data=data_acc, columns=["acc"])
+    col_gmn = pd.DataFrame(data=data_gmn, columns=["gmn"])
+    df = pd.concat([col_auc["auc"], col_prc["prc"], col_f1["f1"], col_rec["rec"], col_acc["acc"], col_gmn["gmn"]],
+                   axis=1, keys=["auc", "prc", "f1", "rec", "acc", "gmn"])
+
+    clean_auc  = np.array([])
+    clean_prc  = np.array([])
+    clean_f1   = np.array([])
+    clean_rec  = np.array([])
+    clean_acc  = np.array([])
+    clean_gmn  = np.array([])
+    
+    for i in range(len(df)):
+        if df["auc"][i] > lower_auc and df["auc"][i] < upper_auc:
+            if df["prc"][i] > lower_prc and df["prc"][i] < upper_prc:
+                if df["acc"][i] > lower_acc and df["acc"][i] < upper_acc:
+                    clean_auc  = np.append(clean_auc, df["auc"][i])
+                    clean_prc  = np.append(clean_prc, df["prc"][i])
+                    clean_f1   = np.append(clean_f1 , df["f1"][i])
+                    clean_rec  = np.append(clean_rec, df["rec"][i])
+                    clean_acc  = np.append(clean_acc, df["acc"][i])
+                    clean_gmn  = np.append(clean_gmn, df["gmn"][i])
+                    
+
+    if len(clean_auc)==0:
+        clean_auc  = np.array(data_auc)
+        clean_prc  = np.array(data_prc)
+        clean_f1   = np.array(data_f1)
+        clean_rec  = np.array(data_rec)
+        clean_acc  = np.array(data_acc)
+        clean_gmn  = np.array(data_gmn)        
+        
+    if np.isnan(np.mean(clean_auc)):
+        print(clean_auc)
+        input()
+           
+    mean_clean_auc = np.ones(abs(len(data_auc)-len(clean_auc))) * np.mean(clean_auc)
+    mean_clean_prc = np.ones(abs(len(data_prc)-len(clean_prc))) * np.mean(clean_prc)
+    mean_clean_f1  = np.ones(abs(len(data_f1) -len(clean_f1)))  * np.mean(clean_f1)
+    mean_clean_rec = np.ones(abs(len(data_rec)-len(clean_rec))) * np.mean(clean_rec)
+    mean_clean_acc = np.ones(abs(len(data_acc)-len(clean_acc))) * np.mean(clean_acc)
+    mean_clean_gmn = np.ones(abs(len(data_gmn)-len(clean_gmn))) * np.mean(clean_gmn)
+
+    # complete the same number of meausurements 
+    clean_auc = np.append(clean_auc, mean_clean_auc)
+    clean_prc = np.append(clean_prc, mean_clean_prc)
+    clean_f1  = np.append(clean_f1,  mean_clean_f1)
+    clean_rec = np.append(clean_rec, mean_clean_rec)
+    clean_acc = np.append(clean_acc, mean_clean_acc)
+    clean_gmn = np.append(clean_gmn, mean_clean_gmn)
+        
+    return clean_auc, clean_prc, clean_f1, clean_rec, clean_acc, clean_gmn
+    
+    
 def stats_results(name, n_cycles, kfolds, n_reps, boot_kfold ='', split_frac=0.6):
     # arrays to store the scores
     mean_auc,mean_prc,mean_f1,mean_rec,mean_acc,mean_gmn = ([]),([]),([]),([]),([]),([])
@@ -454,7 +572,7 @@ def best_absvm_ensemble(sample_name='titanic', boot_kfold='boot'):
     # arrays to store the scores
     mean_auc,mean_prc,mean_f1,mean_rec,mean_acc,mean_gmn = ([]),([]),([]),([]),([]),([])
 
-    # make the list of classifier flavors,set here the top classifier we want to compare against to and show in tables
+    # make the list of classifier ensemble flavors
     flavor_names = []
     for i in range(len(mm.model_loader_batch(0, ensemble_single='ensemble')[0])):
         flavor_names.append(mm.model_loader_batch(0, ensemble_single='ensemble')[0][i][0])
@@ -514,13 +632,18 @@ def statistical_tests(sample_name='titanic', class_interest=['trad-rbf-NOTdiv'],
             
         for i in range(len(flavor_names)):
             input_data = pd.read_csv(directory+'/'+flavor_names[i]+'_'+boot_kfold+'.csv')
-                
-            auc = np.array(input_data['auc'])
-            prc = np.array(input_data['prc'])
-            f1  = np.array(input_data['f1' ])
-            rec = np.array(input_data['rec'])
-            acc = np.array(input_data['acc'])
-            gmn = np.array(input_data['gmn'])
+
+            print(flavor_names[i])
+            auc, prc, f1, rec, acc, gmn = outlier_detection_multivariable(input_data['auc'], input_data['prc'],
+                                                                          input_data['f1'], input_data['rec'],
+                                                                          input_data['acc'], input_data['gmn'],
+                                                                          k_value=1.5)
+            # auc = np.array(input_data['auc'])
+            # prc = np.array(input_data['prc'])
+            # f1  = np.array(input_data['f1' ])
+            # rec = np.array(input_data['rec'])
+            # acc = np.array(input_data['acc'])
+            # gmn = np.array(input_data['gmn'])
 
             auc_values.append(auc)
             prc_values.append(prc)
@@ -671,8 +794,8 @@ def statistical_tests(sample_name='titanic', class_interest=['trad-rbf-NOTdiv'],
             f_tukey_table.close()
 
             
-        for i in range(len(matrix)): #print(matrix, len(matrix))
-            print(matrix[i], 'parrito test')
+        # for i in range(len(matrix)): #print(matrix, len(matrix))
+        #     print(matrix[i], 'parrito test')
                 
         sigmin = 0
         sigmax = len(flavor_names)
@@ -686,6 +809,9 @@ def statistical_tests(sample_name='titanic', class_interest=['trad-rbf-NOTdiv'],
     # save file outside he main selected ensemble loop
     # selected_values.append(mean_auc[0])
     # selected_errors.append(std_auc[0])
+
+    # print(len(mean_metric), selected_values, metric, sample_name)
+    # input()
 
     print(selected_values[0],selected_values[1],selected_values[2],selected_values[3])
     f_single = open('./tables/student_'+sample_name+'_combined_'+metric+'.tex', "w")
