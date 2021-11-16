@@ -190,7 +190,7 @@ class genetic_selection:
     def tournament_selection(self, scores, popx, popy, data_index, size_k=3):
         ''' Tournament selection '''
 
-        indices = np.array([i for i in range(len(pop_x))])
+        indices = np.array([i for i in range(len(popx))])
         parents_indices = []
 
         for _ in range(2):
@@ -199,12 +199,12 @@ class genetic_selection:
             indices.remove(best_competitor)
             parents_indices.append(best_competitor)
 
-        pa_x = pop_x[parents_indices[0]]
-        pa_y = pop_y[parents_indices[0]]
+        pa_x = popx[parents_indices[0]]
+        pa_y = popy[parents_indices[0]]
         in_a = data_index[parents_indices[0]]
 
-        pb_x = pop_x[parents_indices[1]]
-        pb_y = pop_y[parents_indices[1]]
+        pb_x = popx[parents_indices[1]]
+        pb_y = popy[parents_indices[1]]
         in_b = data_index[parents_indices[1]]
 
         return pa_x, pa_y, pb_x, pb_y, in_a, in_b
