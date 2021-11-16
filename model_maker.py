@@ -191,25 +191,25 @@ def model_flavors_ensemble():
     models_auc.append(("genRLTACC-lin-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "roulette", 0.5))
 
     
-    models_auc.append(("genTNAUC-rbf-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "tournament", 0.5))
-    models_auc.append(("genTNAUC-sig-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "auc", "tournament", 0.5))
-    models_auc.append(("genTNAUC-pol-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "tournament", 0.5))
-    models_auc.append(("genTNAUC-lin-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "tournament", 0.5))
+    # models_auc.append(("genTNAUC-rbf-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "tournament", 0.5))
+    # models_auc.append(("genTNAUC-sig-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "auc", "tournament", 0.5))
+    # models_auc.append(("genTNAUC-pol-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "tournament", 0.5))
+    # models_auc.append(("genTNAUC-lin-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "tournament", 0.5))
 
-    models_auc.append(("genTNAUC-rbf-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "tournament", 0.5))
-    models_auc.append(("genTNAUC-sig-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "auc", "tournament", 0.5))
-    models_auc.append(("genTNAUC-pol-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "tournament", 0.5))
-    models_auc.append(("genTNAUC-lin-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "tournament", 0.5))
+    # models_auc.append(("genTNAUC-rbf-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "tournament", 0.5))
+    # models_auc.append(("genTNAUC-sig-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "auc", "tournament", 0.5))
+    # models_auc.append(("genTNAUC-pol-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "tournament", 0.5))
+    # models_auc.append(("genTNAUC-lin-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "auc", "tournament", 0.5))
 
-    models_auc.append(("genTNACC-rbf-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "tournament", 0.5))
-    models_auc.append(("genTNACC-sig-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "acc", "tournament", 0.5))
-    models_auc.append(("genTNACC-pol-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "tournament", 0.5))
-    models_auc.append(("genTNACC-lin-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "tournament", 0.5))
+    # models_auc.append(("genTNACC-rbf-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "tournament", 0.5))
+    # models_auc.append(("genTNACC-sig-NOTdiv", adaboost_svm(div_flag=False, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "acc", "tournament", 0.5))
+    # models_auc.append(("genTNACC-pol-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "tournament", 0.5))
+    # models_auc.append(("genTNACC-lin-NOTdiv", adaboost_svm(div_flag=False, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "tournament", 0.5))
 
-    models_auc.append(("genTNACC-rbf-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "tournament", 0.5))
-    models_auc.append(("genTNACC-sig-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "acc", "tournament", 0.5))
-    models_auc.append(("genTNACC-pol-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "tournament", 0.5))
-    models_auc.append(("genTNACC-lin-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "tournament", 0.5))
+    # models_auc.append(("genTNACC-rbf-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "tournament", 0.5))
+    # models_auc.append(("genTNACC-sig-YESdiv", adaboost_svm(div_flag=True, my_c=1000, my_gamma_end=0.1, myKernel='sigmoid', myDegree=2, myCoef0=-1), "absv",  "gene", mut_rate, "acc", "tournament", 0.5))
+    # models_auc.append(("genTNACC-pol-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='poly',    myDegree=2, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "tournament", 0.5))
+    # models_auc.append(("genTNACC-lin-YESdiv", adaboost_svm(div_flag=True, my_c= 100, my_gamma_end=0.1, myKernel='linear',  myDegree=1, myCoef0=+1), "absv",  "gene", mut_rate, "acc", "tournament", 0.5))
 
     return models_auc
 
