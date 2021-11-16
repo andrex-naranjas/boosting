@@ -196,7 +196,7 @@ class genetic_selection:
         for _ in range(2):
             competitors = np.random.choice(indices, size_k, replace=False)
             best_competitor = min(competitors)
-            indices.delete(best_competitor)
+            indices = np.delete(indices, best_competitor)
             parents_indices.append(best_competitor)
 
         pa_x = popx[parents_indices[0]]
