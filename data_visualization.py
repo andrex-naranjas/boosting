@@ -7,10 +7,12 @@
 # visualization module
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.offsetbox import AnchoredText
 from scipy.stats import norm
 import pandas as pd
 import math as math
 from sklearn.metrics import auc
+import csv
 
 # frame plots
 def plot_frame(frame,name,xlabel,ylabel,yUserRange,ymin,ymax,sample):
@@ -105,7 +107,7 @@ def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name, my_kernel='rbf'):
     plt.close()
 
 
-def plot_ordered_stats_summary(val_auc, val_acc, val_prc, names, sample_name, metric='auc'):
+def plot_ordered_stats_summary(val_acc, val_auc, val_prc, names, sample_name, metric='auc'):
 
     fig = plt.figure()
     fig.subplots_adjust(bottom=0.275, top=0.99, right=0.99, left=0.085)
@@ -113,16 +115,20 @@ def plot_ordered_stats_summary(val_auc, val_acc, val_prc, names, sample_name, me
     size_x = len(val_auc)
     
     x = np.linspace(0, size_x, size_x)
-    y1 = val_auc
-    y2 = val_acc
+    y1 = val_acc
+    y2 = val_auc
     y3 = val_prc
     ax.set_xticks(x)
     #ax.set_ylim([-0.05,1.05])
     ax.set_xticklabels(names, rotation=90, ha='center', fontsize=7)
 
-    ax.scatter(x,y1, c='b', marker="^", label='AUC')
-    ax.scatter(x,y2, c='r', marker="+", label='ACC')
+    ax.scatter(x,y1, c='b', marker="^", label='ACC')
+    ax.scatter(x,y2, c='r', marker="+", label='AUC')
     ax.scatter(x,y3, c='k', marker=".", label='PRC')
+    at = AnchoredText(sample_name, prop=dict(size=12.5), frameon=False, loc='lower left')
+    at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
+    ax.add_artist(at)
+
 
     
     plt.axhline(y=np.mean(y2), color="r", linewidth=0.75, linestyle="--")
@@ -139,7 +145,7 @@ def plot_ordered_stats_summary(val_auc, val_acc, val_prc, names, sample_name, me
     
     #plt.xlabel(xlabel)
     plt.ylabel('Metric A.U.')
-    #plt.title(quark+' mesons')
+
     plt.savefig('./plots/rank_'+metric+'_'+sample_name+'.pdf')
     plt.close()
 
@@ -151,10 +157,10 @@ def save_df_selected_classifiers(mean_list_auc, mean_list_acc, mean_list_prc, na
     selected_classifiers = []
     for i in range(len(mean_list_auc)):
         
-        if mean_list_acc[i] > thres_acc and mean_list_prc[i] > thres_prc:
+        if mean_list_acc[i] > thres_acc and mean_list_prc[i] > thres_prc or True:
             selected_classifiers.append(name_list[i])
 
-        if len(selected_classifiers) == 10:
+        if len(selected_classifiers) == 4:
             break
         
     total_selected_classifier_val = []
@@ -424,10 +430,10 @@ def latex_table_student(names, sample, auc_val, auc_error, auc_pval, prc_val, pr
 def latex_table_student_single(names, sample, metric_name=None, metric_val=None, metric_error=None,
                                pvalues=None, mean_values=None, error_values=None, f_out=None):
 
-    mean_err_1 = '$'+str(round(mean_values[0],2))+'\\pm'+str(round(error_values[0],2))+'$'
-    mean_err_2 = '$'+str(round(mean_values[1],2))+'\\pm'+str(round(error_values[1],2))+'$'
-    mean_err_3 = '$'+str(round(mean_values[2],2))+'\\pm'+str(round(error_values[2],2))+'$'
-    mean_err_4 = '$'+str(round(mean_values[3],2))+'\\pm'+str(round(error_values[3],2))+'$'
+    mean_err_1 = '$'+str(round(mean_values[0],2))+'\\!\\!\\pm\\!\\!'+str(round(error_values[0],2))+'$'
+    mean_err_2 = '$'+str(round(mean_values[1],2))+'\\!\\!\\pm\\!\\!'+str(round(error_values[1],2))+'$'
+    mean_err_3 = '$'+str(round(mean_values[2],2))+'\\!\\!\\pm\\!\\!'+str(round(error_values[2],2))+'$'
+    mean_err_4 = '$'+str(round(mean_values[3],2))+'\\!\\!\\pm\\!\\!'+str(round(error_values[3],2))+'$'
 
     pval_1 = pvalues[0]
     pval_2 = pvalues[1]
@@ -439,9 +445,19 @@ def latex_table_student_single(names, sample, metric_name=None, metric_val=None,
     reject_3 = ''
     reject_4 = ''
     alpha = 0.05
+
+    blue_1 = 0
+    blue_2 = 0
+    blue_3 = 0
+    blue_4 = 0
+
+    red_1 = 0
+    red_2 = 0
+    red_3 = 0
+    red_4 = 0
     
     print("\\begin{tabular}{c  c | c  c  c  c}\hline \hline", file=f_out)
-    print(sample,     "&         &  Model1        &  Model2         &  Model3         &  Model4         \\\  \hline", file=f_out)
+    print(sample,     "&         &  Ensemble1        &  Ensemble2         &  Ensemble3         &  Ensemble4         \\\  \hline", file=f_out)
     print(metric_name,"&         &", mean_err_1, "&", mean_err_2,  "&", mean_err_3,  "&", mean_err_4, " \\\  \hline", file=f_out)
     print("Model & $\mu_{mtrc}$  &  R.$H_{0}$ &  R.$H_{0}$ & R.$H_{0}$  &  R.$H_{0}$   \\\  \hline", file=f_out)
 
@@ -449,40 +465,136 @@ def latex_table_student_single(names, sample, metric_name=None, metric_val=None,
         j = k + 1
         if pval_1[j] < alpha:
             if metric_val[j] < mean_values[0]:
+                blue_1+=1
                 reject_1 = '\\textcolor{blue}{\\checkmark}'
             else:
+                red_1+=1
                 reject_1 = '\\textcolor{red}{\\checkmark}'        
         else:   reject_1 = '\\xmark'
 
         if pval_2[j] < alpha:
             if metric_val[j] < mean_values[1]:
+                blue_2+=1
                 reject_2 = '\\textcolor{blue}{\\checkmark}'
             else:
-                reject_2 = '\\textcolor{red}{\\checkmark}'        
+                red_2+=1
+                reject_2 = '\\textcolor{red}{\\checkmark}'
         else:   reject_2 = '\\xmark'
 
         if pval_3[j] < alpha:
             if metric_val[j] < mean_values[2]:
+                blue_3+=1
                 reject_3 = '\\textcolor{blue}{\\checkmark}'
             else:
+                red_3+=1
                 reject_3 = '\\textcolor{red}{\\checkmark}'        
         else:   reject_3 = '\\xmark'
 
         if pval_4[j] < alpha:
             if metric_val[j] < mean_values[3]:
+                blue_4+=1
                 reject_4 = '\\textcolor{blue}{\\checkmark}'
             else:
+                red_4+=1
                 reject_4 = '\\textcolor{red}{\\checkmark}'        
         else:   reject_4 = '\\xmark'
         
         
         print(names[j], '&',
-              '$', str(round(metric_val[j],2))+'\\pm'+ str(round(metric_error[j],2)), "$",'&', reject_1, '&', reject_2,' & ',
+              '$', str(round(metric_val[j],2))+'\\!\\!\\pm\\!\\!'+ str(round(metric_error[j],2)), "$",'&', reject_1, '&', reject_2,' & ',
               reject_3, '&', reject_4, ' \\\ ', file=f_out)
                         
     print('\hline \hline', file=f_out)
     print('\end{tabular}', file=f_out)
     print("\label{tab:student}", file=f_out)
+
+    # save total count to a CSV files
+    header_csv = ['blue_1', 'red_1', 'blue_2', 'red_2', 'blue_3', 'red_3', 'blue_4', 'red_4', 'sample', 'metric_name']
+    data_csv   = [blue_1, red_1, blue_2, red_2, blue_3, red_3, blue_4, red_4, sample, metric_name]
+    with open('./tables/CSV/blue_red_'+sample+'_'+metric_name+'.csv', 'w', encoding='UTF8', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(header_csv)
+        writer.writerow(data_csv)
+
+
+
+def avarage_table_studente(metric='AUC'):
+
+    titanic = pd.read_csv('./tables/CSV/blue_red_titanic_'+metric+'.csv')
+    cancer  = pd.read_csv('./tables/CSV/blue_red_cancer_'+metric+'.csv')
+    german  = pd.read_csv('./tables/CSV/blue_red_german_'+metric+'.csv')
+    heart   = pd.read_csv('./tables/CSV/blue_red_heart_'+metric+'.csv')
+    car     = pd.read_csv('./tables/CSV/blue_red_car_'+metric+'.csv')
+    ecoli   = pd.read_csv('./tables/CSV/blue_red_ecoli_'+metric+'.csv')
+    wine    = pd.read_csv('./tables/CSV/blue_red_wine_'+metric+'.csv')
+    abalone = pd.read_csv('./tables/CSV/blue_red_abalone_'+metric+'.csv')
+
+    #     blue_1,red_1,blue_2,red_2,blue_3,red_3,blue_4,red_4,sample,metric_name
+    # 10,0,0,17,7,0,4,0,ecoli,ACC
+
+    blue_ensamble_1 = titanic['blue_1'][0]+cancer['blue_1'][0]+german['blue_1'][0]+heart['blue_1'][0]+car['blue_1'][0]+ecoli['blue_1'][0]+wine['blue_1'][0]+abalone['blue_1'][0]
+    blue_ensamble_2 = titanic['blue_2'][0]+cancer['blue_2'][0]+german['blue_2'][0]+heart['blue_2'][0]+car['blue_2'][0]+ecoli['blue_2'][0]+wine['blue_2'][0]+abalone['blue_2'][0]
+    blue_ensamble_3 = titanic['blue_3'][0]+cancer['blue_3'][0]+german['blue_3'][0]+heart['blue_3'][0]+car['blue_3'][0]+ecoli['blue_3'][0]+wine['blue_3'][0]+abalone['blue_3'][0]
+    blue_ensamble_4 = titanic['blue_4'][0]+cancer['blue_4'][0]+german['blue_4'][0]+heart['blue_4'][0]+car['blue_4'][0]+ecoli['blue_4'][0]+wine['blue_4'][0]+abalone['blue_4'][0]
+
+    red_ensamble_1 = titanic['red_1'][0]+cancer['red_1'][0]+german['red_1'][0]+heart['red_1'][0]+car['red_1'][0]+ecoli['red_1'][0]+wine['red_1'][0]+abalone['red_1'][0]
+    red_ensamble_2 = titanic['red_2'][0]+cancer['red_2'][0]+german['red_2'][0]+heart['red_2'][0]+car['red_2'][0]+ecoli['red_2'][0]+wine['red_2'][0]+abalone['red_2'][0]
+    red_ensamble_3 = titanic['red_3'][0]+cancer['red_3'][0]+german['red_3'][0]+heart['red_3'][0]+car['red_3'][0]+ecoli['red_3'][0]+wine['red_3'][0]+abalone['red_3'][0]
+    red_ensamble_4 = titanic['red_4'][0]+cancer['red_4'][0]+german['red_4'][0]+heart['red_4'][0]+car['red_4'][0]+ecoli['red_4'][0]+wine['red_4'][0]+abalone['red_4'][0]
+
+    blue_1 = str(blue_ensamble_1)
+    blue_2 = str(blue_ensamble_2)
+    blue_3 = str(blue_ensamble_3) 
+    blue_4 = str(blue_ensamble_4)
+    
+    red_1  = str(red_ensamble_1)
+    red_2  = str(red_ensamble_2)  
+    red_3  = str(red_ensamble_3)  
+    red_4  = str(red_ensamble_4)
+
+    titanic_string =''
+    cancer_string  =''
+    german_string  =''
+    heart_string   =''
+    car_string     =''
+    ecoli_string   =''
+    wine_string    =''
+    abalone_string =''
+    
+    n_ensem=4
+    for i in range(n_ensem):
+        column = ''
+        if i!=n_ensem-1: column ='&'
+        titanic_string += ' '+str(titanic['blue_'+str(i+1)][0])+' & '+str(titanic['red_'+str(i+1)][0]) + column
+        cancer_string  += ' '+str(cancer['blue_'+str(i+1)][0]) +' & '+str(cancer['red_'+str(i+1)][0])  + column
+        german_string  += ' '+str(german['blue_'+str(i+1)][0]) +' & '+str(german['red_'+str(i+1)][0])  + column
+        heart_string   += ' '+str(heart['blue_'+str(i+1)][0])  +' & '+str(heart['red_'+str(i+1)][0])   + column
+        car_string     += ' '+str(car['blue_'+str(i+1)][0])    +' & '+str(car['red_'+str(i+1)][0])     + column
+        ecoli_string   += ' '+str(ecoli['blue_'+str(i+1)][0])  +' & '+str(ecoli['red_'+str(i+1)][0])   + column
+        wine_string    += ' '+str(wine['blue_'+str(i+1)][0]   )+' & '+str(wine['red_'+str(i+1)][0])    + column
+        abalone_string += ' '+str(abalone['blue_'+str(i+1)][0])+' & '+str(abalone['red_'+str(i+1)][0]) + column
+
+    f_out=open('./tables/blue_red_'+metric+'.tex', "w")
+    print("\\begin{tabular}{c | c c | c c | c c | c c}\hline \hline", file=f_out)
+    print( metric, "         &  Ensemble1    &    &  Ensemble2  &       &  Ensemble3   &      &  Ensemble4   &      \\\  \hline", file=f_out)
+    print("Dataset   &   $N_{rej}^{+}$ & $N_{rej}^{-}$ & $N_{rej}^{+}$ & $N_{rej}^{-}$ & $N_{rej}^{+}$ & $N_{rej}^{-}$ & $N_{rej}^{+}$ & $N_{rej}^{-}$   \\\  \hline", file=f_out)
+    
+    print('titanic &', titanic_string + "\\\ ", file=f_out)
+    print('cancer &',  cancer_string  + "\\\ ", file=f_out)
+    print('german &',  german_string  + "\\\ ", file=f_out)
+    print('heart &',   heart_string   + "\\\ ", file=f_out)
+    print('car &',     car_string     + "\\\ ", file=f_out)
+    print('ecoli &',   ecoli_string   + "\\\ ", file=f_out)
+    print('wine &',    wine_string    + "\\\ ", file=f_out)
+    print('abalone &', abalone_string + "\\\ ", file=f_out)
+
+    print("\hline", file=f_out)
+    print('Total &', blue_1+' & '+red_1+' & '+ blue_2+' & '+red_2+' & '+ blue_3+' & '+red_3+' & '+ blue_4+' &  '+red_4+' \\\ ', file=f_out)
+                            
+    print('\hline \hline', file=f_out)
+    print('\end{tabular}', file=f_out)
+    print("\label{tab:student}", file=f_out)
+
 
 def latex_table_mcnemar(names, p_values,stats,rejects, area2s, prec2s, f1_2s, recall2s, acc2s, gmean2s,
                                                 area1,  prec1,  f1_1, recall1,  acc1,  gmean1, f_out):

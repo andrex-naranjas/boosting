@@ -15,6 +15,7 @@ import uproot
 # sklearn utils
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
+from sklearn.utils import resample
 # data visualization module
 import data_visualization as dv
 
@@ -48,7 +49,7 @@ class data_preparation:
         elif sample == "adult":
             data_set = pd.read_csv(self.workpath+"/data/adult.csv")
         elif sample == "connect":
-            data_set = pd.read_csv(self.workpath+"/data/connect.csv")            
+            data_set = pd.read_csv(self.workpath+"/data/connect.csv")
         elif sample == "contra":
             data_set = pd.read_csv(self.workpath+"/data/contra.csv")
         elif sample == "tac_toe":
@@ -72,6 +73,12 @@ class data_preparation:
             file_test  = uproot.open(self.workpath+"/data/test_D02kpipi0vxVc-cont0p5.root")
             data_test  = file_test["d0tree"].arrays(library="pd")
             #return data_train
+            return (data_train, data_test)
+        elif sample == "belle2_challenge":
+            file_train = uproot.open(self.workpath+"/data/train_D02kpipi0vxVc-cont0p5.root")
+            data_train = file_train["d0tree"].arrays(library="pd")
+            file_test  = uproot.open(self.workpath+"/data/test_D02kpipi0vxVc-cont0p5.root")
+            data_test  = file_test["d0tree"].arrays(library="pd")
             return (data_train, data_test)
         else:
             sys.exit("The sample name provided does not exist. Try again!")
@@ -107,7 +114,7 @@ class data_preparation:
         elif sample_name == "solar":
             X,Y = self.solar(data_set)
         elif sample_name == "car":
-            X,Y = self.car(data_set)            
+            X,Y = self.car(data_set)
         elif sample_name == "ecoli":
             X,Y = self.ecoli(data_set)
         elif sample_name == "wine":
@@ -130,6 +137,9 @@ class data_preparation:
         elif sample_name == "belle2_iv":
             train_test = True
             X_train, Y_train, X_test, Y_test = self.belle2_iv(data_train, data_test, sampling, sample_name=sample_name)
+        elif sample_name == "belle2_challenge":
+            train_test = True
+            X_train, Y_train, X_test, Y_test = self.belle2_challenge(data_train, data_test, sampling, sample_name=sample_name)
 
         # print data after preparation
         if not sampling:
@@ -145,7 +155,7 @@ class data_preparation:
             if not train_test:
                 return X,Y
             else:
-                return X_train, Y_train, X_test, Y_test                
+                return X_train, Y_train, X_test, Y_test   
                                   
         # divide sample into train and test sample
         if indexes is None:
@@ -258,7 +268,6 @@ class data_preparation:
         X_train = sampled_data_train.drop("isSignal", axis=1)
         X_test  = sampled_data_test.drop("isSignal", axis=1)
         return X_train, Y_train, X_test, Y_test
-
     
     # belle2 data preparation
     def belle2_3pi(self, data_train, data_test, sampling, sample_name):
@@ -295,6 +304,57 @@ class data_preparation:
         sampled_data_train = sampled_data_train.drop("M", axis=1)
         sampled_data_test  = sampled_data_test.drop("M", axis=1)
 
+        # column names list
+        cols = list(sampled_data_train.columns)        
+        # data scaling [0,1]
+        sampled_data_train = pd.DataFrame(MinMaxScaler().fit_transform(sampled_data_train),columns = cols)
+        sampled_data_test  = pd.DataFrame(MinMaxScaler().fit_transform(sampled_data_test), columns = cols)
+        
+        X_train = sampled_data_train.drop("isSignal", axis=1)
+        X_test  = sampled_data_test.drop("isSignal", axis=1)
+        return X_train, Y_train, X_test, Y_test
+
+
+    def belle2_challenge(self, data_train, data_test, sampling, sample_name):
+
+        data_train = data_train.copy()
+        data_train.loc[data_train["isSignal"] == 0, "isSignal"] = -1
+        data_test = data_test.copy()
+        data_test.loc[data_test["isSignal"] == 0, "isSignal"] = -1
+
+        if(sampling or self.genetic and False): # sampling already done or not needed
+            Y_train = data_train["isSignal"]
+            Y_test  = data_test["isSignal"]
+            # Data scaling [0,1]
+            cols = list(data_train.columns)        
+            data_train = pd.DataFrame(MinMaxScaler().fit_transform(data_train),columns = cols)
+            data_train = data_train.drop("vM", axis=1)
+            data_train = data_train.drop("vpCMS", axis=1)
+            data_train = data_train.drop("__index__", axis=1)
+
+            data_test  = pd.DataFrame(MinMaxScaler().fit_transform(data_test) ,columns = cols)
+            data_test  = data_test.drop("vM", axis=1)
+            data_test  = data_test.drop("vpCMS", axis=1)
+            data_test  = data_test.drop("__index__", axis=1)
+            
+            X_test  = data_test.drop("isSignal", axis=1)
+            X_train = data_train.drop("isSignal", axis=1)
+            return X_train, Y_train, X_test, Y_test
+        
+        sampled_data_train = resample(data_train, replace = False, n_samples = 1000, random_state=None)
+        sampled_data_test  = resample(data_test,  replace = False, n_samples = 10000, random_state=None)
+
+        Y_train = sampled_data_train["isSignal"]
+        Y_test  = sampled_data_test["isSignal"]
+
+        sampled_data_train = sampled_data_train.drop("vM", axis=1)
+        sampled_data_train = sampled_data_train.drop("vpCMS", axis=1)
+        sampled_data_train = sampled_data_train.drop("__index__", axis=1)
+
+        sampled_data_test  = sampled_data_test.drop("vM", axis=1)
+        sampled_data_test  = sampled_data_test.drop("vpCMS",  axis=1)
+        sampled_data_test  = sampled_data_test.drop("__index__",  axis=1)
+        
         # column names list
         cols = list(sampled_data_train.columns)        
         # data scaling [0,1]

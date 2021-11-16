@@ -44,7 +44,7 @@ myKernel = "rbf"
 data = data_preparation(GA_selection=True)
 
 sample_list = [sample_input]
-sample_list = ["titanic", "cancer", "german", "heart", "car", "ecoli", "wine", "abalone"] # solar, cancer
+sample_list = ["titanic", "cancer", "german", "heart", "car", "ecoli", "wine", "abalone"]#, "solar"] # solar, cancer
 # loop over datasets in sample_list for AdaBoostSVM and other classifiers. get ROC curves & metrics
 for name in sample_list:
     print("Analysing sample: ", name)
@@ -196,7 +196,14 @@ for name in sample_list:
 
     # mix of two worlds
     selected_ensembles = ['trad-rbf-YESdiv', 'genHLAUC-rbf-NOTdiv', 'genHLAUC-lin-NOTdiv', 'genRLTACC-lin-YESdiv']
-    # selected_ensembles = ['trad-rbf-YESdiv', 'trad-rbf-YESdiv', 'trad-rbf-YESdiv', 'trad-rbf-YESdiv']
+    selected_ensembles = ['trad-rbf-YESdiv', 'trad-rbf-YESdiv', 'trad-rbf-YESdiv', 'trad-rbf-YESdiv']
+
+    selected_ensembles = ['genHLACC-lin-NOTdiv', 'genRLTAUC-lin-YESdiv', 'genRLTACC-lin-NOTdiv', 'genRLTACC-lin-YESdiv'] # selected con accuracy
+    selected_ensembles = ['genHLAUC-rbf-YESdiv', 'genRLTAUC-rbf-NOTdiv', 'genRLTACC-rbf-YESdiv','genRLTAUC-lin-NOTdiv'] # selected with no regulsrization
+    selected_ensembles = ['trad-rbf-YESdiv', 'genRLTAUC-rbf-NOTdiv', 'genRLTACC-rbf-YESdiv','genRLTACC-lin-NOTdiv']
+    # "genRLTACC-pol-YESdiv"
+    # "genRLTACC-lin-YESdiv"
+    
 
     # all about RBF
     # selected_ensembles = ['genHLAUC-rbf-NOTdiv',
@@ -211,6 +218,9 @@ for name in sample_list:
         
     #stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', stats_type='student', boot_kfold='boot')
 
+    dv.avarage_table_studente(metric='AUC')
+    dv.avarage_table_studente(metric='ACC')
+    dv.avarage_table_studente(metric='PRC')
         
 #performance = model_performance(model, X_train, Y_train, X_test, Y_test)
 

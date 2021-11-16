@@ -50,6 +50,7 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
     else: sample_train_df, sample_test_df = sample_df_temp
         
     area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores,time_scores = ([]),([]),([]),([]),([]),([]),([])
+    n_class_scores, n_train_scores = ([]), ([])
 
     data_size = sample_df.shape[0]
     n_samples = int(split_frac*data_size)
@@ -91,6 +92,7 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
                                                             data_train=sampled_data_train, data_test = sampled_data_test,
                                                             sampling=True, split_sample=0.4)
         model.fit(X_train, Y_train)
+        n_base_class = 0
         if(model.n_classifiers!=0):
             y_pred = model.predict(X_test)
             prec = precision_score(Y_test, y_pred)
@@ -98,6 +100,7 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
             recall = recall_score(Y_test, y_pred)
             acc = accuracy_score(Y_test, y_pred)
             gmean = np.sqrt(prec*recall)
+            n_base_class = model.n_classifiers
             # calcualate roc-auc depending on the classifier
             if roc_area=="absv":
                 y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
@@ -119,6 +122,8 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
             recall_scores = np.append(recall_scores, recall)
             acc_scores    = np.append(acc_scores, acc)
             gmean_scores  = np.append(gmean_scores, gmean)
+            n_class_scores = np.append(n_class_scores, n_base_class)
+            n_train_scores = np.append(n_train_scores, len(X_train))
         else: # this needs to be re-checked carefully
             end=time.time()
             time_scores   = np.append(time_scores, end-start)
@@ -128,11 +133,13 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
             recall_scores = np.append(recall_scores, 0)
             acc_scores    = np.append(acc_scores, 0)
             gmean_scores  = np.append(gmean_scores, 0)
+            n_class_scores = np.append(n_class_scores, 0)
+            n_train_scores = np.append(n_train_scores, len(X_train))
             
-    return area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores,time_scores
+    return area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores,time_scores,n_class_scores,n_class_scores,n_train_scores
 
 
-def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', GA_selec='', GA_coef=0.5, kfolds=1, n_reps=1, path='.'):
+def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.25, GA_score='', GA_selec='', GA_coef=0.5, kfolds=1, n_reps=1, path='.'):
     
     # fetch data_frame without preparation
     data = data_preparation(path)
@@ -142,6 +149,7 @@ def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_sco
     else: sample_train_df, sample_test_df = sample_df_temp
 
     area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores,time_scores = ([]),([]),([]),([]),([]),([]),([])
+    n_class_scores, n_train_scores = ([]), ([])
         
     X,Y = data.dataset(sample_name=sample_name, data_set=sample_df,
                        sampling=True, split_sample=0.0)
@@ -171,9 +179,11 @@ def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_sco
             print(len(Y_train[Y_train==1]), 'important check for GA outcome')
             
         model.fit(X_train, Y_train)
+        n_base_class = 0
         no_zero_classifiers = True
         if roc_area=="absv":
-            if model.n_classifiers==0:
+            n_base_class = model.n_classifiers
+            if n_base_class==0:
                 no_zero_classifiers = False
                 
         if no_zero_classifiers:
@@ -197,24 +207,28 @@ def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.3, GA_sco
                 area = roc_auc_score(Y_test, Y_pred_dec)
 
             end=time.time()
-            time_scores   = np.append(time_scores, end-start)
-            area_scores   = np.append(area_scores, area)
-            prec_scores   = np.append(prec_scores, prec)
-            f1_scores     = np.append(f1_scores,   f1)
-            recall_scores = np.append(recall_scores, recall)
-            acc_scores    = np.append(acc_scores, acc)
-            gmean_scores  = np.append(gmean_scores, gmean)
+            time_scores    = np.append(time_scores, end-start)
+            area_scores    = np.append(area_scores, area)
+            prec_scores    = np.append(prec_scores, prec)
+            f1_scores      = np.append(f1_scores,   f1)
+            recall_scores  = np.append(recall_scores, recall)
+            acc_scores     = np.append(acc_scores, acc)
+            gmean_scores   = np.append(gmean_scores, gmean)
+            n_class_scores = np.append(n_class_scores, n_base_class)
+            n_train_scores = np.append(n_train_scores, len(X_train))
         else: # this needs to be re-checked carefully
             end=time.time()
-            time_scores   = np.append(time_scores, end-start)
-            area_scores   = np.append(area_scores, 0)
-            prec_scores   = np.append(prec_scores, 0)
-            f1_scores     = np.append(f1_scores,   0)
-            recall_scores = np.append(recall_scores, 0)
-            acc_scores    = np.append(acc_scores, 0)
-            gmean_scores  = np.append(gmean_scores, 0)
+            time_scores    = np.append(time_scores, end-start)
+            area_scores    = np.append(area_scores, 0)
+            prec_scores    = np.append(prec_scores, 0)
+            f1_scores      = np.append(f1_scores,   0)
+            recall_scores  = np.append(recall_scores, 0)
+            acc_scores     = np.append(acc_scores, 0)
+            gmean_scores   = np.append(gmean_scores, 0)
+            n_class_scores = np.append(n_class_scores, 0)
+            n_train_scores = np.append(n_train_scores, len(X_train))
 
-    return area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores,time_scores
+    return area_scores,prec_scores,f1_scores,recall_scores,acc_scores,gmean_scores,time_scores,n_class_scores,n_train_scores
 
 
 def mcnemar_table(y_pred1, y_pred2, y_test):
@@ -597,11 +611,11 @@ def best_absvm_ensemble(sample_name='titanic', boot_kfold='boot'):
         
     # select and plot the flavours we want to further analize
     # sort the first list and map ordered indexes to the second list
-    mean_list_auc, name_list, mean_list_acc, mean_list_prc = zip(*sorted(zip(mean_auc, flavor_names, mean_acc, mean_prc), reverse=True))
+    mean_list_acc, name_list, mean_list_auc, mean_list_prc = zip(*sorted(zip(mean_acc, flavor_names, mean_auc, mean_prc), reverse=True))
     
     # select the best 10 AUC, with the requirement that the ACC and PRC are above average
-    dv.plot_ordered_stats_summary(mean_list_auc, mean_list_acc, mean_list_prc, name_list, sample_name, metric='auc')
-    dv.save_df_selected_classifiers(mean_list_auc, mean_list_acc, mean_list_prc, name_list, flavor_names, sample_name)
+    dv.plot_ordered_stats_summary(mean_list_acc, mean_list_auc, mean_list_prc, name_list, sample_name, metric='auc')
+    dv.save_df_selected_classifiers(mean_list_acc, mean_list_auc, mean_list_prc, name_list, flavor_names, sample_name)
     
 
 def statistical_tests(sample_name='titanic', class_interest=['trad-rbf-NOTdiv'], metric='AUC', stats_type='student', boot_kfold='boot'):
