@@ -184,8 +184,6 @@ class genetic_selection:
         pb_x = pop_x[lf]
         pb_y = pop_y[lf]
         in_b = data_index[lf]
-        print(np.shape(pa_x), np.shape(pa_y), np.shape(pb_x), np.shape(pb_y), 'check high low')
-        print(len(pa_x[0]), len(pa_y[0]), len(pb_x[0]), len(pb_y[0]), 'check high low')
 
         return pa_x, pa_y, pb_x, pb_y, in_a, in_b
 
