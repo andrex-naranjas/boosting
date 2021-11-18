@@ -184,6 +184,8 @@ class genetic_selection:
         pb_x = pop_x[lf]
         pb_y = pop_y[lf]
         in_b = data_index[lf]
+        print(np.shape(pa_x), np.shape(pa_y), np.shape(pb_x), np.shape(pb_y), 'check high low')
+        print(len(pa_x[0]), len(pa_y[0]), len(pb_x[0]), len(pb_y[0]), 'check high low')
 
         return pa_x, pa_y, pb_x, pb_y, in_a, in_b
 
@@ -195,17 +197,17 @@ class genetic_selection:
 
         for _ in range(2):
             competitors = np.random.choice(indices, size_k, replace=False)
-            best_competitor = min(competitors)
+            best_competitor = np.min(competitors)
             indices = np.delete(indices, best_competitor)
             parents_indices.append(best_competitor)
 
-        pa_x = popx[parents_indices[0]]
-        pa_y = popy[parents_indices[0]]
-        in_a = data_index[parents_indices[0]]
+        pa_x = [popx[parents_indices[0]]]
+        pa_y = [popy[parents_indices[0]]]
+        in_a = [data_index[parents_indices[0]]]
 
-        pb_x = popx[parents_indices[1]]
-        pb_y = popy[parents_indices[1]]
-        in_b = data_index[parents_indices[1]]
+        pb_x = [popx[parents_indices[1]]]
+        pb_y = [popy[parents_indices[1]]]
+        in_b = [data_index[parents_indices[1]]]
 
         return pa_x, pa_y, pb_x, pb_y, in_a, in_b
 

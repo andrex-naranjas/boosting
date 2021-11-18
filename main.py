@@ -116,18 +116,18 @@ for name in sample_list:
     # print(len(X_train), len(Y_train), len(X_test), len(Y_test))
 
     # test genetic selection
-    # model_test = mm.adaboost_svm(div_flag=True, my_gamma_end=100, myKernel='poly', myDegree=2, debug=False)
-    # #adaboost_svm(div_flag=False, my_c=100, my_gamma_end=100, myKernel='rbf', myDegree=1, myCoef0=1, early_stop=True, debug=True)
-    # #model = AdaBoostSVM(C=50, gammaIni=5, myKernel=myKernel)
-    # # genRLTAUC-sig-YESdiv_kfold
-    # start_GA = datetime.datetime.now()
-    # GA_selection = genetic_selection(model_test, "absv", X_train, Y_train, X_test, Y_test,
-    #                                  pop_size=10, chrom_len=250, n_gen=50, coef=0.5, mut_rate=0.3, score_type="auc", selec_type="roulette")
+    model_test = mm.adaboost_svm(div_flag=True, my_c=100, my_gamma_end=100, myKernel='rbf', myDegree=2, debug=False)
+    #adaboost_svm(div_flag=False, my_c=100, my_gamma_end=100, myKernel='rbf', myDegree=1, myCoef0=1, early_stop=True, debug=True)
+    #model = AdaBoostSVM(C=50, gammaIni=5, myKernel=myKernel)
+    # genRLTAUC-sig-YESdiv_kfold
+    start_GA = datetime.datetime.now()
+    GA_selection = genetic_selection(model_test, "absv", X_train, Y_train, X_test, Y_test,
+                                     pop_size=10, chrom_len=250, n_gen=50, coef=0.5, mut_rate=0.3, score_type="auc", selec_type="tournament")
     
-    # GA_selection.execute()
-    # GA_train_indexes = GA_selection.best_population()
-    # end_GA = datetime.datetime.now()
-    # elapsed_time_GA = end_GA - start_GA
+    GA_selection.execute()
+    GA_train_indexes = GA_selection.best_population()
+    end_GA = datetime.datetime.now()
+    elapsed_time_GA = end_GA - start_GA
 
     # print(len(GA_train_indexes), type(GA_train_indexes), 'PARRITO PRECIOSO' )
 
@@ -189,38 +189,39 @@ for name in sample_list:
     # genHLAUC-rbf-NOTdiv, genHLAUC-rbf-YESdiv, genHLACC-rbf-NOTdiv, genRLTAUC-rbf-NOTdiv
     # genRLTAUC-rbf-YESdiv, genRLTACC-rbf-YESdiv
 
-    
-    ss.best_absvm_ensemble(sample_name=name, boot_kfold='kfold')
-    dv.voting_table()
-    #selected_ensembles = ['trad-rbf-YESdiv', 'genHLACC-lin-NOTdiv', 'genRLTAUC-lin-NOTdiv', 'genRLTACC-lin-YESdiv']
-
-    # mix of two worlds
-    selected_ensembles = ['trad-rbf-YESdiv', 'genHLAUC-rbf-NOTdiv', 'genHLAUC-lin-NOTdiv', 'genRLTACC-lin-YESdiv']
-    selected_ensembles = ['trad-rbf-YESdiv', 'trad-rbf-YESdiv', 'trad-rbf-YESdiv', 'trad-rbf-YESdiv']
-
-    selected_ensembles = ['genHLACC-lin-NOTdiv', 'genRLTAUC-lin-YESdiv', 'genRLTACC-lin-NOTdiv', 'genRLTACC-lin-YESdiv'] # selected con accuracy
-    selected_ensembles = ['genHLAUC-rbf-YESdiv', 'genRLTAUC-rbf-NOTdiv', 'genRLTACC-rbf-YESdiv','genRLTAUC-lin-NOTdiv'] # selected with no regulsrization
-    selected_ensembles = ['trad-rbf-YESdiv', 'genRLTAUC-rbf-NOTdiv', 'genRLTACC-rbf-YESdiv','genRLTACC-lin-NOTdiv']
-    # "genRLTACC-pol-YESdiv"
-    # "genRLTACC-lin-YESdiv"
-    
-
-    # all about RBF
-    # selected_ensembles = ['genHLAUC-rbf-NOTdiv',
-    #                       'genHLAUC-rbf-YESdiv',
-    #                       'genHLACC-rbf-NOTdiv',
-    #                       'genRLTAUC-rbf-NOTdiv']
-    
-    #selected_ensembles = ['genRLTACC-lin-YESdiv', 'genRLTAUC-lin-NOTdiv', 'genHLACC-lin-NOTdiv', 'genHLAUC-lin-YESdiv']
-    ss.statistical_tests(sample_name=name, class_interest=selected_ensembles, metric='AUC', stats_type='student', boot_kfold='kfold')
-    ss.statistical_tests(sample_name=name, class_interest=selected_ensembles, metric='ACC', stats_type='student', boot_kfold='kfold')
-    ss.statistical_tests(sample_name=name, class_interest=selected_ensembles, metric='PRC', stats_type='student', boot_kfold='kfold')
+    # if False:
+    #     input()
+    #     ss.best_absvm_ensemble(sample_name=name, boot_kfold='kfold')
+    #     dv.voting_table()
+    #     #selected_ensembles = ['trad-rbf-YESdiv', 'genHLACC-lin-NOTdiv', 'genRLTAUC-lin-NOTdiv', 'genRLTACC-lin-YESdiv']
         
-    #stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', stats_type='student', boot_kfold='boot')
+    #     # mix of two worlds
+    #     selected_ensembles = ['trad-rbf-YESdiv', 'genHLAUC-rbf-NOTdiv', 'genHLAUC-lin-NOTdiv', 'genRLTACC-lin-YESdiv']
+    #     selected_ensembles = ['trad-rbf-YESdiv', 'trad-rbf-YESdiv', 'trad-rbf-YESdiv', 'trad-rbf-YESdiv']
+        
+    #     selected_ensembles = ['genHLACC-lin-NOTdiv', 'genRLTAUC-lin-YESdiv', 'genRLTACC-lin-NOTdiv', 'genRLTACC-lin-YESdiv'] # selected con accuracy
+    #     selected_ensembles = ['genHLAUC-rbf-YESdiv', 'genRLTAUC-rbf-NOTdiv', 'genRLTACC-rbf-YESdiv','genRLTAUC-lin-NOTdiv'] # selected with no regulsrization
+    #     selected_ensembles = ['trad-rbf-YESdiv', 'genRLTAUC-rbf-NOTdiv', 'genRLTACC-rbf-YESdiv','genRLTACC-lin-NOTdiv']
+    #     # "genRLTACC-pol-YESdiv"
+    #     # "genRLTACC-lin-YESdiv"
+    
 
-    dv.avarage_table_studente(metric='AUC')
-    dv.avarage_table_studente(metric='ACC')
-    dv.avarage_table_studente(metric='PRC')
+    #     # all about RBF
+    #     # selected_ensembles = ['genHLAUC-rbf-NOTdiv',
+    #     #                       'genHLAUC-rbf-YESdiv',
+    #     #                       'genHLACC-rbf-NOTdiv',
+    #     #                       'genRLTAUC-rbf-NOTdiv']
+    
+    #     #selected_ensembles = ['genRLTACC-lin-YESdiv', 'genRLTAUC-lin-NOTdiv', 'genHLACC-lin-NOTdiv', 'genHLAUC-lin-YESdiv']
+    #     ss.statistical_tests(sample_name=name, class_interest=selected_ensembles, metric='AUC', stats_type='student', boot_kfold='kfold')
+    #     ss.statistical_tests(sample_name=name, class_interest=selected_ensembles, metric='ACC', stats_type='student', boot_kfold='kfold')
+    #     ss.statistical_tests(sample_name=name, class_interest=selected_ensembles, metric='PRC', stats_type='student', boot_kfold='kfold')
+        
+    #     #stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', stats_type='student', boot_kfold='boot')
+
+    #     dv.avarage_table_studente(metric='AUC')
+    #     dv.avarage_table_studente(metric='ACC')
+    #     dv.avarage_table_studente(metric='PRC')
         
 #performance = model_performance(model, X_train, Y_train, X_test, Y_test)
 
