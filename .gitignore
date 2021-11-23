@@ -1,0 +1,7 @@
+*.root
+*/*.root
+*/*/*.root
+*.csv
+*/*.csv
+*/*/*.csv
+*.pdf
