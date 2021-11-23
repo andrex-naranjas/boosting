@@ -184,14 +184,14 @@ def grid_param_gauss(train_x, train_y, test_x, test_y, sigmin=-5, sigmax=5, cmin
     # log_step_sigma = np.logspace(sigmax,sigmin,20,endpoint=True,base=math.e)
     my_coef = 1
     if my_kernel == 'rbf':
-        sigmax,sigmin=100,0.00
-        cmax,cmin=100.,0.0
+        sigmax,sigmin=100.0,0.0
+        cmax,cmin=100.0,0.0
     elif my_kernel == 'sigmoid':
-        sigmax,sigmin=0.1,0.00
-        cmax,cmin=100.,00.
+        sigmax,sigmin=0.1,0.0
+        cmax,cmin=100.0,0.0
         my_coef = -1        
     elif my_kernel == 'poly' or my_kernel == 'linear':
-        sigmax,sigmin=0.1,0.00
+        sigmax,sigmin=0.1,0.0
         cmax,cmin=10.,0.0
         
     log_step_c     = np.linspace(cmax,    cmin,10,endpoint=False)
@@ -203,7 +203,7 @@ def grid_param_gauss(train_x, train_y, test_x, test_y, sigmin=-5, sigmax=5, cmin
         errors = ([])
         for j in range(len(log_step_sigma)): # sigma loop
             #my_gamma=1/(2*((log_step_sigma[j])**2))
-            my_gamma= log_step_sigma[j]
+            my_gamma = log_step_sigma[j]
             my_c = log_step_c[i]
             #my_c = 10
             svc = SVC(C=my_c, kernel=my_kernel, degree=2, gamma=my_gamma, coef0=my_coef, shrinking = True, probability = True, tol = 0.001)
@@ -217,7 +217,7 @@ def grid_param_gauss(train_x, train_y, test_x, test_y, sigmin=-5, sigmax=5, cmin
                 acc, prec, recall, f1 = generate_report(test_y, pred_y, verbose=False)
 
             print('creating matrix element:', i,j, round(log_step_c[i],2), round(log_step_sigma[j],2), round(my_gamma,2),
-                  round((0.01)*(100-acc),2), my_kernel)
+                  round((100-acc),2), my_kernel)
 
             errors = np.append(errors,[(0.01)*(100-acc)])
 

@@ -20,7 +20,7 @@ model_auc = mm.model_loader_batch(process, ensemble_single=ensem_single)[1]
 model_auc_names = mm.model_loader_batch(process, ensemble_single=ensem_single)[0]
 n_cycles = 10
 k_folds  = 10
-n_reps   = 1
+n_reps   = 5
 
 print('sample:', name, 'model name:', model_auc[0], '  validation', boot_kfold)
 start = datetime.datetime.now()
@@ -44,7 +44,7 @@ col_base= pd.DataFrame(data=n_class,columns=["n_base"])
 col_size= pd.DataFrame(data=n_train,columns=["n_train"])
 df = pd.concat([col_auc["auc"], col_prc["prc"], col_f1["f1"], col_rec["rec"], col_acc["acc"], col_gmn["gmn"], col_time["time"], col_base["n_base"], col_size["n_train"]],
                axis=1, keys=["auc", "prc", "f1", "rec", "acc", "gmn", "time", "n_base", "n_train"])
-name_csv = path+"/stats_results/"+name+"/"+boot_kfold+"/"+model_auc[0]+"_"+boot_kfold+".csv" 
+name_csv = path+"/stats_results_fast/"+name+"/"+boot_kfold+"/"+model_auc[0]+"_"+boot_kfold+".csv" 
 df.to_csv(str(name_csv), index=False)
 
 end = datetime.datetime.now()

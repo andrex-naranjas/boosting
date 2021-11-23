@@ -74,6 +74,9 @@ def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name, my_kernel='rbf'):
     tick_x = [sigmax, half_sig, int(sigmin)]
     tick_y = [cmax,   int(cmax/2),   cmin]
 
+    matrix = 100*matrix
+    matrix = matrix.astype(int)
+
     fig, ax = plt.subplots()
     im = ax.imshow(matrix)
     
@@ -85,9 +88,9 @@ def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name, my_kernel='rbf'):
     ax.xaxis.tick_top()
     ax.xaxis.label.set_size(15)
     ax.set_xlabel('$\gamma$')
+    ax.set_ylabel('$C$')
     
-    #ax.spines['left'].set_visible(False)
-
+    # ax.spines['left'].set_visible(False)
     # ax.set_xticks(np.arange(matrix.shape[1])) # show all ticks
     # ax.set_yticks(np.arange(matrix.shape[0]))
     ax.set_xticks([0,matrix.shape[1]/2, matrix.shape[1]-1])
@@ -96,13 +99,19 @@ def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name, my_kernel='rbf'):
     # loop over data dimensions and create text annotations.
     for i in range(matrix.shape[1]):
         for j in range(matrix.shape[0]):
-            text = ax.text(j, i, math.floor(100*matrix[i,j]),
+            text = ax.text(j, i, math.floor(matrix[i,j]),
                            ha="center", va="center", color="black")
 
     #ax.set_title('Test Error (%) - '+sample_name+' dataset')
-    fig.tight_layout()
-    #plt.xlabel('$\gamma$')
-    plt.ylabel('C')
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
+    from matplotlib.ticker import MaxNLocator
+    #ax_int = ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+    
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    cbar = plt.colorbar(im, cax=cax)
+    cbar.set_label('Train error %')
+
     plt.savefig('./plots/2dplot_'+sample_name+'.pdf', bbox_inches='tight', pad_inches = 0)
     plt.close()
 
@@ -128,8 +137,6 @@ def plot_ordered_stats_summary(val_acc, val_auc, val_prc, names, sample_name, me
     at = AnchoredText(sample_name, prop=dict(size=12.5), frameon=False, loc='lower left')
     at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
     ax.add_artist(at)
-
-
     
     plt.axhline(y=np.mean(y2), color="r", linewidth=0.75, linestyle="--")
     plt.axhline(y=np.mean(y3), color="k", linewidth=0.75, linestyle="--")
