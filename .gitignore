@@ -5,3 +5,7 @@
 */*.csv
 */*/*.csv
 *.pdf
+*.out
+*.tex
+*.aux
+*.log
