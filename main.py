@@ -59,8 +59,9 @@ for name in sample_list:
         cmin = 0
         cmax = 6
         kernel = 'rbf'
-        ending = '_test1'        
+        ending = '_'+name+'_paper'        
         kernels = ['rbf', 'poly', 'sigmoid', 'linear']
+        kernels = ['linear']
         start = datetime.datetime.now()
         
         for kernel in kernels:        

@@ -19,8 +19,8 @@ ensem_single = str(sys.argv[5])# use ensemble or standard classifiers
 model_auc = mm.model_loader_batch(process, ensemble_single=ensem_single)[1]
 model_auc_names = mm.model_loader_batch(process, ensemble_single=ensem_single)[0]
 n_cycles = 10
-k_folds  = 5
-n_reps   = 1
+k_folds  = 10
+n_reps   = 5
 
 print('sample:', name, 'model name:', model_auc[0], '  validation', boot_kfold)
 start = datetime.datetime.now()

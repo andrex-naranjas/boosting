@@ -56,15 +56,21 @@ def simple_plot(sample,name='AUC',xlabel='metric', pval=0, alpha_in=0.05):
 # 2d test error plot as function of sigma and c SVM parameters
 def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name, my_kernel='rbf'):
 
+    plot_tile=''
     if my_kernel == 'rbf':
         sigmax,sigmin=100,0.00
         cmax,cmin=100,0
+        plot_tile='RBF'        
     elif my_kernel == 'sigmoid':
         sigmax,sigmin=0.1,0.00
         cmax,cmin=100,0
+        plot_tile='Sigmoid'
     elif my_kernel == 'poly' or my_kernel == 'linear':
         sigmax,sigmin=0.1,0.00
         cmax,cmin=10,0
+        if my_kernel == 'poly':   plot_tile='Polynomial'
+        if my_kernel == 'linear': plot_tile='Linear'
+
 
     # tick_x = [math.floor(sigmax), math.floor(sigmax/2) , math.floor(sigmin)]
     # tick_y = [math.floor(cmax),math.floor(cmax/2),math.floor(cmin)]
@@ -110,7 +116,10 @@ def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name, my_kernel='rbf'):
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.05)
     cbar = plt.colorbar(im, cax=cax)
+    cbar.ax.locator_params(nbins=6)
+    
     cbar.set_label('Train error %')
+    plt.title(plot_tile, y=-0.1)
 
     plt.savefig('./plots/2dplot_'+sample_name+'.pdf', bbox_inches='tight', pad_inches = 0)
     plt.close()
