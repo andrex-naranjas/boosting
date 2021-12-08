@@ -50,7 +50,7 @@ def single_svm(my_kernel):
     my_coef = +1
     if my_kernel == 'sigmoid':
         my_coef = -1
-        my_gamma = 0.1
+        my_gamma = 10
     elif my_kernel == 'poly':
         my_C = 10
         my_gamma = 0.1        
