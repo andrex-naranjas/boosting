@@ -725,18 +725,24 @@ class data_preparation:
                  "Scotland", "Thailand", "Yugoslavia", "El-Salvador", "Trinadad&Tobago", "Peru", "Hong", "Holand-Netherlands"]        
         for i in range(len(dummy)):
             data_set.loc[data_set["native-country"].astype(str) == dummy[i] , "native-country"] = i
+
+
+        data_set = resample(data_set, replace = False, n_samples = 5000, random_state=None)
             
         # set the class vector
         Y = data_set["Class"]
         # data normalization [0,1]
         data_set = pd.DataFrame(MinMaxScaler().fit_transform(data_set),
                                 columns = list(data_set.columns))        
-        X = data_set.drop("Class", axis=1)
+        X = data_set.drop("Class", axis=1)        
+        
         return X,Y
 
     def connect(self, data_set):
         data_set = data_set.copy()
-        # set the class vector
+        # sampling
+        # data_set = resample(data_set, replace = False, n_samples = 5000, random_state=None)
+        # set the class vector        
         Y = data_set["Class"]
         # data normalization [0,1]
         data_set = pd.DataFrame(MinMaxScaler().fit_transform(data_set),

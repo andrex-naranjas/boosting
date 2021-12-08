@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 import datetime
 from sklearn.svm import SVC, LinearSVC # machine learning
-from sklearn.metrics import accuracy_score,auc
+from sklearn.metrics import accuracy_score,auc,precision_score
 
 # framework includes
 from data_preparation import data_preparation
@@ -53,7 +53,7 @@ for name in sample_list:
         data.dataset(sample_name=name,
                      sampling=False,split_sample=0.4)
     
-    if True: # 2d grid maps
+    if False: # 2d grid maps
         sigmin = -5
         sigmax = 5
         cmin = 0
@@ -71,27 +71,35 @@ for name in sample_list:
         end = datetime.datetime.now()
         elapsed_time = end - start
         print('elapsed time: ', elapsed_time)
+
+    if True: # AdaBoost SVM
     
-    # run AdaBoost support vector machine
-    # print("AdaBoost-support vector machines")
-    # model = mm.adaboost_svm(div_flag=True, my_gamma_end=0.1, myKernel='poly', myDegree=2)
-    # #adaboost_svm(div_flag=False, my_c=100, my_gamma_end=100, myKernel='rbf', myDegree=1, myCoef0=1, early_stop=True, debug=True)
-    # #model = AdaBoostSVM(C=50, gammaIni=5, myKernel=myKernel)
+        # run AdaBoost support vector machine
+        print("AdaBoost-support vector machines")
+        #model = AdaBoostSVM(C=50, gammaIni=5, myKernel=myKernel)
+        model = mm.adaboost_svm(div_flag=False, my_c=100, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1) # "trad-rbf-NOTdiv"
+        
+        start = datetime.datetime.now()
+        model.fit(X_train, Y_train)
+        end = datetime.datetime.now()
+        elapsed_time = pd.DataFrame({"Elapsed time": [end - start]})
+        
+        elapsed_time.to_csv("output/" + name +  "/" + "AdaBoostSVM_time.csv", index=False)
+        y_preda = model.predict(X_test)
+        print("Final test accuracy:   ", accuracy_score(Y_test, y_preda))
+        y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
+        TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
+        
+        prec = precision_score(Y_test, y_preda)
+        print("Final test precision:   ", prec)
+        
+        area = auc(FPR,TPR)
+        print("Final test AUC:   ", area)        
 
-    # start = datetime.datetime.now()
-    # model.fit(X_train, Y_train)
-    # end = datetime.datetime.now()
-    # elapsed_time = pd.DataFrame({"Elapsed time": [end - start]})
-
-    # elapsed_time.to_csv("output/" + name +  "/" + "AdaBoostSVM_time.csv", index=False)
-    # y_preda = model.predict(X_test)
-    # print("Final test prediction:   ", accuracy_score(Y_test, y_preda))
-    # y_thresholds = model.decision_thresholds(X_test, glob_dec=True)
-    # TPR, FPR = du.roc_curve_adaboost(y_thresholds, Y_test)
-
-    # nWeaks = len(model.alphas) # print on plot no. classifiers
-    # dv.plot_roc_curve(TPR,FPR,name,"sorted", glob_local=True, name="nom", kernel=myKernel, nClass=nWeaks)        
-    # print("End adaboost")
+        nWeaks = len(model.alphas) # print on plot no. classifiers
+        dv.plot_roc_curve(TPR,FPR,name,"sorted", glob_local=True, name="nom", kernel=myKernel, nClass=nWeaks)
+        print(elapsed_time)
+        print("End adaboost")
     
     # # run Diverse-AdaBoost Diversity support vector machine
     # print("Diverse-AdaBoost-support vector machines")
