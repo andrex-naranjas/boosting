@@ -38,9 +38,9 @@ arguments = {1}/batch_stats_summary.py $(Process) {2} {1} {3} {4}
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 request_memory = 2048
-output = {1}/output_batch_fast/{2}/$(Process).out
-error = {1}/output_batch_fast/{2}/$(Process).err
-log = {1}/output_batch_fast/{2}/$(Process).log
+output = {1}/output_batch_single/{2}/$(Process).out
+error = {1}/output_batch_single/{2}/$(Process).err
+log = {1}/output_batch_single/{2}/$(Process).log
 Queue {5}
 
 '''.format(py3_path, workpath, sample_name, boot_kfold, ensem_single, n_flavors)
