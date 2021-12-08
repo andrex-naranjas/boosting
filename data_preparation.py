@@ -727,7 +727,7 @@ class data_preparation:
             data_set.loc[data_set["native-country"].astype(str) == dummy[i] , "native-country"] = i
 
 
-        data_set = resample(data_set, replace = False, n_samples = 5000, random_state=None)
+        # data_set = resample(data_set, replace = False, n_samples = 5000, random_state=None)
             
         # set the class vector
         Y = data_set["Class"]
