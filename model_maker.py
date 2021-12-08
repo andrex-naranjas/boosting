@@ -45,16 +45,22 @@ def adaboost_svm(div_flag=False, my_c=150, my_gamma_end=100, myKernel='rbf', myD
 
 def single_svm(my_kernel):
     # support vector machine (single case)
+    my_C = 100
+    my_gamma = 100
     my_coef = +1
     if my_kernel == 'sigmoid':
         my_coef = -1
+        my_gamma = 0.1
+    elif my_kernel == 'poly':
+        my_C = 10
+        my_gamma = 0.1        
             
-    return SVC(C=100.0, kernel=my_kernel, degree=2, coef0=my_coef, gamma=100, shrinking = True, probability = True, tol = 0.001)
+    return SVC(C=my_C, kernel=my_kernel, degree=2, coef0=my_coef, gamma=my_gamma, shrinking = True, probability = True, tol = 0.001)
 
 def linear_svm():
     # support vector machine (linear case)
     # decision
-    return LinearSVC()
+    return LinearSVC(C=10.0)
 
 def bdt_svm():
     # AdaBoost-SAMME: Zhu, H. Zou, S. Rosset, T. Hastie, “Multi-class AdaBoost”, 2009.
