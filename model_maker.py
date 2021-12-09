@@ -70,7 +70,8 @@ def bdt_svm():
 
 def bag_svm():
     # bagging (bootstrap) default base classifier, decision_tree
-    return BaggingClassifier(base_estimator=SVC(C=100.0, kernel='rbf', gamma=100, shrinking = True, probability = True, tol = 0.001))
+    #return BaggingClassifier(base_estimator=SVC(C=100.0, kernel='rbf', gamma=100, shrinking = True, probability = True, tol = 0.001))
+    return BaggingClassifier(base_estimator=SVC(kernel='rbf'))
 
 def rand_forest():
     # RANDOM forest classifier
