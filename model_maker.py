@@ -243,7 +243,7 @@ def model_flavors_single():
     # models_auc.append(("neural-net", neural_net(),          "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 9
     # models_auc.append(("k-neigh",    k_neighbors(),         "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 10
     # models_auc.append(("gauss-nb",   gauss_nb(),            "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 11
-    models_auc.append(("gauss-pc",   gauss_pc(),            "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 12
+    # models_auc.append(("gauss-pc",   gauss_pc(),            "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 12
     # models_auc.append(("log-reg",    log_reg(),             "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 13
     # models_auc.append(("ridge-cl",   ridge_class(),         "deci", "trad", mut_rate, "auc", "roulette", 0.0))  # 14
     # models_auc.append(("sgdc-cl",    sgdc_class(),          "deci", "trad", mut_rate, "auc", "roulette", 0.0))  # 15
