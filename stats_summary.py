@@ -154,6 +154,7 @@ def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.25, GA_sc
     X,Y = data.dataset(sample_name=sample_name, data_set=sample_df,
                        sampling=True, split_sample=0.0)
     
+    from sklearn.model_selection import train_test_split
     # n-k fold cross validation, n_cycles = n_splits * n_repeats
     rkf = RepeatedKFold(n_splits = kfolds, n_repeats = n_reps, random_state = 1) # set random state=1 for reproducibility
     for i in range(1):#train_index, test_index in rkf.split(X):
