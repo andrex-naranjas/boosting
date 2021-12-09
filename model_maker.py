@@ -56,7 +56,7 @@ def single_svm(my_kernel):
         my_gamma = 0.1        
             
     #return SVC(C=my_C, kernel=my_kernel, degree=2, coef0=my_coef, gamma=my_gamma, shrinking = True, probability = True, tol = 0.001)
-    return SVC(kernel=my_kernel)#, degree=2, coef0=my_coef, gamma=my_gamma, shrinking = True, probability = True, tol = 0.001)
+    return SVC(kernel=my_kernel, shrinking = True, probability = True, tol = 0.001)#, degree=2, coef0=my_coef, gamma=my_gamma, shrinking = True, probability = True, tol = 0.001)
 
 def linear_svm():
     # support vector machine (linear case)
@@ -71,7 +71,7 @@ def bdt_svm():
 def bag_svm():
     # bagging (bootstrap) default base classifier, decision_tree
     #return BaggingClassifier(base_estimator=SVC(C=100.0, kernel='rbf', gamma=100, shrinking = True, probability = True, tol = 0.001))
-    return BaggingClassifier(base_estimator=SVC(kernel='rbf'))
+    return BaggingClassifier(base_estimator=SVC(kernel='rbf', shrinking = True, probability = True, tol = 0.001))
 
 def rand_forest():
     # RANDOM forest classifier
