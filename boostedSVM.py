@@ -53,7 +53,7 @@ class AdaBoostSVM:
                        coef0=self.myCoef0,
                        gamma=myGamma,                       #gamma=1/(2*(myGamma**2)),
                        shrinking=True,
-                       probability=True,
+                       probability=False,
                        tol=0.001,
                        cache_size=1000)
             
