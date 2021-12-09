@@ -166,10 +166,11 @@ def plot_ordered_stats_summary(val_acc, val_auc, val_prc, names, sample_name, me
     plt.close()
 
 
-def save_df_selected_classifiers(mean_list_auc, mean_list_acc, mean_list_prc, name_list, f_names, sample_name):    
+def save_df_selected_classifiers(mean_list_auc, mean_list_acc, mean_list_prc, name_list, f_names, sample_name):
+    # save_df_selected_classifiers(mean_list_acc, mean_list_auc, mean_list_prc, name_list, flavor_names, sample_name) actual calling
     # select the best 10 AUC, with the requirement that the ACC and PRC are above average
-    thres_acc = np.mean(mean_list_acc)
-    thres_prc = np.mean(mean_list_prc)
+    thres_acc = np.mean(mean_list_acc)*0
+    thres_prc = np.mean(mean_list_prc)*0
     selected_classifiers = []
     for i in range(len(mean_list_auc)):
         

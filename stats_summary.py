@@ -693,10 +693,10 @@ def statistical_tests(sample_name='titanic', class_interest=['trad-rbf-NOTdiv'],
                         #wilcoxon, ttest_ind
                         student_auc = np.append(student_auc, wilcoxon(auc_values[i], auc_values[j]).pvalue)
                         student_prc = np.append(student_prc, wilcoxon(prc_values[i], prc_values[j]).pvalue)
-                        student_f1  = np.append(student_f1 , wilcoxon( f1_values[i],  f1_values[j]).pvalue)
-                        student_rec = np.append(student_rec, wilcoxon(rec_values[i], rec_values[j]).pvalue)
+                        student_f1  = np.append(student_f1 , 0)#wilcoxon( f1_values[i],  f1_values[j]).pvalue)
+                        student_rec = np.append(student_rec, 0)#wilcoxon(rec_values[i], rec_values[j]).pvalue)
                         student_acc = np.append(student_acc, wilcoxon(acc_values[i], acc_values[j]).pvalue)
-                        student_gmn = np.append(student_gmn, wilcoxon(gmn_values[i], gmn_values[j]).pvalue)
+                        student_gmn = np.append(student_gmn, 0)#wilcoxon(gmn_values[i], gmn_values[j]).pvalue)
                     elif(i==0 and j==0):
                         student_auc = np.append(student_auc, 1.)
                         student_prc = np.append(student_prc, 1.)

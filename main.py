@@ -44,6 +44,7 @@ myKernel = "rbf"
 data = data_preparation(GA_selection=True)
 
 sample_list = [sample_input]
+sample_list = ["titanic", "cancer", "german", "heart", "solar","car", "ecoli", "wine", "abalone"]
 #sample_list = ["titanic", "cancer", "german", "heart", "car", "ecoli", "wine", "abalone"]#, "solar"] # solar, cancer
 # loop over datasets in sample_list for AdaBoostSVM and other classifiers. get ROC curves & metrics
 for name in sample_list:
@@ -72,7 +73,7 @@ for name in sample_list:
         elapsed_time = end - start
         print('elapsed time: ', elapsed_time)
 
-    if True: # AdaBoost SVM
+    if False: # AdaBoost SVM
     
         # run AdaBoost support vector machine
         print("AdaBoost-support vector machines")
@@ -204,8 +205,9 @@ for name in sample_list:
     # genHLAUC-rbf-NOTdiv, genHLAUC-rbf-YESdiv, genHLACC-rbf-NOTdiv, genRLTAUC-rbf-NOTdiv
     # genRLTAUC-rbf-YESdiv, genRLTACC-rbf-YESdiv
 
-    if False: # enable statistics tests
-        input()
+    if True: # enable statistics tests
+        print(name)
+        #input()        
         ss.best_absvm_ensemble(sample_name=name, boot_kfold='kfold')
         dv.voting_table()
         #selected_ensembles = ['trad-rbf-YESdiv', 'genHLACC-lin-NOTdiv', 'genRLTAUC-lin-NOTdiv', 'genRLTACC-lin-YESdiv']
@@ -217,6 +219,8 @@ for name in sample_list:
         selected_ensembles = ['genHLACC-lin-NOTdiv', 'genRLTAUC-lin-YESdiv', 'genRLTACC-lin-NOTdiv', 'genRLTACC-lin-YESdiv'] # selected con accuracy
         selected_ensembles = ['genHLAUC-rbf-YESdiv', 'genRLTAUC-rbf-NOTdiv', 'genRLTACC-rbf-YESdiv','genRLTAUC-lin-NOTdiv'] # selected with no regulsrization
         selected_ensembles = ['trad-rbf-YESdiv', 'genRLTAUC-rbf-NOTdiv', 'genRLTACC-rbf-YESdiv','genRLTACC-lin-NOTdiv']
+
+        # selected_ensembles = ['genHLAUC-pol-NOTdiv', 'trad-rbf-YESdiv', 'genHLACC-pol-YESdiv', 'genRLTACC-rbf-NOTdiv'] # december 2021
         # "genRLTACC-pol-YESdiv"
         # "genRLTACC-lin-YESdiv"
     
