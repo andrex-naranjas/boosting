@@ -55,7 +55,8 @@ def single_svm(my_kernel):
         my_C = 10
         my_gamma = 0.1        
             
-    return SVC(C=my_C, kernel=my_kernel, degree=2, coef0=my_coef, gamma=10, shrinking = True, probability = True, tol = 0.001)
+    #return SVC(C=my_C, kernel=my_kernel, degree=2, coef0=my_coef, gamma=my_gamma, shrinking = True, probability = True, tol = 0.001)
+    return SVC(kernel=my_kernel)#, degree=2, coef0=my_coef, gamma=my_gamma, shrinking = True, probability = True, tol = 0.001)
 
 def linear_svm():
     # support vector machine (linear case)
