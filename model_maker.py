@@ -56,7 +56,7 @@ def single_svm(my_kernel):
         my_gamma = 0.1        
             
     #return SVC(C=my_C, kernel=my_kernel, degree=2, coef0=my_coef, gamma=my_gamma, shrinking = True, probability = True, tol = 0.001)
-    return SVC(kernel=my_kernel, shrinking = True, probability = True, tol = 0.001)#, degree=2, coef0=my_coef, gamma=my_gamma, shrinking = True, probability = True, tol = 0.001)
+    return SVC(kernel=my_kernel, shrinking = True, probability = False, tol = 0.001)#, degree=2, coef0=my_coef, gamma=my_gamma, shrinking = True, probability = True, tol = 0.001)
 
 def linear_svm():
     # support vector machine (linear case)
@@ -71,7 +71,7 @@ def bdt_svm():
 def bag_svm():
     # bagging (bootstrap) default base classifier, decision_tree
     #return BaggingClassifier(base_estimator=SVC(C=100.0, kernel='rbf', gamma=100, shrinking = True, probability = True, tol = 0.001))
-    return BaggingClassifier(base_estimator=SVC(kernel='rbf', shrinking = True, probability = True, tol = 0.001))
+    return BaggingClassifier(base_estimator=SVC(kernel='rbf', shrinking = True, probability = False, tol = 0.001))
 
 def rand_forest():
     # RANDOM forest classifier
@@ -230,14 +230,14 @@ def model_flavors_single():
     models_auc = []
     mut_rate = 0.5
     # different models
-    models_auc.append(("rbf-svm", single_svm("rbf"),        "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 0
-    models_auc.append(("poly-svm", single_svm("poly"),      "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 1
-    models_auc.append(("sigmoid-svm", single_svm("sigmoid"),"prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 2
+    models_auc.append(("rbf-svm", single_svm("rbf"),        "deci", "trad", mut_rate, "auc", "roulette", 0.0))  # 0
+    models_auc.append(("poly-svm", single_svm("poly"),      "deci", "trad", mut_rate, "auc", "roulette", 0.0))  # 1
+    models_auc.append(("sigmoid-svm", single_svm("sigmoid"),"deci", "trad", mut_rate, "auc", "roulette", 0.0))  # 2
     # models_auc.append(("linear-svm", linear_svm(),          "deci", "trad", mut_rate, "auc", "roulette", 0.0))  # 3
     
     # models_auc.append(("bdt-svm",    bdt_svm(),             "prob", "trad", mut_rate, "auc", "roulette", 0.0))
     
-    models_auc.append(("bag-svm",    bag_svm(),             "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 4
+    models_auc.append(("bag-svm",    bag_svm(),             "deci", "trad", mut_rate, "auc", "roulette", 0.0))  # 4
     # models_auc.append(("rand-forest",rand_forest(),         "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 5
     # models_auc.append(("bdt-forest", bdt_forest(),          "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 6
     # models_auc.append(("bag-forest", bag_forest(),          "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 7
