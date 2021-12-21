@@ -44,8 +44,7 @@ myKernel = "rbf"
 data = data_preparation(GA_selection=True)
 
 sample_list = [sample_input]
-sample_list = ["titanic", "cancer", "german", "heart", "solar","car", "ecoli", "wine", "abalone"]
-#sample_list = ["titanic", "cancer", "german", "heart", "car", "ecoli", "wine", "abalone"]#, "solar"] # solar, cancer
+sample_list = ["titanic", "cancer", "german", "heart", "solar","car", "ecoli", "wine", "abalone", "adult", "connect"]
 # loop over datasets in sample_list for AdaBoostSVM and other classifiers. get ROC curves & metrics
 for name in sample_list:
     print("Analysing sample: ", name)
@@ -218,29 +217,53 @@ for name in sample_list:
         
         selected_ensembles = ['genHLACC-lin-NOTdiv', 'genRLTAUC-lin-YESdiv', 'genRLTACC-lin-NOTdiv', 'genRLTACC-lin-YESdiv'] # selected con accuracy
         selected_ensembles = ['genHLAUC-rbf-YESdiv', 'genRLTAUC-rbf-NOTdiv', 'genRLTACC-rbf-YESdiv','genRLTAUC-lin-NOTdiv'] # selected with no regulsrization
+
+
+        #selected_ensembles = ['genHLAUC-pol-NOTdiv', 'trad-rbf-YESdiv', 'genHLACC-pol-YESdiv', 'genRLTACC-rbf-NOTdiv'] # december 2021
+
+        selected_ensembles = ['genRLTACC-rbf-NOTdiv','genHLAUC-pol-NOTdiv','genHLACC-pol-YESdiv','trad-rbf-YESdiv']
         selected_ensembles = ['trad-rbf-YESdiv', 'genRLTAUC-rbf-NOTdiv', 'genRLTACC-rbf-YESdiv','genRLTACC-lin-NOTdiv']
 
-        # selected_ensembles = ['genHLAUC-pol-NOTdiv', 'trad-rbf-YESdiv', 'genHLACC-pol-YESdiv', 'genRLTACC-rbf-NOTdiv'] # december 2021
+        selected_ensembles = ['genRLTACC-sig-YESdiv', 'trad-rbf-NOTdiv', 'genHLACC-pol-YESdiv', 'genHLACC-rbf-NOTdiv']
+
+        selected_ensembles = ['genHLAUC-sig-YESdiv', 'genRLTAUC-rbf-YESdiv', 'genHLACC-pol-YESdiv', 'trad-rbf-NOTdiv'] # ayer
+
+        selected_ensembles = ['trad-rbf-YESdiv', 'genHLAUC-sig-YESdiv', 'genHLACC-rbf-NOTdiv', 'genHLACC-pol-YESdiv']#'genRLTACC-rbf-YESdiv']
+        
+        # genHLACC-rbf-NOTdiv
+        # genHLACC-pol-YESdiv        
+        # genRLTAUC-rbf-NOTdiv
+        # genRLTAUC-sig-NOTdiv
+        # genRLTAUC-rbf-YESdiv        
+        # genRLTACC-lin-NOTdiv        
+        # genRLTACC-rbf-YESdiv        
         # "genRLTACC-pol-YESdiv"
         # "genRLTACC-lin-YESdiv"
-    
+
+        # 'genHLACC-rbf-NOTdiv'  # very good one
+        #  genHLACC-pol-YESdiv
+
+        
 
         # all about RBF
         # selected_ensembles = ['genHLAUC-rbf-NOTdiv',
         #                       'genHLAUC-rbf-YESdiv',
         #                       'genHLACC-rbf-NOTdiv',
         #                       'genRLTAUC-rbf-NOTdiv']
+
+        selected_ensembles = ['trad-rbf-YESdiv', 'genHLACC-rbf-NOTdiv', 'genHLAUC-sig-YESdiv', 'genHLACC-pol-YESdiv'] # final selection
     
-        #selected_ensembles = ['genRLTACC-lin-YESdiv', 'genRLTAUC-lin-NOTdiv', 'genHLACC-lin-NOTdiv', 'genHLAUC-lin-YESdiv']
-        ss.statistical_tests(sample_name=name, class_interest=selected_ensembles, metric='AUC', stats_type='student', boot_kfold='kfold')
-        ss.statistical_tests(sample_name=name, class_interest=selected_ensembles, metric='ACC', stats_type='student', boot_kfold='kfold')
-        ss.statistical_tests(sample_name=name, class_interest=selected_ensembles, metric='PRC', stats_type='student', boot_kfold='kfold')
+        # ss.statistical_tests(sample_name=name, class_interest=selected_ensembles, metric='AUC', stats_type='student', boot_kfold='kfold')
+        # ss.statistical_tests(sample_name=name, class_interest=selected_ensembles, metric='ACC', stats_type='student', boot_kfold='kfold')
+        # ss.statistical_tests(sample_name=name, class_interest=selected_ensembles, metric='PRC', stats_type='student', boot_kfold='kfold')
         
         #stats_test_batch(sample_name='titanic', class_interest='trad-rbf-NOTdiv', stats_type='student', boot_kfold='boot')
 
         dv.avarage_table_studente(metric='AUC')
         dv.avarage_table_studente(metric='ACC')
         dv.avarage_table_studente(metric='PRC')
+
+        dv.latex_table_student_combined(name)
         
 #performance = model_performance(model, X_train, Y_train, X_test, Y_test)
 

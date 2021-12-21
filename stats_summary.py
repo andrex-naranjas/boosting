@@ -649,7 +649,7 @@ def statistical_tests(sample_name='titanic', class_interest=['trad-rbf-NOTdiv'],
         for i in range(len(flavor_names)):
             input_data = pd.read_csv(directory+'/'+flavor_names[i]+'_'+boot_kfold+'.csv')
 
-            print(flavor_names[i])
+            print(flavor_names[i], i)
             auc, prc, f1, rec, acc, gmn = outlier_detection_multivariable(input_data['auc'], input_data['prc'],
                                                                           input_data['f1'], input_data['rec'],
                                                                           input_data['acc'], input_data['gmn'],
@@ -706,7 +706,7 @@ def statistical_tests(sample_name='titanic', class_interest=['trad-rbf-NOTdiv'],
                         student_rec = np.append(student_rec, 1.)
                         student_acc = np.append(student_acc, 1.)
                         student_gmn = np.append(student_gmn, 1.)                    
-                    if(i!=j):
+                    if(i!=j):                        
                         pvalue = wilcoxon(auc_values[i], auc_values[j]).pvalue
                     else:
                         pvalue = 1.
@@ -821,14 +821,30 @@ def statistical_tests(sample_name='titanic', class_interest=['trad-rbf-NOTdiv'],
 
         # append stuff in the main selected ensemble loop
         # do stuff
+
         
-    # save file outside he main selected ensemble loop
-    # selected_values.append(mean_auc[0])
-    # selected_errors.append(std_auc[0])
+    # save to csv files for later use
+    col_flav = pd.DataFrame(data=flavor_names, columns=["flav"])
+    col_mean = pd.DataFrame(data=mean_metric,  columns=["mean"])
+    col_std  = pd.DataFrame(data=std_metric,   columns=["std"])
+    col_pva1 = pd.DataFrame(data=ensembles_pvalues[0],   columns=["pva1"])
+    col_pva2 = pd.DataFrame(data=ensembles_pvalues[1],   columns=["pva2"])
+    col_pva3 = pd.DataFrame(data=ensembles_pvalues[2],   columns=["pva3"])
+    col_pva4 = pd.DataFrame(data=ensembles_pvalues[3],   columns=["pva4"])    
+    df = pd.concat([col_flav["flav"], col_mean["mean"], col_std["std"], col_pva1["pva1"], col_pva2["pva2"], col_pva3["pva3"], col_pva4["pva4"]],
+                   axis=1, keys=["flav", "mean", "std", "pval1", "pval2", "pval3", "pval4"])    
+    name_csv = "./tables/CSV/popular_"+sample_name+"_"+metric+".csv"
+    df.to_csv(str(name_csv), index=False)
 
-    # print(len(mean_metric), selected_values, metric, sample_name)
-    # input()
-
+    ensemble_names=["E1","E2","E3","E4"]
+    col_ens  = pd.DataFrame(data=ensemble_names,   columns=["ens"])
+    col_mean = pd.DataFrame(data=selected_values,  columns=["mean"])
+    col_std  = pd.DataFrame(data=selected_errors,  columns=["std"])
+    df = pd.concat([col_ens["ens"], col_mean["mean"], col_std["std"]],
+                   axis=1, keys=["ens", "mean", "std"])
+    name_csv = "./tables/CSV/selected_"+sample_name+"_"+metric+".csv"
+    df.to_csv(str(name_csv), index=False)
+    
     print(selected_values[0],selected_values[1],selected_values[2],selected_values[3])
     f_single = open('./tables/student_'+sample_name+'_combined_'+metric+'.tex', "w")
     dv.latex_table_student_single(flavor_names, sample_name, metric_name=metric, metric_val=mean_metric, metric_error=std_metric,
