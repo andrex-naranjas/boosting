@@ -1,18 +1,14 @@
-
-# -*- coding: utf-8 -*-
 '''
 ---------------------------------------------------------------
  Code to improve SVM
  Authors: A. Ramirez-Morales and J. Salmon-Gamboa
  ---------------------------------------------------------------
 '''
-
 import numpy as np
 import pandas as pd
 import data_visualization as dv
 import data_utils as du
 
-# functions to be defined
 
 class model_performance:
 
@@ -37,12 +33,7 @@ class model_performance:
         # errors plot
         dv.plot_frame(pd.DataFrame(self.errors*100,np.arange(self.errors.shape[0])),
                       'Classifier error', 'Classifier', 'training error (%)', True, 0, 100,'belle2_iii')
-        
-        # weights plot
-        # dv.plot_frame(pd.DataFrame(weights[10],np.arange(weights.shape[1])),
-        #                           'Sample weights', 'Sample', 'weights (a.u.)', True, -0.005, 0.01,'belle2_iii')
-        
-        
+                
         # grid hyper parameter 2D-plots
         matrix = du.grid_param_gauss(self.X_train, self.Y_train, self.X_test, self.Y_test, sigmin=-5, sigmax=5, cmin=0, cmax=6)
         dv.plot_2dmap(matrix,-5,5,0,6,'belle2_iii')

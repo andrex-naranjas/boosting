@@ -45,7 +45,7 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
     # fetch data_frame without preparation
     data = data_preparation(path)
     sample_df_temp = data.fetch_data(sample_name)
-    train_test = type(sample_df_temp) is tuple  # are the data already splitted?
+    train_test = type(sample_df_temp) is tuple  # check if the data is already splitted
     if not train_test: sample_df = sample_df_temp
     else: sample_train_df, sample_test_df = sample_df_temp
         
@@ -808,11 +808,7 @@ def statistical_tests(sample_name='titanic', class_interest=['trad-rbf-NOTdiv'],
             dv.latex_table_tukey(f_names, sample_name, mean_auc, std_auc, tukey_auc, mean_prc, std_prc,  tukey_prc, mean_f1, std_f1,  tukey_f1,
                                  mean_rec, std_rec, tukey_rec, mean_acc, std_acc,  tukey_acc, mean_gmn, std_gmn,  tukey_gmn,  f_tukey_table)
             f_tukey_table.close()
-
-            
-        # for i in range(len(matrix)): #print(matrix, len(matrix))
-        #     print(matrix[i], 'parrito test')
-                
+                            
         sigmin = 0
         sigmax = len(flavor_names)
         cmin = 0

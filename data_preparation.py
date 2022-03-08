@@ -1,5 +1,3 @@
-
-# -*- coding: utf-8 -*-
 '''
 ---------------------------------------------------------------
  Code to improve SVM
@@ -10,13 +8,12 @@
 import sys
 import pandas as pd
 import numpy as np
-# uproot to import ROOT format data
-import uproot
+import uproot # ROOT format data
 # sklearn utils
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.utils import resample
-# data visualization module
+# framework includes
 import data_visualization as dv
 
 
@@ -725,9 +722,6 @@ class data_preparation:
                  "Scotland", "Thailand", "Yugoslavia", "El-Salvador", "Trinadad&Tobago", "Peru", "Hong", "Holand-Netherlands"]        
         for i in range(len(dummy)):
             data_set.loc[data_set["native-country"].astype(str) == dummy[i] , "native-country"] = i
-
-
-        # data_set = resample(data_set, replace = False, n_samples = 5000, random_state=None)
             
         # set the class vector
         Y = data_set["Class"]
@@ -793,7 +787,7 @@ class data_preparation:
         Y = data_set["Class"]
         return X,Y
 
-
+    
     def tac_toe(self, data_set):
 
         title_mapping = {"x": 0, "o": 1, "b": 2}
@@ -839,15 +833,3 @@ class data_preparation:
         X = data_set.drop("Class", axis=1)
         Y = data_set["Class"]
         return X,Y
-
-
-    # bin data?!?
-    # from sklearn.preprocessing import KBinsDiscretizer
-    # Xin = data_set.drop("Class", axis=1)
-    # est = KBinsDiscretizer(n_bins=20, encode="ordinal", strategy="uniform")
-    # est.fit(Xin)
-    
-    # XT = est.transform(Xin)
-    
-    # # Creating pandas dataframe from numpy array
-    # X = pd.DataFrame({"D0_m": XT[:, 0], "D0_p": XT[:, 1], "p0_p": XT[:, 2]})

@@ -51,7 +51,7 @@ class AdaBoostSVM:
                        kernel=self.myKernel,
                        degree=self.myDegree,
                        coef0=self.myCoef0,
-                       gamma=myGamma,                       #gamma=1/(2*(myGamma**2)),
+                       gamma=myGamma,
                        shrinking=True,
                        probability=False,
                        tol=0.001,
@@ -172,7 +172,6 @@ class AdaBoostSVM:
         self.n_classifiers = count
         if(count==0):
             print(' WARNING: No selected classifiers in the ensemble!!!!')
-            # print('Adding artifically the first one with NO requirements!!!!!!')
             self.n_classifiers = 0
             # self.alphas   = np.append(self.alphas, 1.0)
             # # artificially added classifier, when no classifier has been
@@ -344,10 +343,7 @@ class AdaBoostSVM:
                 # print('check point: ', len(steps), len(decision))
                 decision_temp = np.array([np.sign(decision[j] + steps[i] ) for j in range(len(decision))]) #*svm_biases[j]
                 thres_decision.append(decision_temp)
-                # for k in range(len(decision)):
-                #     print(decision[k], steps[i])
-                #     input()
-                        
+                
             return np.array(thres_decision)
             
     # different number of classifiers

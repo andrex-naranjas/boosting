@@ -1,42 +1,31 @@
-
-# -*- coding: utf-8 -*-
-
 '''
 ---------------------------------------------------------------
  Code to improve SVM
  Authors: A. Ramirez-Morales and J. Salmon-Gamboa
  ---------------------------------------------------------------
 '''
-
+# utilities module
 import os
-
-# visualization
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
-
-#metrics: some functions to measure the quality of the predictions
-from sklearn.model_selection import cross_val_score
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve, auc
-from sklearn.model_selection import KFold
-
 import numpy as np
 import math as math
 
-# import class for data preparation
-from data_preparation import data_preparation
-
-# import boostedSVM class
-from boostedSVM import AdaBoostSVM
-
-# machine learning
+# sklearn utils
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve, auc
+from sklearn.model_selection import KFold
 from sklearn.svm import SVC, LinearSVC
-
-# bootstrap
 from sklearn.utils import resample
 
-# makes a directory for each dataset
+# framework includes
+from data_preparation import data_preparation
+from boostedSVM import AdaBoostSVM
+
+
 def make_directories(sample_list):
+    # makes a directory for each dataset
     for item in sample_list:
         try:
             os.makedirs('output/{}'.format(item))
@@ -49,8 +38,8 @@ def cv_scores(model, x,y):
     return ["%0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2)]
 
 
-# Makeshift metric for predictors
 def cv_metrics(model, X, y):
+    # Makeshift metric for predictors
 
     X = X.values
     y = y.values
@@ -82,7 +71,6 @@ def cv_metrics(model, X, y):
     print("Cross-validation Precision Score: %0.2f (+/- %0.2f)" % (prec_scores.mean(), prec_scores.std() * 2))
     print("Cross-validation Recall Score: %0.2f (+/- %0.2f)" % (recall_scores.mean(), recall_scores.std() * 2))
     print("Cross-validation F1 Score: %0.2f (+/- %0.2f)" % (f1_scores.mean(), f1_scores.std() * 2))
-
 
 def generate_report(y_val, y_pred, verbose):
     acc    = round(accuracy_score(y_val, y_pred) * 100, 2)
@@ -116,10 +104,10 @@ def metrics(sample, name, method, X_train, Y_train, Y_test, X_test, Y_pred):
     return cv_scores(method, X_train, Y_train) + generate_report(Y_test, Y_pred, verbose=True)
 
 
-# function to get average errors via bootstrap, for 1-n classifiers
 def error_number(sample_name, myC, myGammaIni, train_test):
+    # function to get average errors via bootstrap, for 1-n classifiers
+    
     print('Start of error number')
-
     # fetch data_frame without preparation
     data_df   = data_preparation()
     if not train_test: sample_df = data_df.fetch_data(sample_name)
@@ -175,8 +163,9 @@ def error_number(sample_name, myC, myGammaIni, train_test):
 
     return pd.DataFrame(final_final,np.arange(np.amax(number)))
 
-# grid svm-hyperparameters (sigma and C) to explore test errors
+
 def grid_param_gauss(train_x, train_y, test_x, test_y, sigmin=-5, sigmax=5, cmin=0, cmax=6, my_kernel='rbf', train_test='train'):
+    # grid svm-hyperparameters (sigma and C) to explore test errors
 
     # inverted limits, to acommodate the manner at which the arrays are stored and plotted as a matrix
     # sigmin = -5    sigmax = 5    cmin = 0    cmax = 6
@@ -228,7 +217,6 @@ def grid_param_gauss(train_x, train_y, test_x, test_y, sigmin=-5, sigmax=5, cmin
 
 def roc_curve_adaboost(Y_thresholds, Y_test):
     # function to create the TPR and FPR, for ROC curve
-
     # check data format
     if type(Y_test) != type(np.array([])):
         Y_test = Y_test.values

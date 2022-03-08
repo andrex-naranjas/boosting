@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 '''
 ---------------------------------------------------------------
  Code to improve SVM
@@ -9,7 +6,6 @@
 '''
 
 # tmva module
-
 from root_pandas import to_root
 
 # data analysis and wrangling

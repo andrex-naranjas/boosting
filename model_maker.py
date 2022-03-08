@@ -86,12 +86,11 @@ def bag_forest():
     return BaggingClassifier(n_estimators=100)
 
 def grad_forest():
-    # gradient boost classifier tree, this only for trees!
+    # gradient boost classifier tree
     return GradientBoostingClassifier(n_estimators=100,learning_rate=1.0,max_depth=1,random_state=1)
     
 def neural_net():
     # Neural Network Multi Layer Perceptron classifier
-    #return MLPClassifier(solver='sgd', alpha=0.0001, hidden_layer_sizes=(2, 2), random_state=1)
     return MLPClassifier(solver='sgd', random_state=1)
 
 def k_neighbors():
@@ -251,9 +250,4 @@ def model_flavors_single():
     models_auc.append(("linear-dis", linear_dis(),          "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 17
     models_auc.append(("quad-dis",   quad_dis(),            "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 18
     
-    # if sample_name != "belle2_ii" and sample_name != "solar": # ugly fix
-    #     models_auc.append((linear_dis(),  "prob", "linear-dis", "trad"))
-    #     models_auc.append((quad_dis(),    "prob", "quad-dis", "trad"))
-    
     return models_auc
-    

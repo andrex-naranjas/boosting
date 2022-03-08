@@ -14,8 +14,10 @@ import math as math
 from sklearn.metrics import auc
 import csv
 
-# frame plots
+
 def plot_frame(frame,name,xlabel,ylabel,yUserRange,ymin,ymax,sample):
+    # frame plots
+    
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
@@ -32,8 +34,9 @@ def plot_frame(frame,name,xlabel,ylabel,yUserRange,ymin,ymax,sample):
     plt.close()
 
 
-# simple plots
 def simple_plot(sample,name='AUC',xlabel='metric', pval=0, alpha_in=0.05):
+    # simple plots
+    
     fig = plt.figure()
     ax = fig.add_subplot(111)
     plt.hist(sample, 20, density=True, label = 'Sampling')
@@ -52,9 +55,10 @@ def simple_plot(sample,name='AUC',xlabel='metric', pval=0, alpha_in=0.05):
     #plt.title(quark+' mesons')
     plt.savefig('./plots/'+name+'.pdf')
     plt.close()
+
     
-# 2d test error plot as function of sigma and c SVM parameters
 def plot_2dmap(matrix,sigmin,sigmax,cmin,cmax,sample_name, my_kernel='rbf'):
+    # 2d test error plot as function of sigma and c SVM parameters
 
     plot_tile=''
     if my_kernel == 'rbf':
@@ -784,8 +788,6 @@ def latex_table_student_combined(sample):
     print('\end{tabular}', file=f_out)
 
     f_out.close()
-
-
 
 
 def avarage_table_studente(metric='AUC'):
