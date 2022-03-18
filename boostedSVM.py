@@ -372,7 +372,7 @@ class AdaBoostSVM:
         self.weights_list = []
         self.errors    = ([])
         self.precision = ([])
-        self.eta = 0.5
+        self.eta = 0.7
         self.diversities = ([])
         self.Div_total = ([])
         self.Div_partial = ([])

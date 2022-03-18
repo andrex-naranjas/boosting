@@ -39,5 +39,12 @@ class model_performance:
         dv.plot_2dmap(matrix,-5,5,0,6,'belle2_iii')
         
         #boostrap error VS number of classiffiers calculation
-        frame = du.error_number('belle2_iii',myC=50,myGammaIni=10, train_test=True)
-        dv.plot_frame(frame, 'Classifiers error', 'No. Classifiers', 'test error', False, 0, 50,'belle2_iii')
+        frame = du.error_number('titanic',myC=50,myGammaIni=10, train_test=False)
+        classifier = "trad-rbf-YESdiv"
+        classifier = "genHLACC-rbf-NOTdiv"
+        classifier = "genHLAUC-sig-YESdiv"
+        # classifier = "genHLACC-pol-YESdiv"        
+        dv.plot_frame(frame, classifier, 'No. Classifiers', 'Test error (%)', False, 0, 50,'titanic')
+        print(frame)
+        frame.to_csv(classifier+"_number.csv", index=False)
+        

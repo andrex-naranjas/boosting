@@ -41,6 +41,7 @@ myKernel = "rbf"
 # get the data
 data = data_preparation(GA_selection=True)
 sample_list = ["titanic", "cancer", "german", "heart", "solar","car", "ecoli", "wine", "abalone", "adult", "connect"]
+sample_list = ["titanic"]
 # loop over datasets in sample_list for AdaBoostSVM and other classifiers. get ROC curves & metrics
 for name in sample_list:
     print("Analysing sample: ", name)
@@ -111,7 +112,7 @@ for name in sample_list:
         dv.plot_roc_curve(TPR_a,FPR_a,name,"sorted", glob_local=True, name="div", kernel=myKernel, nClass=nWeaks)
         print("End adaboost")
 
-        test statistical results
+        # test statistical results
         start = datetime.datetime.now()
         ss.stats_results(name, n_cycles=5, kfolds=3, n_reps=2, boot_kfold ="bootstrap")
         #ss.stats_results(name, n_cycles=5, kfolds=3, n_reps=2, boot_kfold ="kfold")
@@ -179,7 +180,7 @@ for name in sample_list:
         start = datetime.datetime.now()
         bootstrap
         ss.stats_results(name, n_cycles=50, kfolds=10, n_reps=10, boot_kfold ="bootstrap")
-        kfold cross-validation
+        # kfold cross-validation
         ss.stats_results(name, n_cycles=5, kfolds=10, n_reps=10, boot_kfold ="kfold")
         end = datetime.datetime.now()
         elapsed_time = end - start
@@ -188,7 +189,7 @@ for name in sample_list:
         ss.cross_validation(name, model, "absv", "gene",
                             GA_mut=0.5, GA_score="ACC", GA_selec="highlow", GA_coef=0.5, kfolds=5, n_reps=2, path='.')        
 
-    if True: # enable statistics tests
+    if False: # enable statistics tests
         ss.best_absvm_ensemble(sample_name=name, boot_kfold='kfold')
         dv.voting_table()
         selected_ensembles = ['trad-rbf-YESdiv', 'genHLACC-rbf-NOTdiv', 'genHLAUC-sig-YESdiv', 'genHLACC-pol-YESdiv'] # final selection
@@ -196,3 +197,9 @@ for name in sample_list:
         dv.avarage_table_studente(metric='ACC')
         dv.avarage_table_studente(metric='PRC')
         dv.latex_table_student_combined(name)
+
+    if True: # model comparison
+        print('Starting model performance')
+        model = mm.adaboost_svm(div_flag=False, my_c=100, my_gamma_end=100, myKernel='rbf',     myDegree=1, myCoef0=+1) # "trad-rbf-NOTdiv"
+        performance = model_performance(model, X_train, Y_train, X_test, Y_test)
+        performance.execute()

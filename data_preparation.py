@@ -58,7 +58,7 @@ class data_preparation:
             file = uproot.open(self.workpath+"/data/belle2_kpi.root")
             data_set = file["combined"].arrays(library="pd")
         elif sample == "belle2_iii":
-            file_train = uproot.open(self.workpath+"/data/train_D02k3pi.root")            
+            file_train = uproot.open(self.workpath+"/data/train_D02k3pi.root")
             data_train = file_train["d0tree"].arrays(library="pd")
             file_test  = uproot.open(self.workpath+"/data/test_D02k3pi.root")
             data_test  = file_test["d0tree"].arrays(library="pd")
@@ -157,7 +157,7 @@ class data_preparation:
         # divide sample into train and test sample
         if indexes is None:
             if not train_test:
-                X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=split_sample)
+                X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.1, random_state=2) # split_sample
         else:
             if not train_test:
                 X_train, X_test, Y_train, Y_test = self.indexes_split(X, Y, split_indexes=indexes, train_test=train_test)

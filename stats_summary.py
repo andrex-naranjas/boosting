@@ -157,10 +157,10 @@ def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.25, GA_sc
     from sklearn.model_selection import train_test_split
     # n-k fold cross validation, n_cycles = n_splits * n_repeats
     rkf = RepeatedKFold(n_splits = kfolds, n_repeats = n_reps, random_state = 1) # set random state=1 for reproducibility
-    for i in range(1):#train_index, test_index in rkf.split(X):
-        # X_train, X_test = X.loc[train_index], X.loc[test_index]
-        # Y_train, Y_test = Y.loc[train_index], Y.loc[test_index]
-        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.1, random_state=1)
+    for i in range(train_index, test_index in rkf.split(X)):
+        X_train, X_test = X.loc[train_index], X.loc[test_index]
+        Y_train, Y_test = Y.loc[train_index], Y.loc[test_index]
+        # X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.1, random_state=1) # testing
         start = time.time()
 
         # keep the chromosome size under the limit [100,1000]
