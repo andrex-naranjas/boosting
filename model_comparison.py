@@ -1,6 +1,3 @@
-
-# -*- coding: utf-8 -*-
-
 '''
 ---------------------------------------------------------------
  Code to improve SVM
@@ -10,19 +7,19 @@
 
 # model comparison module
 
-# machine learning modules
+import pandas as pd
+import datetime
+import numpy as np
+# sklearn
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
-
-# import module for data utils
+# framework includes
 import data_utils as du
-import pandas as pd
-import datetime
-import numpy as np
+
 
 # perform the ml algos and generate report (fit , predict and metrics)
 def comparison(sample, X_train, Y_train, Y_test, X_test):

@@ -86,12 +86,11 @@ def bag_forest():
     return BaggingClassifier(n_estimators=100)
 
 def grad_forest():
-    # gradient boost classifier tree, this only for trees!
+    # gradient boost classifier tree
     return GradientBoostingClassifier(n_estimators=100,learning_rate=1.0,max_depth=1,random_state=1)
     
 def neural_net():
     # Neural Network Multi Layer Perceptron classifier
-    #return MLPClassifier(solver='sgd', alpha=0.0001, hidden_layer_sizes=(2, 2), random_state=1)
     return MLPClassifier(solver='sgd', random_state=1)
 
 def k_neighbors():
@@ -233,29 +232,22 @@ def model_flavors_single():
     models_auc.append(("rbf-svm", single_svm("rbf"),        "deci", "trad", mut_rate, "auc", "roulette", 0.0))  # 0
     models_auc.append(("poly-svm", single_svm("poly"),      "deci", "trad", mut_rate, "auc", "roulette", 0.0))  # 1
     models_auc.append(("sigmoid-svm", single_svm("sigmoid"),"deci", "trad", mut_rate, "auc", "roulette", 0.0))  # 2
-    # models_auc.append(("linear-svm", linear_svm(),          "deci", "trad", mut_rate, "auc", "roulette", 0.0))  # 3
-    
+    models_auc.append(("linear-svm", linear_svm(),          "deci", "trad", mut_rate, "auc", "roulette", 0.0))  # 3    
     # models_auc.append(("bdt-svm",    bdt_svm(),             "prob", "trad", mut_rate, "auc", "roulette", 0.0))
-    
     models_auc.append(("bag-svm",    bag_svm(),             "deci", "trad", mut_rate, "auc", "roulette", 0.0))  # 4
-    # models_auc.append(("rand-forest",rand_forest(),         "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 5
-    # models_auc.append(("bdt-forest", bdt_forest(),          "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 6
-    # models_auc.append(("bag-forest", bag_forest(),          "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 7
-    # models_auc.append(("grad-forest",grad_forest(),         "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 8
-    # models_auc.append(("neural-net", neural_net(),          "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 9
-    # models_auc.append(("k-neigh",    k_neighbors(),         "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 10
-    # models_auc.append(("gauss-nb",   gauss_nb(),            "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 11
-    # models_auc.append(("gauss-pc",   gauss_pc(),            "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 12
-    # models_auc.append(("log-reg",    log_reg(),             "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 13
-    # models_auc.append(("ridge-cl",   ridge_class(),         "deci", "trad", mut_rate, "auc", "roulette", 0.0))  # 14
-    # models_auc.append(("sgdc-cl",    sgdc_class(),          "deci", "trad", mut_rate, "auc", "roulette", 0.0))  # 15
-    # models_auc.append(("pass-agre",  pass_agre(),           "deci", "trad", mut_rate, "auc", "roulette", 0.0))  # 16
-    # models_auc.append(("linear-dis", linear_dis(),          "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 17
-    # models_auc.append(("quad-dis",   quad_dis(),            "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 18
-    
-    # if sample_name != "belle2_ii" and sample_name != "solar": # ugly fix
-    #     models_auc.append((linear_dis(),  "prob", "linear-dis", "trad"))
-    #     models_auc.append((quad_dis(),    "prob", "quad-dis", "trad"))
+    models_auc.append(("rand-forest",rand_forest(),         "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 5
+    models_auc.append(("bdt-forest", bdt_forest(),          "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 6
+    models_auc.append(("bag-forest", bag_forest(),          "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 7
+    models_auc.append(("grad-forest",grad_forest(),         "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 8
+    models_auc.append(("neural-net", neural_net(),          "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 9
+    models_auc.append(("k-neigh",    k_neighbors(),         "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 10
+    models_auc.append(("gauss-nb",   gauss_nb(),            "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 11
+    models_auc.append(("gauss-pc",   gauss_pc(),            "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 12
+    models_auc.append(("log-reg",    log_reg(),             "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 13
+    models_auc.append(("ridge-cl",   ridge_class(),         "deci", "trad", mut_rate, "auc", "roulette", 0.0))  # 14
+    models_auc.append(("sgdc-cl",    sgdc_class(),          "deci", "trad", mut_rate, "auc", "roulette", 0.0))  # 15
+    models_auc.append(("pass-agre",  pass_agre(),           "deci", "trad", mut_rate, "auc", "roulette", 0.0))  # 16
+    models_auc.append(("linear-dis", linear_dis(),          "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 17
+    models_auc.append(("quad-dis",   quad_dis(),            "prob", "trad", mut_rate, "auc", "roulette", 0.0))  # 18
     
     return models_auc
-    

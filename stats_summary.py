@@ -45,7 +45,7 @@ def bootstrap(sample_name, model, roc_area, selection, GA_mut=0.3, GA_score='', 
     # fetch data_frame without preparation
     data = data_preparation(path)
     sample_df_temp = data.fetch_data(sample_name)
-    train_test = type(sample_df_temp) is tuple  # are the data already splitted?
+    train_test = type(sample_df_temp) is tuple  # check if the data is already splitted
     if not train_test: sample_df = sample_df_temp
     else: sample_train_df, sample_test_df = sample_df_temp
         
@@ -154,11 +154,13 @@ def cross_validation(sample_name, model, roc_area, selection, GA_mut=0.25, GA_sc
     X,Y = data.dataset(sample_name=sample_name, data_set=sample_df,
                        sampling=True, split_sample=0.0)
     
+    from sklearn.model_selection import train_test_split
     # n-k fold cross validation, n_cycles = n_splits * n_repeats
     rkf = RepeatedKFold(n_splits = kfolds, n_repeats = n_reps, random_state = 1) # set random state=1 for reproducibility
-    for train_index, test_index in rkf.split(X):
+    for i in range(train_index, test_index in rkf.split(X)):
         X_train, X_test = X.loc[train_index], X.loc[test_index]
         Y_train, Y_test = Y.loc[train_index], Y.loc[test_index]
+        # X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.1, random_state=1) # testing
         start = time.time()
 
         # keep the chromosome size under the limit [100,1000]
@@ -647,7 +649,7 @@ def statistical_tests(sample_name='titanic', class_interest=['trad-rbf-NOTdiv'],
         for i in range(len(flavor_names)):
             input_data = pd.read_csv(directory+'/'+flavor_names[i]+'_'+boot_kfold+'.csv')
 
-            print(flavor_names[i])
+            print(flavor_names[i], i)
             auc, prc, f1, rec, acc, gmn = outlier_detection_multivariable(input_data['auc'], input_data['prc'],
                                                                           input_data['f1'], input_data['rec'],
                                                                           input_data['acc'], input_data['gmn'],
@@ -704,7 +706,7 @@ def statistical_tests(sample_name='titanic', class_interest=['trad-rbf-NOTdiv'],
                         student_rec = np.append(student_rec, 1.)
                         student_acc = np.append(student_acc, 1.)
                         student_gmn = np.append(student_gmn, 1.)                    
-                    if(i!=j):
+                    if(i!=j):                        
                         pvalue = wilcoxon(auc_values[i], auc_values[j]).pvalue
                     else:
                         pvalue = 1.
@@ -806,11 +808,7 @@ def statistical_tests(sample_name='titanic', class_interest=['trad-rbf-NOTdiv'],
             dv.latex_table_tukey(f_names, sample_name, mean_auc, std_auc, tukey_auc, mean_prc, std_prc,  tukey_prc, mean_f1, std_f1,  tukey_f1,
                                  mean_rec, std_rec, tukey_rec, mean_acc, std_acc,  tukey_acc, mean_gmn, std_gmn,  tukey_gmn,  f_tukey_table)
             f_tukey_table.close()
-
-            
-        # for i in range(len(matrix)): #print(matrix, len(matrix))
-        #     print(matrix[i], 'parrito test')
-                
+                            
         sigmin = 0
         sigmax = len(flavor_names)
         cmin = 0
@@ -819,14 +817,30 @@ def statistical_tests(sample_name='titanic', class_interest=['trad-rbf-NOTdiv'],
 
         # append stuff in the main selected ensemble loop
         # do stuff
+
         
-    # save file outside he main selected ensemble loop
-    # selected_values.append(mean_auc[0])
-    # selected_errors.append(std_auc[0])
+    # save to csv files for later use
+    col_flav = pd.DataFrame(data=flavor_names, columns=["flav"])
+    col_mean = pd.DataFrame(data=mean_metric,  columns=["mean"])
+    col_std  = pd.DataFrame(data=std_metric,   columns=["std"])
+    col_pva1 = pd.DataFrame(data=ensembles_pvalues[0],   columns=["pva1"])
+    col_pva2 = pd.DataFrame(data=ensembles_pvalues[1],   columns=["pva2"])
+    col_pva3 = pd.DataFrame(data=ensembles_pvalues[2],   columns=["pva3"])
+    col_pva4 = pd.DataFrame(data=ensembles_pvalues[3],   columns=["pva4"])    
+    df = pd.concat([col_flav["flav"], col_mean["mean"], col_std["std"], col_pva1["pva1"], col_pva2["pva2"], col_pva3["pva3"], col_pva4["pva4"]],
+                   axis=1, keys=["flav", "mean", "std", "pval1", "pval2", "pval3", "pval4"])    
+    name_csv = "./tables/CSV/popular_"+sample_name+"_"+metric+".csv"
+    df.to_csv(str(name_csv), index=False)
 
-    # print(len(mean_metric), selected_values, metric, sample_name)
-    # input()
-
+    ensemble_names=["E1","E2","E3","E4"]
+    col_ens  = pd.DataFrame(data=ensemble_names,   columns=["ens"])
+    col_mean = pd.DataFrame(data=selected_values,  columns=["mean"])
+    col_std  = pd.DataFrame(data=selected_errors,  columns=["std"])
+    df = pd.concat([col_ens["ens"], col_mean["mean"], col_std["std"]],
+                   axis=1, keys=["ens", "mean", "std"])
+    name_csv = "./tables/CSV/selected_"+sample_name+"_"+metric+".csv"
+    df.to_csv(str(name_csv), index=False)
+    
     print(selected_values[0],selected_values[1],selected_values[2],selected_values[3])
     f_single = open('./tables/student_'+sample_name+'_combined_'+metric+'.tex', "w")
     dv.latex_table_student_single(flavor_names, sample_name, metric_name=metric, metric_val=mean_metric, metric_error=std_metric,

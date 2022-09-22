@@ -1,5 +1,3 @@
-
-# -*- coding: utf-8 -*-
 '''
 ---------------------------------------------------------------
  Code to improve SVM
@@ -10,13 +8,12 @@
 import sys
 import pandas as pd
 import numpy as np
-# uproot to import ROOT format data
-import uproot
+import uproot # ROOT format data
 # sklearn utils
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.utils import resample
-# data visualization module
+# framework includes
 import data_visualization as dv
 
 
@@ -61,7 +58,7 @@ class data_preparation:
             file = uproot.open(self.workpath+"/data/belle2_kpi.root")
             data_set = file["combined"].arrays(library="pd")
         elif sample == "belle2_iii":
-            file_train = uproot.open(self.workpath+"/data/train_D02k3pi.root")            
+            file_train = uproot.open(self.workpath+"/data/train_D02k3pi.root")
             data_train = file_train["d0tree"].arrays(library="pd")
             file_test  = uproot.open(self.workpath+"/data/test_D02k3pi.root")
             data_test  = file_test["d0tree"].arrays(library="pd")
@@ -160,7 +157,7 @@ class data_preparation:
         # divide sample into train and test sample
         if indexes is None:
             if not train_test:
-                X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=split_sample)
+                X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.1, random_state=2) # split_sample
         else:
             if not train_test:
                 X_train, X_test, Y_train, Y_test = self.indexes_split(X, Y, split_indexes=indexes, train_test=train_test)
@@ -725,9 +722,6 @@ class data_preparation:
                  "Scotland", "Thailand", "Yugoslavia", "El-Salvador", "Trinadad&Tobago", "Peru", "Hong", "Holand-Netherlands"]        
         for i in range(len(dummy)):
             data_set.loc[data_set["native-country"].astype(str) == dummy[i] , "native-country"] = i
-
-
-        # data_set = resample(data_set, replace = False, n_samples = 5000, random_state=None)
             
         # set the class vector
         Y = data_set["Class"]
@@ -793,7 +787,7 @@ class data_preparation:
         Y = data_set["Class"]
         return X,Y
 
-
+    
     def tac_toe(self, data_set):
 
         title_mapping = {"x": 0, "o": 1, "b": 2}
@@ -839,15 +833,3 @@ class data_preparation:
         X = data_set.drop("Class", axis=1)
         Y = data_set["Class"]
         return X,Y
-
-
-    # bin data?!?
-    # from sklearn.preprocessing import KBinsDiscretizer
-    # Xin = data_set.drop("Class", axis=1)
-    # est = KBinsDiscretizer(n_bins=20, encode="ordinal", strategy="uniform")
-    # est.fit(Xin)
-    
-    # XT = est.transform(Xin)
-    
-    # # Creating pandas dataframe from numpy array
-    # X = pd.DataFrame({"D0_m": XT[:, 0], "D0_p": XT[:, 1], "p0_p": XT[:, 2]})

@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 '''
 ---------------------------------------------------------------
  Code to improve SVM
@@ -9,7 +6,6 @@
 '''
 
 # tmva module
-
 import ROOT
 from ROOT import TFile, TMVA, TCut
 
@@ -64,36 +60,9 @@ m_factory.BookMethod( m_loader, TMVA.Types.kSVM, "SVM_RBF", "Kernel=RBF:Gamma=0.
 m_factory.BookMethod( m_loader, TMVA.Types.kSVM, "SVM_Poly","Kernel=Polynomial:Theta=0.1:Order=2:Tol=0.001:VarTransform=Norm" )#Polynomial kernel
 m_factory.BookMethod( m_loader, TMVA.Types.kSVM, "SVM_prod_polRBF","Kernel=Prod:KernelList=RBF*Polynomial:Gamma=0.1:Theta=1:Order=1:Tol=0.001:VarTransform=Norm")#prod
 m_factory.BookMethod( m_loader, TMVA.Types.kSVM, "SVM_sum_polRBF", "Kernel=Sum:KernelList=RBF+Polynomial:Gamma=0.1:Theta=1:Order=1:Tol=0.001:VarTransform=Norm")#sum
-# m_factory.BookMethod( m_loader, TMVA.Types.kSVM, "SVM_MG",  "Kernel=MultiGauss:GammaList=0.25,0.25,0.25,0.25:Tol=0.001:VarTransform=Norm" )#MultiGauss kernel
-# m_factory.BookMethod( m_loader, TMVA.Types.kSVM, "SVM_prod_mgRBF", "Kernel=Prod:KernelList=RBF*MultiGauss:Gamma=0.25:GammaList=0.1,0.2:Tol=0.001:VarTransform=Norm")#prod
-# m_factory.BookMethod( m_loader, TMVA.Types.kSVM, "SVM_sum_mgRBF",  "Kernel=Sum:KernelList=RBF+MultiGauss:Gamma=0.25:GammaList=0.1,0.2:Tol=0.001:VarTransform=Norm")#prod
 
 #Train methods
 m_factory.TrainAllMethods()
 #Test and evaluate the model(s)
 m_factory.TestAllMethods()
 m_factory.EvaluateAllMethods()
-
-
-
-
-# m_loader.AddVariable("Status")
-# m_loader.AddVariable("Duration")
-# m_loader.AddVariable("History")
-# m_loader.AddVariable("Purpose")
-# m_loader.AddVariable("Amount")
-# m_loader.AddVariable("Savings")
-# m_loader.AddVariable("Employment")
-# m_loader.AddVariable("Income")
-# m_loader.AddVariable("SexStatus")
-# m_loader.AddVariable("Debtor")
-# m_loader.AddVariable("Since")
-# m_loader.AddVariable("Property")
-# m_loader.AddVariable("Age")
-# m_loader.AddVariable("Plans")
-# m_loader.AddVariable("Housing")
-# m_loader.AddVariable("Accounts")
-# m_loader.AddVariable("Job")
-# m_loader.AddVariable("People")
-# m_loader.AddVariable("Phone")
-# m_loader.AddVariable("Foreign")
