@@ -1,4 +1,4 @@
-# Boosted Support Vector Machines
+# Boosted Support Vector Machines (paper published)
 ## Installation
 git clone git@github.com:andrex-naranjas/boosting.git
 
