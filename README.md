@@ -1,8 +1,6 @@
-<<<<<<< HEAD
 # Boosted Support Vector Machines (paper published)
-=======
 # GenBoost-SVM
->>>>>>> e98331459ad1b2f1ff5cfded692c469167fcddca
+
 ## Installation
 git clone git@github.com:andrex-naranjas/boosting.git
 
